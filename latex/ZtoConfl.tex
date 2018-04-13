@@ -1,0 +1,36 @@
+\documentclass[a4paper,envcountsame]{llncs}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[british]{babel}
+\usepackage{lmodern}
+%\usepackage{fullpage}
+\usepackage{coqdoc}
+\usepackage{amsmath,amssymb}
+\usepackage{amsfonts, color}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage[backend=bibtex,style=numeric-comp,sorting=none,firstinits=true]{biblatex}
+
+\newcommand{\flavio}[1]{{\color{red} #1}}
+
+\title{A formal proof that Z property implies Confluence in Coq}
+\author{Flávio L. C. de Moura and Leandro Oliveira Rezende}
+
+\institute{Departamento de Ciência da Computação, Universidade de Brasília, Brazil\\
+  \email{flaviomoura@unb.br,l-ordo.ab.chao@hotmail.com}}
+
+\makeindex
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  A formal proof that Z property implies confluence.
+\end{abstract}
+\include{ZtoConfl.v}
+
+\printbibliography
+
+\end{document}
