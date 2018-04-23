@@ -13,7 +13,14 @@ Definition Confl {A:Type} (R: Rel A) :=
 
 Lemma CompReflTrans {A} (R: Rel A): forall a b c, refltrans R a b -> refltrans R b c -> refltrans R a c.
 Proof.
-  Admitted.
+intros a b c H H0.
+induction H.
+assumption.
+apply IHrefltrans in H0.
+apply rtrans with b.
+assumption.
+assumption.
+Qed.
   
 Theorem Zprop_implies_Confl {A:Type}: forall R: Rel A, Zprop R -> Confl R.
 Proof.
@@ -28,10 +35,13 @@ Proof.
     exists c. split.
     + assumption.
     + apply refl.
-  - intros c0 Hrefl2.
+  - intros c1 Hrefl2.
     assert (Hreflto: refltrans R b (x a) -> refltrans R (x a) (x b)).
     {
-      apply H; assumption.
+      apply H in H0.
+      intros.
+      destruct H0.
+      assumption.
     }
     assert (Hcons: refltrans R a (x b)).
     {
@@ -40,11 +50,15 @@ Proof.
         + apply rtrans with b.
           * assumption.
           * apply refl.
-        +
-      - apply H
-    }    
-    apply H in H0. Focus 2.
+        + apply H in H0.
+          destruct H0.
+          assumption.
+      - apply H.
+        assumption.
+    }
+    apply H in H0.
+    destruct H0.
     apply IHHrefl1 in Hrefl1.
-    destruct Hrefl1.
-    
 Admitted.
+
+
