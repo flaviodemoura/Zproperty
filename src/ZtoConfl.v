@@ -28,7 +28,7 @@ Proof.
   unfold Zprop in HZprop.
   destruct HZprop.
   unfold Confl.
-  intros a b c Hrefl1 Hrefl2.
+  intros a b c Hrefl1.
   generalize dependent c.
   induction Hrefl1.
   - intros c Hrefl.
@@ -56,9 +56,30 @@ Proof.
       - apply H.
         assumption.
     }
-    apply H in H0.
-    destruct H0.
-    apply IHHrefl1 in Hrefl1.
+    assert (Hba1: refltrans R b (x a)).
+    {
+      apply H.
+      assumption.
+    }
+    apply IHHrefl1 in Hba1.
+    destruct Hba1.
+    induction Hrefl2.
+    exists c.
+    split.
+    apply refl.
+    apply rtrans with b.
+    assumption.
+    assumption.
+    assert (Hba2: refltrans R b0 (x a)).
+    {
+      apply H.
+      assumption.
+    }
+    assert (Hba1: refltrans R b (x a)).
+    {
+      apply H.
+      assumption.
+    }
 Admitted.
 
 
