@@ -15,11 +15,9 @@ Lemma CompReflTrans {A} (R: Rel A): forall a b c, refltrans R a b -> refltrans R
 Proof.
 intros a b c H H0.
 induction H.
-assumption.
-apply IHrefltrans in H0.
-apply rtrans with b.
-assumption.
-assumption.
+- assumption.
+- apply IHrefltrans in H0.
+  apply rtrans with b; assumption.
 Qed.
   
 Theorem Zprop_implies_Confl {A:Type}: forall R: Rel A, Zprop R -> Confl R.
@@ -36,50 +34,36 @@ Proof.
     + assumption.
     + apply refl.
   - intros c1 Hrefl2.
-    assert (Hreflto: refltrans R b (x a) -> refltrans R (x a) (x b)).
+    assert (HZprop: refltrans R b (x a)).
     {
-      apply H in H0.
-      intros.
-      destruct H0.
+      apply H; assumption.
+    }
+    assert (HZprop': refltrans R b (x a)).
+    {
       assumption.
     }
-    assert (Hcons: refltrans R a (x b)).
+    apply IHHrefl1 in HZprop'.
+    inversion HZprop'.
+    destruct H1 as [Hcx0 Hxax0].
+    clear HZprop' IHHrefl1.
+    assert (Hac: refltrans R a c).
     {
-      apply CompReflTrans with (x a).
-      - apply CompReflTrans with b.
-        + apply rtrans with b.
-          * assumption.
-          * apply refl.
-        + apply H in H0.
-          destruct H0.
-          assumption.
-      - apply H.
-        assumption.
+      apply rtrans with b; assumption.
     }
-    assert (Hba1: refltrans R b (x a)).
+    assert (Hax0: refltrans R a x0).
     {
-      apply H.
-      assumption.
-    }
-    apply IHHrefl1 in Hba1.
-    destruct Hba1.
+      apply CompReflTrans with c; assumption.
+    }    
+    clear H0 Hrefl1 HZprop Hcx0.
+    generalize dependent c.
     induction Hrefl2.
-    exists c.
-    split.
-    apply refl.
-    apply rtrans with b.
-    assumption.
-    assumption.
-    assert (Hba2: refltrans R b0 (x a)).
-    {
-      apply H.
-      assumption.
-    }
-    assert (Hba1: refltrans R b (x a)).
-    {
-      apply H.
-      assumption.
-    }
+    + intros c Hrefl. exists c. split.
+      * apply refl.
+      * assumption.
+    + intros c' Hrefl.
+      apply IHHrefl2.
+      * apply CompReflTrans with (x a).
+        ** apply H in H0.
 Admitted.
 
 
