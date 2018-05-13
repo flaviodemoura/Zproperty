@@ -34,36 +34,66 @@ Proof.
     + assumption.
     + apply refl.
   - intros c1 Hrefl2.
-    assert (HZprop: refltrans R b (x a)).
+    assert (Hbxa: refltrans R b (x a)).
     {
-      apply H; assumption.
-    }
-    assert (HZprop': refltrans R b (x a)).
-    {
+      apply H.
       assumption.
     }
-    apply IHHrefl1 in HZprop'.
-    inversion HZprop'.
-    destruct H1 as [Hcx0 Hxax0].
-    clear HZprop' IHHrefl1.
-    assert (Hac: refltrans R a c).
+    assert (Haxa: refltrans R a (x a)).
     {
-      apply rtrans with b; assumption.
+      apply rtrans with b.
+      assumption.
+      apply Hbxa.
     }
-    assert (Hax0: refltrans R a x0).
-    {
-      apply CompReflTrans with c; assumption.
-    }    
-    clear H0 Hrefl1 HZprop Hcx0.
-    generalize dependent c.
+    clear H0.
+    generalize dependent b.
     induction Hrefl2.
-    + intros c Hrefl. exists c. split.
-      * apply refl.
-      * assumption.
-    + intros c' Hrefl.
-      apply IHHrefl2.
+    + intros.
+      specialize (IHHrefl1 (x a)).
+      destruct IHHrefl1.
+      assumption.
+      exists x0.
+      split.
+      * apply H0.
       * apply CompReflTrans with (x a).
-        ** apply H in H0.
-Admitted.
-
+        assumption.
+        apply H0.
+    + intros.
+      assert (IHHrefl1': forall c0 : A,
+           refltrans R b0 c0 ->
+           exists d : A, refltrans R c d /\ refltrans R c0 d).
+      {
+        assumption.
+      }
+      specialize (IHHrefl1 (x b)).
+      destruct IHHrefl1.
+      apply CompReflTrans with (x a).
+      assumption.
+      apply H.
+      assumption.
+      apply IHHrefl2 with b0.
+      * apply CompReflTrans with (x a).
+          ** apply H.
+             assumption.
+          ** apply H.
+             assumption.
+      * assumption.
+      * destruct IHHrefl2 with b0.
+        ** apply CompReflTrans with (x a).
+           *** apply H.
+               assumption.
+           *** apply H.
+               assumption.
+        ** assumption.
+        ** assumption.
+        ** apply CompReflTrans with (x a).
+           *** assumption.
+           *** apply H.
+               assumption.
+        ** apply IHHrefl1'.
+      * apply CompReflTrans with (x a).
+        ** assumption.
+        ** apply H.
+           assumption.
+Qed.
 
