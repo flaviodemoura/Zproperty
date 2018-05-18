@@ -289,3 +289,9 @@ Definition lex t u :=  red_ctx_mod_eqC sys_Bx t u.
 Theorem Zlex: Zprop lex.
 Proof.
 Admitted.
+
+Corollary lex_is_confluent: Confl lex.
+Proof.
+  apply Zprop_implies_Confl.
+  apply Zlex.
+Qed.
