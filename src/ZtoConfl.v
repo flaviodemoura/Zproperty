@@ -263,7 +263,7 @@ Notation "t =e u" := (eqC t u) (at level 66).
 Definition red_ctx_mod_eqC (R: Rel pterm) (t: pterm) (u : pterm) :=
            exists t', exists u', (t =e t')/\(R t' u')/\(u' =e u).
 
-Inductive rule_b : pterm -> pterm -> Prop :=
+Inductive rule_b : Rel pterm  :=
    reg_rule_b : forall (t u:pterm),  body t -> term u ->  
      rule_b (pterm_app(pterm_abs t) u) (t[u]).
 Notation "t ->_B u" := (rule_b t u) (at level 66).
@@ -285,6 +285,30 @@ Inductive sys_Bx: Rel pterm :=
 | sys_x_lx : forall t u, t ->_x u -> sys_Bx t u.
 
 Definition lex t u :=  red_ctx_mod_eqC sys_Bx t u.
+
+(** Implicit substitution, for free names *)
+Fixpoint isb_aux (n:nat) (t u : pterm) : pterm :=
+  match t with
+  | pterm_bvar i    => if n === i then u else t
+  | pterm_fvar x    =>  t
+  | pterm_abs t1    => pterm_abs (isb_aux (S n) t1 u)
+  | pterm_app t1 t2 => pterm_app (isb_aux n t1 u) (isb_aux n t2 u)
+  | pterm_sub t1 t2 => pterm_sub (isb_aux (S n) t1 u) (isb_aux n t2 u)
+  end.
+
+Definition isb t u := isb_aux 0 t u.
+
+Fixpoint wb (t : pterm) : pterm :=
+  match t with
+  | pterm_bvar i    => t
+  | pterm_fvar x    => t
+  | pterm_abs t1    => pterm_abs (wb t1)
+  | pterm_app t1 t2 => match t1 with
+                        | pterm_abs t' => isb ????????
+  | pterm_sub t1 t2 => isb (wb t1) (wb t2)
+  end.
+    
+
 
 Theorem Zlex: Zprop lex.
 Proof.
