@@ -44,21 +44,17 @@ Proof.
   - intros c1 Hrefl2.
     assert (Hbxa: refltrans R b (x a)).
     {
-      apply H.
-      assumption.
+      apply H; assumption.
     }
     assert (Haxa: refltrans R a (x a)).
     {
-      apply rtrans with b.
-      assumption.
-      apply Hbxa.
+      apply rtrans with b; assumption.
     }
     clear H0.
     generalize dependent b.
     induction Hrefl2.
-    + intros.
-      specialize (IHHrefl1 (x a)).
-      destruct IHHrefl1.
+    + intros b Hrefl1 IHHrefl1 Hbxa.
+      destruct IHHrefl1 with (x a).
       assumption.
       exists x0.
       split.
@@ -66,43 +62,32 @@ Proof.
       * apply CompReflTrans with (x a).
         assumption.
         apply H0.
-    + intros.
+    + intros b0 Hrefl1 IHHrefl1 Hb0xa.
       assert (IHHrefl1': forall c0 : A,
            refltrans R b0 c0 ->
            exists d : A, refltrans R c d /\ refltrans R c0 d).
       {
+        assumption. 
+      }
+      assert (Hb0xb : refltrans R b0 (x b)).
+      {
+        apply CompReflTrans with (x a).
+        assumption.
+        apply H.
         assumption.
       }
-      specialize (IHHrefl1 (x b)).
-      destruct IHHrefl1.
-      apply CompReflTrans with (x a).
-      assumption.
-      apply H.
-      assumption.
-      apply IHHrefl2 with b0.
-      * apply CompReflTrans with (x a).
-          ** apply H.
-             assumption.
-          ** apply H.
-             assumption.
+      destruct IHHrefl1 with (x b).
       * assumption.
-      * destruct IHHrefl2 with b0.
-        ** apply CompReflTrans with (x a).
-           *** apply H.
-               assumption.
-           *** apply H.
-               assumption.
+      * apply IHHrefl2 with b0.
+        ** apply CompReflTrans with (x a); apply H; assumption.
         ** assumption.
-        ** assumption.
-        ** apply CompReflTrans with (x a).
-           *** assumption.
-           *** apply H.
-               assumption.
-        ** apply IHHrefl1'.
-      * apply CompReflTrans with (x a).
-        ** assumption.
-        ** apply H.
-           assumption.
+        ** destruct IHHrefl2 with b0.
+          *** apply CompReflTrans with (x a); apply H; assumption.
+          *** assumption.
+          *** assumption.
+          *** assumption.
+          *** assumption.
+        ** assumption. 
 Qed.
 
 (** Confluence of the Lex-calculus *)
