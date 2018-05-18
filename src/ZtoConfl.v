@@ -298,18 +298,20 @@ Fixpoint isb_aux (n:nat) (t u : pterm) : pterm :=
 
 Definition isb t u := isb_aux 0 t u.
 
-Fixpoint wb (t : pterm) : pterm :=
+(** Superdevelpment function *)
+Fixpoint sd (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => t
   | pterm_fvar x    => t
-  | pterm_abs t1    => pterm_abs (wb t1)
-  | pterm_app t1 t2 => match t1 with
-                        | pterm_abs t' => isb ????????
-  | pterm_sub t1 t2 => isb (wb t1) (wb t2)
+  | pterm_abs t1    => pterm_abs (sd t1)
+  | pterm_app t1 t2 => let t0 := (sd t1) in
+                      match t0 with
+                      | pterm_abs t' => isb t0 (sd t2)
+                      | _ => pterm_app (sd t1) (sd t2)
+                      end 
+  | pterm_sub t1 t2 => isb (sd t1) (sd t2)
   end.
     
-
-
 Theorem Zlex: Zprop lex.
 Proof.
 Admitted.
