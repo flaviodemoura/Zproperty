@@ -14,6 +14,21 @@ Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
 | refl: forall a, (refltrans R) a a
 | rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c.
 
+Lemma refltrans_composition {A}:
+    forall (R: Rel A) t u v, refltrans R t u -> refltrans R u v -> refltrans R t v.
+Proof.
+  intros R t u v H1 H2. induction H1.
+  - assumption.
+  - apply rtrans with b.
+    + assumption.
+    + apply IHrefltrans; assumption.
+Qed.
+
+Lemma refltrans_composition' {A}:
+    forall (R: Rel A) t u v, refltrans R t u -> R u v -> refltrans R t v.
+Proof.
+  Admitted.
+  
 Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
 
 Definition Confl {A:Type} (R: Rel A) :=
@@ -260,9 +275,102 @@ Notation "t =c+ u" := (eqc_trans t u) (at level 66).
 Definition eqC (t : pterm) (u : pterm) := refltrans eqc_ctx t u.
 Notation "t =e u" := (eqC t u) (at level 66).
 
-Lemma eqc_comm: forall a b, a =e b -> b =e a.
+Lemma lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
 Proof.
-  Admitted.
+Admitted.  
+
+Lemma bswap_rec_id : forall n t, bswap_rec n (bswap_rec n t)  = t.
+Proof.
+ intros n t. generalize dependent n. 
+ induction t.
+ Admitted.
+
+(*  (* bvar *) *)
+(*  intros n'. unfolds bswap_rec. *)
+(*  case (n' === n). intro H1. *)
+(*  case (n' === S n'). intros H2. *)
+(*  assert (Q: n' <> S n'). omega. *)
+(*  contradiction. intro H2. *)
+(*  case (S n' === S n'). intro H3. *)
+(*  rewrite H1. trivial. intro H3. *)
+(*  assert (Q: S n' = S n'). trivial. *)
+(*  contradiction. intro H. fold bswap_rec. *)
+(*  case (S n' === n). intro H1. unfolds bswap_rec. *)
+(*  case (n' === n'). intro H2. rewrite H1. trivial. *)
+(*  intros H2. assert (Q: n' = n'). trivial. *)
+(*  contradiction. intro H1. unfolds bswap_rec. *)
+(*  case (n' === n). intro H2. contradiction. intro H2. *)
+(*  case (S n' === n). intro H3. contradiction. intro H3. *)
+(*  trivial. *)
+(*  (* fvar *) *)
+(*  intro n. simpl. trivial. *)
+(*  (* app *) *)
+(*  intro n. simpl. rewrite (IHt1 n). rewrite (IHt2 n). *)
+(*  trivial. *)
+(*  (* abs *) *)
+(*  intro n. simpl. rewrite (IHt (S n)). trivial. *)
+(*  (* sub *) *)
+(*  intro n. simpl. rewrite (IHt1 (S n)). rewrite (IHt2 n). *)
+(*  trivial. *)
+(*  (* sub' *) *)
+(*  intro n. simpl. rewrite (IHt1 (S n)). rewrite (IHt2 n). *)
+(*  trivial. *)
+(* Qed. *)
+
+Lemma bswap_idemp : forall t, (& (& t)) = t.
+Proof.
+  intro t. unfold bswap.
+  apply bswap_rec_id.
+Qed.
+
+Lemma eqc_sym : forall t u, eqc t u -> eqc u t.
+Proof.
+ intros t u H. inversion H; subst. 
+ replace t0 with (&(& t0)) at 2.
+ - apply eqc_def.
+   + apply lc_at_bswap. auto. assumption.
+   + assumption.
+   + assumption.
+ - apply bswap_idemp.
+Qed.
+
+Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
+Proof.
+  intros t u H. induction H.
+  - Admitted.
+  
+(*   apply ES_redex. apply eqc_sym; assumption. *)
+(*   apply ES_app_left; assumption. *)
+(*   apply ES_app_right; assumption. *)
+(*   apply ES_abs_in with L; assumption. *)
+(*   apply ES_subst_left with L; assumption. *)
+(*   apply ES_subst_right; assumption. *)
+(* Qed. *)
+
+Lemma eqC_trans : forall t u v, t =e u -> u =e v -> t =e v.
+Proof.
+ intros t u v H H'.
+ generalize dependent t.
+ induction H'.
+ - intros v H; assumption.
+ - intros v H1.
+   apply IHH'. clear H'.
+   apply refltrans_composition' with a; assumption.
+Qed.
+
+Lemma eqC_sym : forall t u, t =e u -> u =e t.
+Proof.
+ intros t u H. induction H.
+ - apply refl.
+ - apply eqc_ctx_sym in H.
+   assert (H': b =e a).
+   {
+     apply rtrans with a.
+     + assumption.
+     + apply refl.
+   }
+   apply eqC_trans with b; assumption.
+Qed.
   
 Definition red_ctx_mod_eqC (R: Rel pterm) (t: pterm) (u : pterm) :=
            exists t', exists u', (t =e t')/\(R t' u')/\(u' =e u).
@@ -336,7 +444,7 @@ Proof.
   {
     apply sys_BxEqc with x x'.
     - assumption.
-    - apply eqc_comm in Heq1; assumption.
+    - apply eqC_sym in Heq1; assumption.
     - assumption.
   }
   generalize dependent Hsys'.
