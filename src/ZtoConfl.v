@@ -260,6 +260,10 @@ Notation "t =c+ u" := (eqc_trans t u) (at level 66).
 Definition eqC (t : pterm) (u : pterm) := refltrans eqc_ctx t u.
 Notation "t =e u" := (eqC t u) (at level 66).
 
+Lemma eqc_comm: forall a b, a =e b -> b =e a.
+Proof.
+  Admitted.
+  
 Definition red_ctx_mod_eqC (R: Rel pterm) (t: pterm) (u : pterm) :=
            exists t', exists u', (t =e t')/\(R t' u')/\(u' =e u).
 
@@ -311,10 +315,33 @@ Fixpoint sd (t : pterm) : pterm :=
                       end 
   | pterm_sub t1 t2 => isb (sd t1) (sd t2)
   end.
-    
-Theorem Zlex: Zprop lex.
+
+Lemma sys_BxEqc: forall a a' b b', sys_Bx a b -> a =e a' -> b =e b' -> sys_Bx a' b'.
+Proof.
+Admitted.  
+  
+Lemma BxZlex: forall a b, sys_Bx a b -> refltrans lex b (sd a) /\ refltrans lex (sd a) (sd b).
 Proof.
 Admitted.
+  
+Theorem Zlex: Zprop lex.
+Proof.
+  unfold Zprop.
+  exists sd.
+  intros a b Hlex.
+  unfold lex in Hlex.
+  inversion Hlex.
+  destruct H as [x' [Heq1 [Hsys Heq2]]].
+  assert (Hsys': sys_Bx a b).
+  {
+    apply sys_BxEqc with x x'.
+    - assumption.
+    - apply eqc_comm in Heq1; assumption.
+    - assumption.
+  }
+  generalize dependent Hsys'.
+  apply BxZlex.
+Qed.
 
 Corollary lex_is_confluent: Confl lex.
 Proof.
