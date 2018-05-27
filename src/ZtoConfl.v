@@ -12,10 +12,12 @@ Arguments transit {A} {red} _ _ _ _ _ .
 
 Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
 | refl: forall a, (refltrans R) a a
-| rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c.
+| rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c
+.
 
 Lemma refltrans_composition {A}:
-    forall (R: Rel A) t u v, refltrans R t u -> refltrans R u v -> refltrans R t v.
+  forall (R: Rel A) t u v, refltrans R t u -> refltrans R u v -> refltrans R t v
+.
 Proof.
   intros R t u v H1 H2. induction H1.
   - assumption.
@@ -29,12 +31,15 @@ Lemma refltrans_composition' {A}:
 Proof.
   Admitted.
   
-Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
+Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b))
+.
 
 Definition Confl {A:Type} (R: Rel A) :=
-  forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
+  forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d)
+.
 
-Lemma CompReflTrans {A} (R: Rel A): forall a b c, refltrans R a b -> refltrans R b c -> refltrans R a c.
+Lemma CompReflTrans {A} (R: Rel A): forall a b c, refltrans R a b -> refltrans R b c -> refltrans R a c
+.
 Proof.
 intros a b c H H0.
 induction H.
@@ -337,8 +342,7 @@ Qed.
 Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
 Proof.
   intros t u H. induction H.
-  - Admitted.
-  
+  - Admitted.  
 (*   apply ES_redex. apply eqc_sym; assumption. *)
 (*   apply ES_app_left; assumption. *)
 (*   apply ES_app_right; assumption. *)
@@ -414,6 +418,8 @@ Fixpoint isb_aux (n:nat) (t u : pterm) : pterm :=
 
 Definition isb t u := isb_aux 0 t u.
 
+
+
 (** Superdevelpment function *)
 Fixpoint sd (t : pterm) : pterm :=
   match t with
@@ -439,9 +445,13 @@ Proof.
   
 Lemma BxZlex: forall a b, sys_Bx a b -> refltrans lex b (sd a) /\ refltrans lex (sd a) (sd b).
 Proof.
-  intros a b HBx; split.
-  - inversion HBx; subst. clear HBx.
-    inversion H; subst. simpl.
+  intros a b HBx.
+  inversion HBx; subst. clear HBx.
+  - inversion H; subst. split.
+    + simpl.
+      apply 
+    +
+      
 Admitted.
   
 Theorem Zlex: Zprop lex.
