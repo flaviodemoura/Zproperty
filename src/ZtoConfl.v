@@ -398,6 +398,10 @@ Inductive sys_Bx: Rel pterm :=
 
 Definition lex t u :=  red_ctx_mod_eqC sys_Bx t u.
 
+Lemma sys_BxEqc: forall a a' b b', sys_Bx a b -> a =e a' -> b =e b' -> sys_Bx a' b'.
+Proof.
+Admitted.  
+
 (** Implicit substitution, for free names *)
 Fixpoint isb_aux (n:nat) (t u : pterm) : pterm :=
   match t with
@@ -418,18 +422,26 @@ Fixpoint sd (t : pterm) : pterm :=
   | pterm_abs t1    => pterm_abs (sd t1)
   | pterm_app t1 t2 => let t0 := (sd t1) in
                       match t0 with
-                      | pterm_abs t' => isb t0 (sd t2)
+                      | pterm_abs t' => isb t' (sd t2)
                       | _ => pterm_app (sd t1) (sd t2)
                       end 
   | pterm_sub t1 t2 => isb (sd t1) (sd t2)
   end.
 
-Lemma sys_BxEqc: forall a a' b b', sys_Bx a b -> a =e a' -> b =e b' -> sys_Bx a' b'.
+Lemma to_sd: forall t, refltrans lex t (sd t).
 Proof.
-Admitted.  
+  induction t0.
+  - simpl.
+    apply refl.
+  - simpl.
+    apply refl.
+  - Admitted.
   
 Lemma BxZlex: forall a b, sys_Bx a b -> refltrans lex b (sd a) /\ refltrans lex (sd a) (sd b).
 Proof.
+  intros a b HBx; split.
+  - inversion HBx; subst. clear HBx.
+    inversion H; subst. simpl.
 Admitted.
   
 Theorem Zlex: Zprop lex.
