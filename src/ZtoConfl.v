@@ -30,6 +30,16 @@ Lemma refltrans_composition' {A}:
     forall (R: Rel A) t u v, refltrans R t u -> R u v -> refltrans R t v.
 Proof.
   Admitted.
+
+Lemma trans_to_refltrans {A:Type} (R: Rel A): forall a b, trans R a b -> refltrans R a b.
+Proof.
+  intros a b Htrans.
+  induction Htrans.
+  - apply rtrans with b.
+    + assumption.
+    + apply refl.
+  - apply rtrans with b; assumption.
+Qed.    
   
 Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b))
 .
@@ -191,6 +201,8 @@ Inductive term : pterm -> Prop :=
       term (pterm_sub t1 t2).
 Hint Constructors term.
 
+Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
+
 (** Local closure of terms *)
 Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   match t with
@@ -201,7 +213,9 @@ Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   | pterm_sub t1 t2 => (lc_at (S k) t1) /\ lc_at k t2
   end.
 
-Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
+Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
+Proof.
+  Admitted.
 
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   match t with
@@ -382,7 +396,9 @@ Definition red_ctx_mod_eqC (R: Rel pterm) (t: pterm) (u : pterm) :=
 Inductive rule_b : Rel pterm  :=
    reg_rule_b : forall (t u:pterm),  body t -> term u ->  
      rule_b (pterm_app(pterm_abs t) u) (t[u]).
-Notation "t ->_B u" := (rule_b t u) (at level 66).
+
+Definition b_ctx t u := red_ctx_mod_eqC rule_b t u. 
+Notation "t ->_B u" := (b_ctx t u) (at level 66).
 
 Inductive sys_x : Rel pterm :=
 | reg_rule_var : forall t, sys_x (pterm_bvar 0 [t]) t
@@ -394,31 +410,23 @@ Inductive sys_x : Rel pterm :=
 | reg_rule_comp : forall t u v, has_free_index 0 u ->
   sys_x (t[u][v]) (((& t)[v])[ u[ v ] ]).
 
-Notation "t ->_x u" := (sys_x t u) (at level 59, left associativity).
+Definition x_ctx t u := red_ctx_mod_eqC sys_x t u. 
+Notation "t ->_x u" := (x_ctx t u) (at level 59, left associativity).
 
-Inductive sys_Bx: Rel pterm :=
-| B_lx : forall t u, t ->_B u -> sys_Bx t u
-| sys_x_lx : forall t u, t ->_x u -> sys_Bx t u.
+Inductive lex: Rel pterm :=
+| b_ctx_rule : forall t u, t ->_B u -> lex t u
+| x_ctx_rule : forall t u, t ->_x u -> lex t u.
+Notation "t ->_lex u" := (lex t u) (at level 59, left associativity).
 
-Definition lex t u :=  red_ctx_mod_eqC sys_Bx t u.
+Definition trans_lex t u := trans lex t u.
+Notation "t ->_lex+ u" := (trans_lex t u) (at level 59, left associativity).
 
-Lemma sys_BxEqc: forall a a' b b', sys_Bx a b -> a =e a' -> b =e b' -> sys_Bx a' b'.
+Definition refltrans_lex t u := refltrans lex t u.
+Notation "t ->_lex* u" := (refltrans_lex t u) (at level 59, left associativity).
+
+Lemma sys_BxEqc: forall a a' b b', a ->_lex b -> a =e a' -> b =e b' -> a' ->_lex b'.
 Proof.
 Admitted.  
-
-(** Implicit substitution, for free names *)
-Fixpoint isb_aux (n:nat) (t u : pterm) : pterm :=
-  match t with
-  | pterm_bvar i    => if n === i then u else t
-  | pterm_fvar x    =>  t
-  | pterm_abs t1    => pterm_abs (isb_aux (S n) t1 u)
-  | pterm_app t1 t2 => pterm_app (isb_aux n t1 u) (isb_aux n t2 u)
-  | pterm_sub t1 t2 => pterm_sub (isb_aux (S n) t1 u) (isb_aux n t2 u)
-  end.
-
-Definition isb t u := isb_aux 0 t u.
-
-
 
 (** Superdevelpment function *)
 Fixpoint sd (t : pterm) : pterm :=
@@ -428,48 +436,26 @@ Fixpoint sd (t : pterm) : pterm :=
   | pterm_abs t1    => pterm_abs (sd t1)
   | pterm_app t1 t2 => let t0 := (sd t1) in
                       match t0 with
-                      | pterm_abs t' => isb t' (sd t2)
+                      | pterm_abs t' => t' ^^ (sd t2)
                       | _ => pterm_app (sd t1) (sd t2)
                       end 
-  | pterm_sub t1 t2 => isb (sd t1) (sd t2)
+  | pterm_sub t1 t2 => (sd t1) ^^ (sd t2)
   end.
 
-Lemma to_sd: forall t, refltrans lex t (sd t).
+Lemma to_sd: forall t, term t -> t ->_lex* (sd t).
 Proof.
-  induction t0.
-  - simpl.
-    apply refl.
-  - simpl.
-    apply refl.
+  intros t Hterm.
+  induction Hterm.
   - Admitted.
   
-Lemma BxZlex: forall a b, sys_Bx a b -> refltrans lex b (sd a) /\ refltrans lex (sd a) (sd b).
+Lemma BxZlex: forall a b, a ->_lex b -> b ->_lex* (sd a) /\ (sd a) ->_lex* (sd b).
 Proof.
-  intros a b HBx.
-  inversion HBx; subst. clear HBx.
-  - inversion H; subst. split.
-    + simpl.
-      apply 
-    +
-      
 Admitted.
   
 Theorem Zlex: Zprop lex.
 Proof.
   unfold Zprop.
   exists sd.
-  intros a b Hlex.
-  unfold lex in Hlex.
-  inversion Hlex.
-  destruct H as [x' [Heq1 [Hsys Heq2]]].
-  assert (Hsys': sys_Bx a b).
-  {
-    apply sys_BxEqc with x x'.
-    - assumption.
-    - apply eqC_sym in Heq1; assumption.
-    - assumption.
-  }
-  generalize dependent Hsys'.
   apply BxZlex.
 Qed.
 
