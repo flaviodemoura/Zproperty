@@ -147,6 +147,10 @@ Proof. exact eq_nat_dec. Qed.
 Notation "x == y" := (eq_var_dec x y) (at level 67).
 Notation "i === j" := (Peano_dec.eq_nat_dec i j) (at level 67).
 
+Lemma notin_union : forall x E F,
+  x \notin (E \u F) <-> (x \notin E) /\ (x \notin F).
+Proof. Admitted.
+
 Inductive pterm : Set :=
   | pterm_bvar : nat -> pterm
   | pterm_fvar : var -> pterm
@@ -155,6 +159,110 @@ Inductive pterm : Set :=
   | pterm_sub : pterm -> pterm -> pterm.
 
 Notation "t [ u ]" := (pterm_sub t u) (at level 70).
+
+Fixpoint fv (t : pterm) {struct t} : vars :=
+  match t with
+  | pterm_bvar i    => {}
+  | pterm_fvar x    => {{x}}
+  | pterm_app t1 t2 => (fv t1) \u (fv t2)
+  | pterm_abs t1    => (fv t1)
+  | pterm_sub t1 t2 => (fv t1) \u (fv t2)
+  end.
+
+(** From Metatheory_Tactics - Arthur Chargueraud. REVISAR *)
+
+Ltac gather_vars_with F :=
+  let rec gather V :=
+    match goal with
+    | H: ?S |- _ =>
+      let FH := constr:(F H) in
+      match V with
+      | {} => gather FH
+      | context [FH] => fail 1
+      | _ => gather (FH \u V)
+      end
+    | _ => V
+    end in
+  let L := gather {} in eval simpl in L.
+
+Ltac gather_vars :=
+  let A := gather_vars_with (fun x : vars => x) in
+  let B := gather_vars_with (fun x : var => {{ x }}) in
+  let D := gather_vars_with (fun x : pterm => fv x) in
+  constr:(A \u B \u D).
+
+Ltac beautify_fset V :=
+  let rec go Acc E :=
+     match E with
+     | ?E1 \u ?E2 => let Acc1 := go Acc E1 in
+                     go Acc1 E2
+     | {}  => Acc
+     | ?E1 => match Acc with
+              | {} => E1
+              | _ => constr:(Acc \u E1)
+              end
+     end
+  in go {} V.
+
+Require Import List Omega.
+Open Scope list_scope.
+
+Lemma max_lt_l :
+  forall (x y z : nat), x <= y -> x <= max y z.
+Proof.
+  induction x; auto with arith.
+  induction y; induction z; simpl; auto with arith.
+Qed.
+
+Lemma finite_nat_list_max : forall (l : list nat),
+  { n : nat | forall x, In x l -> x <= n }.
+Proof.
+  induction l as [ | l ls IHl ].
+  - exists 0; intros x H; inversion H.
+  - inversion IHl as [x H]. Admitted.
+(*     exists (max x l); intros y J; simpl in J. *)
+(*     inversion J; subst; auto with arith. *)
+(*     destruct J. *)
+(*     assert (y <= x); auto using max_lt_l. *)
+(*       apply H. *)
+(*     +  *)
+(* Qed. *)
+
+Lemma finite_nat_list_max' : forall (l : list nat),
+  { n : nat | ~ In n l }.
+Proof.
+  intros l. case (finite_nat_list_max l); intros x H.
+  exists (S x). intros J. assert (K := H _ J); omega.
+Qed.
+
+Definition var_gen (L : vars) : var :=
+  proj1_sig (finite_nat_list_max' (elements L)).
+
+Lemma var_gen_spec : forall E, (var_gen E) \notin E.
+Proof.
+  unfold var_gen. intros E.
+  destruct (finite_nat_list_max' (elements E)) as [n pf].
+  simpl. intros a. 
+  destruct pf. Admitted.
+(*   rewrite elements_iff in a. *)
+(*   rewrite InA_alt in a. *)
+(*   destruct a as [y [H1 H2]]. *)
+(*   subst. *)
+(*   assumption. *)
+(* Qed. *)
+
+Lemma var_fresh : forall (L : vars), { x : var | x \notin L }.
+Proof.
+  intros L. exists (var_gen L). apply var_gen_spec.
+Qed.
+
+Ltac pick_fresh_gen L Y :=
+  let Fr := fresh "Fr" in
+  let L := beautify_fset L in
+  (destruct (var_fresh L) as [Y Fr]).
+
+Ltac pick_fresh Y :=
+  let L := gather_vars in (pick_fresh_gen L Y).
 
 (** Opening up abstractions and substitutions *)
 Fixpoint open_rec (k : nat) (u : pterm) (t : pterm) {struct t} : pterm :=
@@ -213,9 +321,48 @@ Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   | pterm_sub t1 t2 => (lc_at (S k) t1) /\ lc_at k t2
   end.
 
-Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
+Lemma lc_at_open_rec : forall x t k,
+  lc_at k (open_rec k x t) -> lc_at (S k) t.
 Proof.
   Admitted.
+  
+Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
+Proof.
+  intro t; split.
+  - intro Hterm.
+    induction Hterm.
+    + simpl; auto.
+    + simpl; split.
+      * apply IHHterm1.
+      * apply IHHterm2.
+    + pick_fresh y.
+      unfold open in H0.
+      simpl.
+      apply lc_at_open_rec with (pterm_fvar y).
+      apply H0.
+      apply notin_union in Fr.
+      apply Fr.
+    + simpl; split.
+      * pick_fresh y.
+        unfold open in H0.
+        apply lc_at_open_rec with (pterm_fvar y).
+        apply H0.
+        apply notin_union in Fr.
+        destruct Fr.
+        apply notin_union in H1.
+        apply H1.
+      * assumption.
+  - induction t.
+    + intro Hlc.
+      inversion Hlc.
+    + intro Hlc.
+      apply term_var.
+    + intro Hlc.
+      inversion Hlc.
+      apply term_app.
+      * apply IHt1; assumption.
+      * apply IHt2; assumption.
+    + intro Hlc. Admitted.
 
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   match t with
