@@ -10,8 +10,8 @@ coq: Makefile.coq
 
 Makefile.coq: Makefile $(VS)
 	coq_makefile $(VS) \
-		COQC = "coqc -R src lex" \
-		COQDEP = "coqdep -R src lex" \
+		COQC = "coqc -R src " \
+		COQDEP = "coqdep -R src " \
 		-o Makefile.coq
 
 clean:: Makefile.coq

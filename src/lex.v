@@ -1,5 +1,7 @@
 (** Confluence of the Lex-calculus through Z property. *)
 
+Require Import ZtoConfl.
+        
 Definition var := nat.
 
 Require Import Arith MSetList.
