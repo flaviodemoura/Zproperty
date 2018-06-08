@@ -145,7 +145,7 @@ Ltac pick_fresh Y :=
   let L := gather_vars in (pick_fresh_gen L Y).
 
 (** Opening up abstractions and substitutions *)
-Fixpoint open_rec (k : nat) (u : pterm) (t : pterm) {struct t} : pterm :=
+Fixpoint open_rec (k : nat) (u : pterm) (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => if k === i then u else (pterm_bvar i)
   | pterm_fvar x    => pterm_fvar x
@@ -161,7 +161,7 @@ Notation "t ^^ u" := (open t u) (at level 67).
 Notation "t ^ x" := (open t (pterm_fvar x)).   
 
 (** Variable closing *)
-Fixpoint close_rec  (k : nat) (x : var) (t : pterm) {struct t} : pterm :=
+Fixpoint close_rec  (k : nat) (x : var) (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => pterm_bvar i
   | pterm_fvar x'    => if x' == x then (pterm_bvar k) else pterm_fvar x'
@@ -191,6 +191,45 @@ Hint Constructors term.
 
 Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
 
+(* (** Specialized induction principle for preterms. *) *)
+(* Theorem pterm_induction : forall P : pterm -> Prop, *)
+(*        (forall n : nat, P (pterm_bvar n)) -> *)
+(*        (forall v : var, P (pterm_fvar v)) -> *)
+(*        (forall t1, P t1 -> forall t2, P t2 -> P (pterm_app t1 t2)) -> *)
+(*        (forall L t, (forall x, x \notin L -> P (t ^ x)) -> P (pterm_abs t)) -> *)
+(*        (forall L t1, (forall x, x \notin L -> P (t1 ^ x)) -> forall t2, P t2 -> P (t1 [t2])) -> *)
+(*        forall t, P t. *)
+(* Proof. *)
+(*   intros P Hbvar Hfvar Happ Habs Hsubs t. *)
+(*   induction t. *)
+(*   - apply Hbvar. *)
+(*   - apply Hfvar. *)
+(*   - apply Happ; assumption. *)
+(*   - apply Habs with (fv t0). *)
+(*     intros x Hfv. *)
+(*     unfold open. *)
+(*     induction t0.     *)
+(*     + case n eqn: Hn. *)
+(*       * simpl. *)
+(*         apply Hfvar. *)
+(*       * subst. *)
+(*         simpl. *)
+(*         assumption. *)
+(*     + simpl. *)
+(*       apply Hfvar. *)
+(*     + simpl. *)
+(*       apply Happ. *)
+(*       assert (H:  P t0_1). *)
+(*       { *)
+        
+(*       } *)
+(*       * apply IHt0_1. *)
+(*       * *)
+(*     + *)
+(*     + *)
+(*   - *)
+
+    
 (** Local closure of terms *)
 Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   match t with
@@ -205,7 +244,13 @@ Lemma lc_at_open_rec : forall x t k,
   lc_at k (open_rec k x t) -> lc_at (S k) t.
 Proof.
   Admitted.
+
+Lemma lc_at_one_open_rec: forall t x, lc_at 1 t -> term (t ^ x).
+Proof.
+  intro t; induction t.
   
+  Admitted.
+
 Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
 Proof.
   intro t; split.
@@ -232,18 +277,21 @@ Proof.
         apply notin_union in H1.
         apply H1.
       * assumption.
-  - induction t.
-    + intro Hlc.
-      inversion Hlc.
-    + intro Hlc.
-      apply term_var.
-    + intro Hlc.
-      inversion Hlc.
+  - intro Hlc.
+    induction t.
+    + inversion Hlc.
+    + apply term_var.
+    + simpl in Hlc.
+      destruct Hlc as [Hlc1 Hlc2]. 
       apply term_app.
       * apply IHt1; assumption.
       * apply IHt2; assumption.
-    + intro Hlc. Admitted.
-
+    + apply term_abs with (fv t0).
+      intros x Hfv.
+      apply lc_at_one_open_rec.
+      assumption.
+    + Admitted.
+      
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => if k === i then (pterm_bvar (S k))
@@ -438,19 +486,35 @@ Inductive sys_x : Rel pterm :=
   sys_x (t[u][v]) (((& t)[v])[ u[ v ] ]).
 
 Definition x_ctx t u := red_ctx_mod_eqC sys_x t u. 
-Notation "t ->_x u" := (x_ctx t u) (at level 59, left associativity).
+Notation "t ->_ex u" := (x_ctx t u) (at level 59, left associativity).
+
+Definition trans_ex t u := trans x_ctx t u.
+Notation "t ->_ex+ u" := (trans_ex t u) (at level 59, left associativity).
+
+Lemma full_comp: forall t u, body t -> term u ->  
+                t[u] ->_ex+ (t ^^ u). 
+Proof.
+Admitted.
 
 Inductive lex: Rel pterm :=
 | b_ctx_rule : forall t u, t ->_B u -> lex t u
-| x_ctx_rule : forall t u, t ->_x u -> lex t u.
+| x_ctx_rule : forall t u, t ->_ex u -> lex t u.
 Notation "t ->_lex u" := (lex t u) (at level 59, left associativity).
 
 Definition trans_lex t u := trans lex t u.
 Notation "t ->_lex+ u" := (trans_lex t u) (at level 59, left associativity).
 
+Lemma trans_ex_to_lex: forall t u, t ->_ex+ u -> t ->_lex+ u.
+Proof.
+  Admitted.
+
 Definition refltrans_lex t u := refltrans lex t u.
 Notation "t ->_lex* u" := (refltrans_lex t u) (at level 59, left associativity).
 
+Lemma lex_trans: forall t u v, t ->_lex* u -> u ->_lex* v -> t ->_lex* v.
+Proof.
+  Admitted.
+  
 Lemma sys_BxEqc: forall a a' b b', a ->_lex b -> a =e a' -> b =e b' -> a' ->_lex b'.
 Proof.
 Admitted.  
@@ -469,12 +533,61 @@ Fixpoint sd (t : pterm) : pterm :=
   | pterm_sub t1 t2 => (sd t1) ^^ (sd t2)
   end.
 
+Lemma sd_term: forall t, term t -> term (sd t).
+Proof.
+Admitted.
+
+Corollary sd_body: forall t, body t -> body (sd t).
+Proof.
+  Admitted.
+
+Lemma sd_app: forall t u, pterm_app (sd t) (sd u) ->_lex* sd(pterm_app t u). 
+Proof.
+  Admitted.
+
+Lemma refltrans_app: forall t u t' u', t ->_lex* t' -> u ->_lex* u' -> pterm_app t u  ->_lex* pterm_app t' u'.
+Proof.
+  Admitted.
+
+Lemma abs_sd: forall t1 L , (forall x, x \notin L -> t1 ^ x ->_lex* sd (t1 ^ x)) ->  pterm_abs t1 ->_lex* pterm_abs (sd t1).
+Proof.
+Admitted.
+
+Lemma refltrans_sub: forall t L u t' u', (forall x, x \notin L -> t ^ x ->_lex* sd (t ^ x)) -> u ->_lex* u' -> (t [ u ])  ->_lex* (t' [ u' ]).
+Proof.
+  Admitted.
+
 Lemma to_sd: forall t, term t -> t ->_lex* (sd t).
 Proof.
-  intros t Hterm.
-  induction Hterm.
-  - Admitted.
-  
+  induction 1.
+  - apply refl.
+  - apply refltrans_composition with (pterm_app (sd t1) (sd t2)).
+    + apply refltrans_app; assumption.
+    + apply sd_app.
+  - clear H.
+    generalize dependent L.
+    apply abs_sd.
+  - simpl.
+    apply refltrans_composition with ((sd t1) [(sd t2)]).
+    + apply refltrans_sub with L.
+      * assumption.
+      * assumption.
+    + apply trans_to_refltrans.
+      apply trans_ex_to_lex.
+      apply full_comp.
+      * pick_fresh y.
+        assert (Ht1: term (t1 ^ y)).
+        {
+          apply H.
+          apply notin_union in Fr.
+          destruct Fr as [HFr Ht2].
+          apply notin_union in HFr.
+          apply HFr.
+        }
+        admit.
+      * apply sd_term; assumption.
+Admitted.
+        
 Lemma BxZlex: forall a b, a ->_lex b -> b ->_lex* (sd a) /\ (sd a) ->_lex* (sd b).
 Proof.
 Admitted.
