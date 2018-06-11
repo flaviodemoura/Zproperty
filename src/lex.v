@@ -4,7 +4,7 @@ Require Import ZtoConfl.
         
 Definition var := nat.
 
-Require Import Arith MSetList.
+Require Import Arith MSetList Setoid.
 
 Declare Module Var_as_OT : UsualOrderedType
   with Definition t := var.
@@ -662,7 +662,7 @@ Proof.
 (*  intros_all. apply eqC_fv; trivial. *)
 (* Qed. *)
 
-Instance rw_eqC_app : Proper (eqC ++> eqC ++> eqC) pterm_app.
+Instance rw_eqC_app : Proper (eqC ==> eqC ==> eqC) pterm_app.
 Proof.
   Admitted.
 (*     intros_all. apply star_closure_composition with (u:=pterm_app y x0). *)
@@ -689,13 +689,17 @@ Proof.
 (*  constructor 2 with (t [u]). constructor 6; auto. admit. auto. *)
 (* Qed. *)
 
+Instance eqC_equiv: Equivalence eqC.
+Proof.
+Admitted.
+
 (** Lex rules *)
 
 Inductive rule_b : Rel pterm  :=
    reg_rule_b : forall (t u:pterm),  body t -> term u ->  
      rule_b (pterm_app(pterm_abs t) u) (t[u]).
 
-Definition b_ctx t u := red_ctx_mod_eqC rule_b t u. 
+Definition b_ctx t u := ES_contextual_closure rule_b t u. 
 Notation "t ->_B u" := (b_ctx t u) (at level 66).
 
 Inductive sys_x : Rel pterm :=
@@ -708,20 +712,28 @@ Inductive sys_x : Rel pterm :=
 | reg_rule_comp : forall t u v, has_free_index 0 u ->
   sys_x (t[u][v]) (((& t)[v])[ u[ v ] ]).
 
-Definition x_ctx t u := red_ctx_mod_eqC sys_x t u. 
-Notation "t ->_ex u" := (x_ctx t u) (at level 59, left associativity).
+Definition x_ctx t u := ES_contextual_closure sys_x t u. 
+Notation "t ->_x u" := (x_ctx t u) (at level 59, left associativity).
 
-Definition trans_ex t u := trans x_ctx t u.
+Inductive lx: Rel pterm :=
+| b_ctx_rule : forall t u, t ->_B u -> lx t u
+| x_ctx_rule : forall t u, t ->_x u -> lx t u.
+Notation "t ->_Bx u" := (lx t u) (at level 59, left associativity).
+
+Definition trans_x t u := trans x_ctx t u.
+Notation "t ->_x+ u" := (trans_x t u) (at level 59, left associativity).
+
+Definition ex t u := red_ctx_mod_eqC x_ctx t u.
+Notation "t ->_ex u" := (ex t u) (at level 59, left associativity).
+
+Definition trans_ex t u := trans ex t u.
 Notation "t ->_ex+ u" := (trans_ex t u) (at level 59, left associativity).
 
-Lemma full_comp: forall t u, body t -> term u ->  
-                t[u] ->_ex+ (t ^^ u). 
+Lemma full_comp: forall t u, body t -> term u -> t[u] ->_ex+ (t ^^ u). 
 Proof.
 Admitted.
 
-Inductive lex: Rel pterm :=
-| b_ctx_rule : forall t u, t ->_B u -> lex t u
-| x_ctx_rule : forall t u, t ->_ex u -> lex t u.
+Definition lex t u := red_ctx_mod_eqC lx t u.
 Notation "t ->_lex u" := (lex t u) (at level 59, left associativity).
 
 Definition trans_lex t u := trans lex t u.
@@ -778,12 +790,24 @@ Proof.
     + apply refltrans_composition with (pterm_app t b).
       * clear IHHuu' Huu'.
         apply rtrans with (pterm_app t b).
-        **
+        ** inversion H; subst.
+           *** clear H.
+               inversion H0; subst. clear H0.
+               destruct H as [x' [Heq1 [Hb Heq2]]].
+               apply b_ctx_rule.
+               unfold b_ctx.
+               unfold red_ctx_mod_eqC.
+               exists (pterm_app t x).
+               exists (pterm_app t x').
+               split.
+               **** rewrite Heq1.
+                    apply reflexivity.
+               **** split.
+                    ***** apply ES_app_right.
+                      *****
+           ***
         **
           
-        inversion H; subst. clear H.
-        inversion H0; subst. clear H0.
-        destruct H as [x' [Heq1 [Hb Heq2]]].
         
       *
         
