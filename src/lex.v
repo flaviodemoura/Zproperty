@@ -539,7 +539,7 @@ Admitted.
 
 Corollary sd_body: forall t, body t -> body (sd t).
 Proof.
-  Admitted.
+Admitted.
 
 Lemma sd_app: forall t u, pterm_app (sd t) (sd u) ->_lex* sd(pterm_app t u). 
 Proof.
@@ -547,7 +547,31 @@ Proof.
 
 Lemma refltrans_app: forall t u t' u', t ->_lex* t' -> u ->_lex* u' -> pterm_app t u  ->_lex* pterm_app t' u'.
 Proof.
-  Admitted.
+  intros t u t' u' Htt' Huu'.
+  apply refltrans_composition with (pterm_app t u').
+  - clear Htt'.
+    inversion Huu'; subst.
+    + apply refl.
+    + clear Huu'.
+      apply rtrans with (pterm_app t b).
+      * inversion H; subst.
+        ** clear H. clear H0.
+           unfold b_ctx in H1.
+           unfold red_ctx_mod_eqC in H1.
+           destruct H1. destruct H.
+           destruct H as [ Heq1 [Hb Heq2]].
+           apply b_ctx_rule.
+           unfold b_ctx.
+           unfold red_ctx_mod_eqC.
+           exists (pterm_app t x).
+           exists (pterm_app t x0).
+           split.
+           *** apply ES_app_right.
+             
+      *
+  - 
+    
+Admitted.
 
 Lemma abs_sd: forall t1 L , (forall x, x \notin L -> t1 ^ x ->_lex* sd (t1 ^ x)) ->  pterm_abs t1 ->_lex* pterm_abs (sd t1).
 Proof.
