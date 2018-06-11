@@ -240,16 +240,61 @@ Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   | pterm_sub t1 t2 => (lc_at (S k) t1) /\ lc_at k t2
   end.
 
-Lemma lc_at_open_rec : forall x t k,
-  lc_at k (open_rec k x t) -> lc_at (S k) t.
+Lemma lc_at_open : forall n t u, term u -> (lc_at (S n) t <-> lc_at n (open_rec n u t)).
 Proof.
-  Admitted.
-
-Lemma lc_at_one_open_rec: forall t x, lc_at 1 t -> term (t ^ x).
-Proof.
-  intro t; induction t.
-  
-  Admitted.
+ intros n t u T; split. Admitted.
+(* (* -> *) *)
+(*  generalize n; clear n. *)
+(*  induction t. *)
+(*  (* bvar *) *)
+(*  intros n' H0. unfolds open_rec. *)
+(*  case (n' === n). intro H1. *)
+(*  rewrite H1 in H0. rewrite H1. simpl in *|-*.  *)
+(*  apply term_to_term' in T. unfold term' in T. *)
+(*  apply lc_at_weaken_ind with (k1 := 0); try omega; trivial. *)
+(*  intro H1. simpl in *|-*. omega. *)
+(*  (* fvar *) *)
+(*  intros n H. simpl. trivial. *)
+(*  (* app *) *)
+(*  intros n H. simpl in *|-*. *)
+(*  case H; clear H; intros Ht1 Ht2; split. *)
+(*  apply (IHt1 n Ht1).  *)
+(*  apply (IHt2 n Ht2). *)
+(*  (* abs *) *)
+(*  intros n H. simpl in *|-*. *)
+(*  apply (IHt (S n) H). *)
+(*  (* sub *) *)
+(*  intros n H. simpl in *|-*. *)
+(*  case H; clear H; intros Ht1 Ht2; split. *)
+(*  apply (IHt1 (S n) Ht1).  *)
+(*  apply (IHt2 n Ht2). *)
+(*  (* sub' *) *)
+(*  simpl. intros. contradiction. *)
+(* (* <- *) *)
+(*  generalize n; clear n. *)
+(*  induction t. *)
+(*  (* bvar *) *)
+(*  intros n' H0. simpl in H0. *)
+(*  case (n' === n) in H0. simpl. omega. *)
+(*  simpl in *|-*. omega. *)
+(*  (* fvar *) *)
+(*  simpl. trivial.  *)
+(*  (* app *) *)
+(*  simpl in *|-*. intros n H. *)
+(*  case H; clear H; intros Ht1 Ht2; split. *)
+(*  apply (IHt1 n Ht1).  *)
+(*  apply (IHt2 n Ht2). *)
+(*  (* abs *) *)
+(*  simpl in *|-*. intros n H.  *)
+(*  apply (IHt (S n) H). *)
+(*  (* sub *) *)
+(*  simpl in *|-*. intros n H.  *)
+(*  case H; clear H; intros Ht1 Ht2; split. *)
+(*  apply (IHt1 (S n) Ht1).  *)
+(*  apply (IHt2 n Ht2). *)
+(*  (* sub' *) *)
+(*  simpl. intros. contradiction. *)
+(* Qed. *)
 
 Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
 Proof.
@@ -263,19 +308,21 @@ Proof.
     + pick_fresh y.
       unfold open in H0.
       simpl.
-      apply lc_at_open_rec with (pterm_fvar y).
-      apply H0.
-      apply notin_union in Fr.
-      apply Fr.
+      apply lc_at_open with (pterm_fvar y).
+      * apply term_var.
+      * apply H0.
+        apply notin_union in Fr.
+        apply Fr.
     + simpl; split.
       * pick_fresh y.
         unfold open in H0.
-        apply lc_at_open_rec with (pterm_fvar y).
-        apply H0.
-        apply notin_union in Fr.
-        destruct Fr.
-        apply notin_union in H1.
-        apply H1.
+        apply lc_at_open with (pterm_fvar y).
+        ** apply term_var.
+        ** apply H0.
+           apply notin_union in Fr.
+           destruct Fr.
+           apply notin_union in H1.
+           apply H1.
       * assumption.
   - intro Hlc.
     induction t.
@@ -288,8 +335,7 @@ Proof.
       * apply IHt2; assumption.
     + apply term_abs with (fv t0).
       intros x Hfv.
-      apply lc_at_one_open_rec.
-      assumption.
+      admit.
     + Admitted.
       
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
@@ -362,10 +408,65 @@ Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
 
 Inductive eqc : Rel pterm :=
 | eqc_def: forall t u v, lc_at 2 t -> term u -> term v -> eqc (t[u][v]) ((& t)[v][u]).
+
+Definition red_regular (R : Rel pterm) :=
+  forall t t', R t t' -> term t /\ term t'.
+
+Lemma eqc_regular: red_regular eqc.
+Proof.
+  unfold red_regular. intros t t' Heqc; split.
+  - inversion Heqc; subst. clear Heqc.
+    apply term_sub with (fv t0 \u fv u).
+    + intros x Hfv. unfold open; simpl.
+      apply term_sub with (fv t0 \u {{x}}).
+      * intros x' Hfv'.
+        apply term_equiv_lc_at.
+        apply lc_at_open.
+        ** apply term_var.
+        ** apply lc_at_open.
+           *** apply term_var.
+           *** assumption.
+      * admit.
+    + admit.
+  - Admitted.
+(*   apply term'_to_term. unfold term'. *)
+(*   apply lc_at_open; trivial. *)
+(*   apply lc_at_open; trivial. *)
+(*   apply term'_to_term. *)
+(*   apply lc_at_open; trivial. *)
+(*   apply term_to_term' in H1. unfold term' in H1. *)
+(*   apply lc_at_weaken_ind with 0. assumption. auto. assumption. *)
+
+(*   inversion H; subst. clear H. *)
+(*   apply term_sub with (fv t0 \u fv u). *)
+(*   intros_all. unfold open. simpl. *)
+(*   apply term_sub with (fv t0 \u {{x}}). *)
+(*   intros_all. apply term'_to_term. unfold term'. *)
+(*   apply lc_at_open; trivial. *)
+(*   apply lc_at_open; trivial.   *)
+(*   apply lc_at_bswap. auto. assumption. *)
+(*   apply term'_to_term. *)
+(*   apply lc_at_open; trivial. *)
+(*   apply term_to_term' in H2. unfold term' in H2. *)
+(*   apply lc_at_weaken_ind with 0. assumption. auto. assumption. *)
+(* Qed. *)
+  
 Definition eqc_ctx (t u: pterm) := ES_contextual_closure eqc t u.
 Notation "t =c u" := (eqc_ctx t u) (at level 66).
 Definition eqc_trans (t u: pterm) := trans eqc_ctx t u.
 Notation "t =c+ u" := (eqc_trans t u) (at level 66).
+
+(* Lemma eqc_trans_app: forall t t' u u', t =c+ t' -> u =c+ u' -> (pterm_app t u =c+ pterm_app t' u'). *)
+(* Proof. *)
+(*   intros t t' u u' Htt' Huu'. *)
+(*   apply trans_composition with (pterm_app t' u). *)
+(*   - inver clear Huu'. *)
+(*     induction Htt'. *)
+(*     + apply singl. *)
+(*       apply ES_app_left. *)
+(*     + *)   
+(*   - *)
+      
 Definition eqC (t : pterm) (u : pterm) := refltrans eqc_ctx t u.
 Notation "t =e u" := (eqC t u) (at level 66).
 
@@ -464,9 +565,131 @@ Proof.
    }
    apply eqC_trans with b; assumption.
 Qed.
-  
+
 Definition red_ctx_mod_eqC (R: Rel pterm) (t: pterm) (u : pterm) :=
            exists t', exists u', (t =e t')/\(R t' u')/\(u' =e u).
+
+(** =e Rewriting *)
+
+Instance rw_eqC_red : forall R, Proper (eqC ==> eqC ==> iff) (red_ctx_mod_eqC R).
+Proof.
+Admitted.
+(*  intros_all. split. intro H1. *)
+(*  unfold red_ctx_mod_eqC in *. *)
+(*  destruct H1. destruct H1. destruct H1. destruct H2. *)
+(*  exists x1 x2. split.  *)
+(*  apply eqC_sym in H. *)
+(*  apply eqC_trans with x; assumption. *)
+(*  split. assumption. *)
+(*  apply eqC_trans with x0; assumption. *)
+(*  intro H1. *)
+(*  unfold red_ctx_mod_eqC in *. *)
+(*  destruct H1. destruct H1. destruct H1. destruct H2. *)
+(*  exists x1 x2. split.  *)
+(*  rewrite <- H1; assumption. split; trivial. *)
+(*  rewrite H3. rewrite H0.  *)
+(*  reflexivity. *)
+(* Qed. *)
+
+Instance rw_eqC_trs : forall R, Proper (eqC ==> eqC ==> iff) (trans (red_ctx_mod_eqC R)).
+Proof.
+Admitted.
+(*     intros_all. split.  *)
+(*     intro H'. *)
+(*     inversion H'; subst. *)
+(*     apply one_step_reduction. *)
+(*     destruct H1. destruct H1.  destruct H1. destruct H2. *)
+(*     exists x1 x2. *)
+(*     split. rewrite <- H; auto. *)
+(*     split; auto. rewrite <- H0; auto. *)
+(*     constructor 2 with u. rewrite <- H; auto. *)
+(*     apply transitive_star_derivation' in H2. *)
+(*     destruct H2. *)
+(*     constructor 1. *)
+(*     destruct H2. destruct H2.  destruct H2. destruct H3. *)
+(*     unfold red_ctx_mod_eqC. exists x1 x2. *)
+(*     split; auto. split; auto. rewrite H4; auto. *)
+(*     destruct H2. destruct H2. destruct H3. destruct H3. *)
+(*     apply transitive_star_derivation'. *)
+(*     right. exists x1. split; auto. exists x2. split; auto. *)
+(*     destruct H4. destruct H4.  destruct H4. destruct H5. *)
+(*     exists x3 x4. split; auto. split; auto. rewrite H6; auto. *)
+
+(*     intro H'. *)
+(*     inversion H'; subst. *)
+(*     apply one_step_reduction. *)
+(*     destruct H1. destruct H1.  destruct H1. destruct H2. *)
+(*     exists x1 x2. *)
+(*     split. rewrite H; auto. *)
+(*     split; auto. rewrite H0; auto. *)
+(*     constructor 2 with u. rewrite H; auto. *)
+(*     apply transitive_star_derivation' in H2. *)
+(*     destruct H2. *)
+(*     constructor 1. *)
+(*     destruct H2. destruct H2.  destruct H2. destruct H3. *)
+(*     unfold red_ctx_mod_eqC. exists x1 x2. *)
+(*     split; auto. split; auto. rewrite H4; auto. symmetry; auto. *)
+(*     destruct H2. destruct H2. destruct H3. destruct H3. *)
+(*     apply transitive_star_derivation'. *)
+(*     right. exists x1. split; auto. exists x2. split; auto. *)
+(*     destruct H4. destruct H4.  destruct H4. destruct H5. *)
+(*     exists x3 x4. split; auto. split; auto. rewrite H6; auto. symmetry; auto. *)
+(* Qed. *)
+
+Instance rw_eqC_lc_at : forall n, Proper (eqC ==> iff) (lc_at n).
+Proof.
+  Admitted.
+(*  intros_all. apply lc_at_eqC; trivial. *)
+(* Qed. *)
+
+Instance rw_eqC_body : Proper (eqC ==> iff) body.
+Proof.
+  Admitted.
+(*  intros_all. rewrite body_eq_body'. rewrite body_eq_body'. *)
+(*  unfold body'. rewrite H. reflexivity. *)
+(* Qed. *)
+
+Instance rw_eqC_term : Proper (eqC ==> iff) term.
+Proof.
+  Admitted.
+(*  intros_all. rewrite term_eq_term'. rewrite term_eq_term'. *)
+(*  unfold term'. rewrite H. reflexivity. *)
+(* Qed. *)
+
+Instance rw_eqC_fv : Proper (eqC ==> VarSet.Equal) fv.
+Proof.
+  Admitted.
+(*  intros_all. apply eqC_fv; trivial. *)
+(* Qed. *)
+
+Instance rw_eqC_app : Proper (eqC ++> eqC ++> eqC) pterm_app.
+Proof.
+  Admitted.
+(*     intros_all. apply star_closure_composition with (u:=pterm_app y x0). *)
+(*     induction H. constructor. constructor 2.  *)
+
+(*     induction H. *)
+(*     constructor. *)
+(*     constructor 2. auto. admit. constructor 2 with (pterm_app u x0). *)
+(*     constructor 2. auto.  admit. auto. *)
+
+(*     induction H0. constructor. *)
+(*     constructor 2. *)
+(*     induction H0. *)
+(*     constructor. auto. constructor 3; auto. admit. constructor 2 with (pterm_app y u). *)
+(*     constructor 3. auto.  admit. auto. *)
+(* Qed. *)
+
+Instance rw_eqC_subst_right : forall t, Proper (eqC ++> eqC) (pterm_sub t).
+Proof.
+  Admitted.
+(*  intros_all. induction H. *)
+(*  constructor. *)
+(*  constructor 2. induction H. constructor 1; auto. constructor 6. auto. admit. *)
+(*  constructor 2 with (t [u]). constructor 6; auto. admit. auto. *)
+(* Qed. *)
+
+(** Lex rules *)
 
 Inductive rule_b : Rel pterm  :=
    reg_rule_b : forall (t u:pterm),  body t -> term u ->  
@@ -543,16 +766,28 @@ Admitted.
 
 Lemma sd_app: forall t u, pterm_app (sd t) (sd u) ->_lex* sd(pterm_app t u). 
 Proof.
-  Admitted.
+Admitted.
 
 Lemma refltrans_app: forall t u t' u', t ->_lex* t' -> u ->_lex* u' -> pterm_app t u  ->_lex* pterm_app t' u'.
 Proof.
   intros t u t' u' Htt' Huu'.
   apply refltrans_composition with (pterm_app t u').
   - clear Htt'.
-    inversion Huu'; subst.
+    induction Huu'.
     + apply refl.
-    + clear Huu'.
+    + apply refltrans_composition with (pterm_app t b).
+      * clear IHHuu' Huu'.
+        apply rtrans with (pterm_app t b).
+        **
+        **
+          
+        inversion H; subst. clear H.
+        inversion H0; subst. clear H0.
+        destruct H as [x' [Heq1 [Hb Heq2]]].
+        
+      *
+        
+
       apply rtrans with (pterm_app t b).
       * inversion H; subst.
         ** clear H. clear H0.

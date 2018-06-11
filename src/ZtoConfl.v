@@ -10,6 +10,17 @@ Inductive trans {A} (red: Rel A) : Rel A :=
 
 Arguments transit {A} {red} _ _ _ _ _ .
 
+Lemma trans_composition {A}:
+  forall (R: Rel A) t u v, trans R t u -> trans R u v -> trans R t v
+.
+Proof.
+  intros R t u v H1 H2. induction H1.
+  - apply transit with b; assumption.
+  - apply transit with b.
+    + assumption.
+    + apply IHtrans; assumption.
+Qed.
+
 Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
 | refl: forall a, (refltrans R) a a
 | rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c
