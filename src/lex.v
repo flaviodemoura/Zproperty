@@ -793,44 +793,28 @@ Proof.
         ** inversion H; subst.
            *** clear H.
                inversion H0; subst. clear H0.
-               destruct H as [x' [Heq1 [Hb Heq2]]].
-               apply b_ctx_rule.
-               unfold b_ctx.
+               destruct H as [Heq1 [Hb Heq2]].
+               unfold lex.
                unfold red_ctx_mod_eqC.
                exists (pterm_app t x).
-               exists (pterm_app t x').
+               exists (pterm_app t x0).
                split.
                **** rewrite Heq1.
-                    apply reflexivity.
+                    reflexivity.
                **** split.
-                    ***** apply ES_app_right.
-                      *****
-           ***
-        **
-          
-        
-      *
-        
-
-      apply rtrans with (pterm_app t b).
-      * inversion H; subst.
-        ** clear H. clear H0.
-           unfold b_ctx in H1.
-           unfold red_ctx_mod_eqC in H1.
-           destruct H1. destruct H.
-           destruct H as [ Heq1 [Hb Heq2]].
-           apply b_ctx_rule.
-           unfold b_ctx.
-           unfold red_ctx_mod_eqC.
-           exists (pterm_app t x).
-           exists (pterm_app t x0).
-           split.
-           *** apply ES_app_right.
-             
-      *
-  - 
-    
-Admitted.
+                    inversion Hb; subst.  clear Hb.
+                    apply b_ctx_rule.
+                    apply ES_app_right. admit.
+                    assumption.
+                    clear Hb.
+                    apply x_ctx_rule.
+                    apply ES_app_right. admit.
+                    assumption.
+                    rewrite Heq2.
+                    reflexivity.
+        ** apply refl.
+      * assumption.
+  - Admitted.
 
 Lemma abs_sd: forall t1 L , (forall x, x \notin L -> t1 ^ x ->_lex* sd (t1 ^ x)) ->  pterm_abs t1 ->_lex* pterm_abs (sd t1).
 Proof.
