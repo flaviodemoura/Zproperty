@@ -29,7 +29,8 @@ Notation "i === j" := (Peano_dec.eq_nat_dec i j) (at level 67).
 
 Lemma notin_union : forall x E F,
   x \notin (E \u F) <-> (x \notin E) /\ (x \notin F).
-Proof. Admitted.
+Proof.
+Admitted.
 
 Inductive pterm : Set :=
   | pterm_bvar : nat -> pterm
@@ -99,7 +100,8 @@ Lemma finite_nat_list_max : forall (l : list nat),
 Proof.
   induction l as [ | l ls IHl ].
   - exists 0; intros x H; inversion H.
-  - inversion IHl as [x H]. Admitted.
+  - inversion IHl as [x H].
+ Admitted.
 (*     exists (max x l); intros y J; simpl in J. *)
 (*     inversion J; subst; auto with arith. *)
 (*     destruct J. *)
@@ -472,7 +474,27 @@ Notation "t =e u" := (eqC t u) (at level 66).
 
 Lemma lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
 Proof.
-Admitted.  
+  induction k.
+  - induction t0.
+    + intros.
+  apply Nat.nlt_0_r in H0.
+  contradiction.
+    + trivial.
+    + intros.
+      destruct H0.
+      assert (H': 0 <> 1).
+      {
+        assumption.
+      }
+    apply IHt0_1 in H.
+      * apply IHt0_2 in H'.
+        ** simpl.
+           split.
+            *** assumption.
+            *** assumption.
+        ** assumption.
+      * assumption.
+Admitted.
 
 Lemma bswap_rec_id : forall n t, bswap_rec n (bswap_rec n t)  = t.
 Proof.
@@ -741,14 +763,21 @@ Notation "t ->_lex+ u" := (trans_lex t u) (at level 59, left associativity).
 
 Lemma trans_ex_to_lex: forall t u, t ->_ex+ u -> t ->_lex+ u.
 Proof.
-  Admitted.
+Admitted.
 
 Definition refltrans_lex t u := refltrans lex t u.
 Notation "t ->_lex* u" := (refltrans_lex t u) (at level 59, left associativity).
 
 Lemma lex_trans: forall t u v, t ->_lex* u -> u ->_lex* v -> t ->_lex* v.
 Proof.
-  Admitted.
+  intros.
+  induction H.
+   - assumption.
+   - apply IHrefltrans in H0.
+     apply rtrans with b.
+    + assumption.
+    + assumption.
+Qed.
   
 Lemma sys_BxEqc: forall a a' b b', a ->_lex b -> a =e a' -> b =e b' -> a' ->_lex b'.
 Proof.
@@ -818,7 +847,7 @@ Proof.
 
 Lemma abs_sd: forall t1 L , (forall x, x \notin L -> t1 ^ x ->_lex* sd (t1 ^ x)) ->  pterm_abs t1 ->_lex* pterm_abs (sd t1).
 Proof.
-Admitted.
+  Admitted.
 
 Lemma refltrans_sub: forall t L u t' u', (forall x, x \notin L -> t ^ x ->_lex* sd (t ^ x)) -> u ->_lex* u' -> (t [ u ])  ->_lex* (t' [ u' ]).
 Proof.

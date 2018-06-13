@@ -40,7 +40,15 @@ Qed.
 Lemma refltrans_composition' {A}:
     forall (R: Rel A) t u v, refltrans R t u -> R u v -> refltrans R t v.
 Proof.
-  Admitted.
+  intros R t u v H1 H2. induction H1.
+  - apply rtrans with v.
+    + assumption.
+    + apply refl.
+  - apply IHrefltrans in H2.
+    apply rtrans with b.
+    + assumption.
+    + assumption.
+Qed.
 
 Lemma trans_to_refltrans {A:Type} (R: Rel A): forall a b, trans R a b -> refltrans R a b.
 Proof.
