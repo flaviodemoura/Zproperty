@@ -191,7 +191,26 @@ Inductive term : pterm -> Prop :=
       term (pterm_sub t1 t2).
 Hint Constructors term.
 
+Definition red_regular (R : Rel pterm) :=
+  forall t t', R t t' -> term t /\ term t'.
+
 Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
+
+Lemma body_to_term: forall t x, x \notin fv t -> body t -> term (t^x).
+Proof.
+  Admitted.
+
+Lemma red_regular_trans: forall R, red_regular R -> red_regular (trans R).
+Proof.
+Admitted.
+
+Lemma red_regular_refltrans: forall R, red_regular R -> red_regular (refltrans R).
+Proof.
+  intros R Hreg.
+  unfold red_regular.
+  intros t t' Hrefl.
+  induction Hrefl.
+  - Admitted. (* corrigir *)
 
 (* (** Specialized induction principle for preterms. *) *)
 (* Theorem pterm_induction : forall P : pterm -> Prop, *)
@@ -407,13 +426,54 @@ Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
   | ES_subst_right : forall t u u', body t -> ES_contextual_closure R u u' ->
 	  	                    ES_contextual_closure R  (t [u]) (t [u']).
 
+Lemma red_regular_ctx: forall R, red_regular R -> red_regular (ES_contextual_closure R).
+Proof.
+  intros R Hred.
+  unfold red_regular.
+  intros t t' H.
+  induction H.
+  - apply Hred; assumption.
+  - split.
+    + apply term_app.
+      * apply IHES_contextual_closure.
+      * assumption.
+    + apply term_app.
+      * apply IHES_contextual_closure.
+      * assumption.
+  - split.
+    + apply term_app.
+      * assumption.
+      * apply IHES_contextual_closure.
+    + apply term_app.
+      * assumption.
+      * apply IHES_contextual_closure.
+  - split.
+    + apply term_abs with L.
+      apply H0.
+    + apply term_abs with L.
+      apply H0.
+  - split.
+    + apply term_sub with L.
+      * apply H1.
+      * assumption.
+    + apply term_sub with L.
+      * apply H1.
+      * assumption.
+  - split.
+    + apply term_sub with (fv t0).
+      * intros x Hfv.
+        apply body_to_term; assumption.
+      * apply IHES_contextual_closure.
+    + apply term_sub with (fv t0).
+      * intros x Hfv.
+        apply body_to_term; assumption.
+      * apply IHES_contextual_closure.
+Qed.
+    
 Inductive eqc : Rel pterm :=
 | eqc_def: forall t u v, lc_at 2 t -> term u -> term v -> eqc (t[u][v]) ((& t)[v][u]).
 
-Definition red_regular (R : Rel pterm) :=
-  forall t t', R t t' -> term t /\ term t'.
-
-Lemma eqc_regular: red_regular eqc.
+Lemma red_regular_eqc : red_regular eqc.
 Proof.
   unfold red_regular. intros t t' Heqc; split.
   - inversion Heqc; subst. clear Heqc.
@@ -455,49 +515,33 @@ Proof.
 Definition eqc_ctx (t u: pterm) := ES_contextual_closure eqc t u.
 Notation "t =c u" := (eqc_ctx t u) (at level 66).
 
-Lemma eqc_ctx_regular: red_regular eqc_ctx.
+Corollary red_regular_eqc_ctx: red_regular eqc_ctx.
 Proof.
-  unfold red_regular.
-  intros t t' Heqc.
-  induction Heqc.
-  - apply eqc_regular; assumption.
-  - split.
-    + apply term_app.
-      * apply IHHeqc.
-      * assumption.
-    + apply term_app.
-      * apply IHHeqc.
-      * assumption.
-  - split.
-    + apply term_app.
-      * assumption.
-      * apply IHHeqc.
-    + apply term_app.
-      * assumption.
-      * apply IHHeqc. 
-  - split.
-    + apply term_abs with L.
-      intros x Hfv.
-      apply H0; assumption.
-    + apply term_abs with L.
-      intros x Hfv.
-      apply H0; assumption.
-  - split.
-    + apply term_sub with L.
-      * intros x Hfv.
-        apply H1; assumption.        
-      * assumption.
-    + apply term_sub with L.
-      * intros x Hfv.
-        apply H1; assumption.        
-      * assumption.
-  - split.
-    + apply term_sub with (fv t0).
-      
-    +
-    
+  apply red_regular_ctx.
+  apply red_regular_eqc.
+Qed.
+  
+Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
+Proof.
+  intros t u H. induction H.
+  - Admitted.  
+(*   apply ES_redex. apply eqc_sym; assumption. *)
+(*   apply ES_app_left; assumption. *)
+(*   apply ES_app_right; assumption. *)
+(*   apply ES_abs_in with L; assumption. *)
+(*   apply ES_subst_left with L; assumption. *)
+(*   apply ES_subst_right; assumption. *)
+(* Qed. *)
+
+        
 Definition eqc_trans (t u: pterm) := trans eqc_ctx t u.
 Notation "t =c+ u" := (eqc_trans t u) (at level 66).
+
+Corollary red_regular_eqc_trans: red_regular eqc_trans.
+Proof.
+  apply red_regular_trans.
+  apply red_regular_eqc_ctx.
+Qed.
 
 (* Lemma eqc_trans_app: forall t t' u u', t =c+ t' -> u =c+ u' -> (pterm_app t u =c+ pterm_app t' u'). *)
 (* Proof. *)
@@ -513,6 +557,57 @@ Notation "t =c+ u" := (eqc_trans t u) (at level 66).
 Definition eqC (t : pterm) (u : pterm) := refltrans eqc_ctx t u.
 Notation "t =e u" := (eqC t u) (at level 66).
 
+Corollary red_regular_eqC: red_regular eqC.
+Proof.
+  apply red_regular_refltrans.
+  apply red_regular_eqc_ctx.
+Qed.
+  
+(** =e is an equivalence relation *)
+
+Lemma eqC_rf : forall t, t =e t.
+Proof.
+  intro t.
+  apply refl.
+Qed.
+
+Lemma eqC_trans : forall t u v, t =e u -> u =e v -> t =e v.
+Proof.
+ intros t u v H H'.
+ generalize dependent t.
+ induction H'.
+ - intros v H; assumption.
+ - intros v H1.
+   apply IHH'. clear H'.
+   apply refltrans_composition' with a; assumption.
+Qed.
+
+Lemma eqC_sym : forall t u, t =e u -> u =e t.
+Proof.
+ intros t u H. induction H.
+ - apply refl.
+ - apply eqc_ctx_sym in H.
+   assert (H': b =e a).
+   {
+     apply rtrans with a.
+     + assumption.
+     + apply refl.
+   }
+   apply eqC_trans with b; assumption.
+Qed.
+
+Instance eqC_eq : Equivalence eqC.
+Proof.
+  split.
+  - unfold Reflexive. apply eqC_rf.
+  - unfold Symmetric.
+    intros x y Heq.
+    apply eqC_sym; trivial.
+  - unfold Transitive.
+    intros x y z Heq Heq'.
+    apply eqC_trans with y; trivial.
+Qed.
+    
 Lemma lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
 Proof.
   induction k.
@@ -592,46 +687,20 @@ Proof.
  - apply bswap_idemp.
 Qed.
 
-Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
-Proof.
-  intros t u H. induction H.
-  - Admitted.  
-(*   apply ES_redex. apply eqc_sym; assumption. *)
-(*   apply ES_app_left; assumption. *)
-(*   apply ES_app_right; assumption. *)
-(*   apply ES_abs_in with L; assumption. *)
-(*   apply ES_subst_left with L; assumption. *)
-(*   apply ES_subst_right; assumption. *)
-(* Qed. *)
-
-Lemma eqC_trans : forall t u v, t =e u -> u =e v -> t =e v.
-Proof.
- intros t u v H H'.
- generalize dependent t.
- induction H'.
- - intros v H; assumption.
- - intros v H1.
-   apply IHH'. clear H'.
-   apply refltrans_composition' with a; assumption.
-Qed.
-
-Lemma eqC_sym : forall t u, t =e u -> u =e t.
-Proof.
- intros t u H. induction H.
- - apply refl.
- - apply eqc_ctx_sym in H.
-   assert (H': b =e a).
-   {
-     apply rtrans with a.
-     + assumption.
-     + apply refl.
-   }
-   apply eqC_trans with b; assumption.
-Qed.
-
 Definition red_ctx_mod_eqC (R: Rel pterm) (t: pterm) (u : pterm) :=
            exists t', exists u', (t =e t')/\(R t' u')/\(u' =e u).
 
+Lemma red_regular_red_ctx_mod_eqC: forall R, red_regular R -> red_regular (red_ctx_mod_eqC R). 
+Proof.
+  intros R Hreg.
+  unfold red_regular.
+  intros t t' Hctx.
+  induction Hctx.
+  destruct H as [v [Heq [HR Heq']]]; split.
+  - apply Hreg in HR.
+    admit.
+  - Admitted.
+  
 (** =e Rewriting *)
 
 Instance rw_eqC_red : forall R, Proper (eqC ==> eqC ==> iff) (red_ctx_mod_eqC R).
@@ -756,15 +825,31 @@ Instance eqC_equiv: Equivalence eqC.
 Proof.
 Admitted.
 
+Lemma red_regular_eqC': forall t t', term t -> t =e t' -> term t'.
+Proof.
+  intros t t' Hterm Heq.
+  rewrite <- Heq; assumption.
+Qed.
+
 (** Lex rules *)
 
 Inductive rule_b : Rel pterm  :=
    reg_rule_b : forall (t u:pterm),  body t -> term u ->  
      rule_b (pterm_app(pterm_abs t) u) (t[u]).
 
+Lemma red_regular_b: red_regular rule_b.
+Proof.
+  Admitted.
+
 Definition b_ctx t u := ES_contextual_closure rule_b t u. 
 Notation "t ->_B u" := (b_ctx t u) (at level 66).
 
+Corollary red_regular_b_ctx : red_regular b_ctx.
+Proof.
+  apply red_regular_ctx.
+  apply red_regular_b.
+Qed.
+  
 Inductive sys_x : Rel pterm :=
 | reg_rule_var : forall t, sys_x (pterm_bvar 0 [t]) t
 | reg_rule_gc : forall t u, term t -> sys_x (t[u]) t
@@ -775,23 +860,63 @@ Inductive sys_x : Rel pterm :=
 | reg_rule_comp : forall t u v, has_free_index 0 u ->
   sys_x (t[u][v]) (((& t)[v])[ u[ v ] ]).
 
+Lemma red_regular_sys_x: red_regular sys_x.
+Proof.
+  Admitted.
+  
 Definition x_ctx t u := ES_contextual_closure sys_x t u. 
 Notation "t ->_x u" := (x_ctx t u) (at level 59, left associativity).
+
+Corollary red_regular_x_ctx : red_regular x_ctx.
+Proof.
+  apply red_regular_ctx.
+  apply red_regular_sys_x.
+Qed.
 
 Inductive lx: Rel pterm :=
 | b_ctx_rule : forall t u, t ->_B u -> lx t u
 | x_ctx_rule : forall t u, t ->_x u -> lx t u.
 Notation "t ->_Bx u" := (lx t u) (at level 59, left associativity).
 
+Corollary red_regular_lx: red_regular lx.
+Proof.
+  unfold red_regular.
+  intros t t' HBx.
+  induction HBx.
+  - apply red_regular_b_ctx; assumption.
+  - apply red_regular_x_ctx; assumption.
+Qed.
+    
 Definition trans_x t u := trans x_ctx t u.
 Notation "t ->_x+ u" := (trans_x t u) (at level 59, left associativity).
+
+Corollary red_regular_trans_x: red_regular trans_x.
+Proof.
+  apply red_regular_trans.
+  apply red_regular_x_ctx.
+Qed.
 
 Definition ex t u := red_ctx_mod_eqC x_ctx t u.
 Notation "t ->_ex u" := (ex t u) (at level 59, left associativity).
 
+Corollary red_regular_ex: red_regular ex.
+Proof.
+  unfold red_regular.
+  intros t t' Hex.
+  apply red_regular_red_ctx_mod_eqC in Hex.
+  - assumption.
+  - apply red_regular_x_ctx.
+Qed.
+  
 Definition trans_ex t u := trans ex t u.
 Notation "t ->_ex+ u" := (trans_ex t u) (at level 59, left associativity).
 
+Corollary red_regular_trans_ex : red_regular trans_ex.
+Proof.
+  apply red_regular_trans.
+  apply red_regular_ex.
+Qed.
+  
 Lemma full_comp: forall t u, body t -> term u -> t[u] ->_ex+ (t ^^ u). 
 Proof.
 Admitted.
@@ -799,15 +924,33 @@ Admitted.
 Definition lex t u := red_ctx_mod_eqC lx t u.
 Notation "t ->_lex u" := (lex t u) (at level 59, left associativity).
 
+Corollary red_regular_lex : red_regular lex.
+Proof.
+  apply red_regular_red_ctx_mod_eqC.
+  apply red_regular_lx.
+Qed.
+  
 Definition trans_lex t u := trans lex t u.
 Notation "t ->_lex+ u" := (trans_lex t u) (at level 59, left associativity).
 
+Corollary red_regular_trans_lex : red_regular trans_lex.
+Proof.
+  apply red_regular_trans.
+  apply red_regular_lex.
+Qed.
+  
 Lemma trans_ex_to_lex: forall t u, t ->_ex+ u -> t ->_lex+ u.
 Proof.
 Admitted.
 
 Definition refltrans_lex t u := refltrans lex t u.
 Notation "t ->_lex* u" := (refltrans_lex t u) (at level 59, left associativity).
+
+Corollary red_regular_refltrans_lex : red_regular refltrans_lex.
+Proof.
+  apply red_regular_refltrans.
+  apply red_regular_lex.
+Qed.
 
 Lemma lex_trans: forall t u v, t ->_lex* u -> u ->_lex* v -> t ->_lex* v.
 Proof.
@@ -854,7 +997,12 @@ Lemma refltrans_app: forall t u t' u', t ->_lex* t' -> u ->_lex* u' -> pterm_app
 Proof.
   intros t u t' u' Htt' Huu'.
   apply refltrans_composition with (pterm_app t u').
-  - clear Htt'.
+  - assert (H: red_regular (refltrans lex)).
+    {
+      apply red_regular_refltrans.
+      apply red_regular
+    }
+    clear Htt'.
     induction Huu'.
     + apply refl.
     + apply refltrans_composition with (pterm_app t b).
