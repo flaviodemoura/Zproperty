@@ -230,7 +230,6 @@ Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
 (*     + *)
 (*     + *)
 (*   - *)
-
     
 (** Local closure of terms *)
 Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
@@ -455,6 +454,48 @@ Proof.
   
 Definition eqc_ctx (t u: pterm) := ES_contextual_closure eqc t u.
 Notation "t =c u" := (eqc_ctx t u) (at level 66).
+
+Lemma eqc_ctx_regular: red_regular eqc_ctx.
+Proof.
+  unfold red_regular.
+  intros t t' Heqc.
+  induction Heqc.
+  - apply eqc_regular; assumption.
+  - split.
+    + apply term_app.
+      * apply IHHeqc.
+      * assumption.
+    + apply term_app.
+      * apply IHHeqc.
+      * assumption.
+  - split.
+    + apply term_app.
+      * assumption.
+      * apply IHHeqc.
+    + apply term_app.
+      * assumption.
+      * apply IHHeqc. 
+  - split.
+    + apply term_abs with L.
+      intros x Hfv.
+      apply H0; assumption.
+    + apply term_abs with L.
+      intros x Hfv.
+      apply H0; assumption.
+  - split.
+    + apply term_sub with L.
+      * intros x Hfv.
+        apply H1; assumption.        
+      * assumption.
+    + apply term_sub with L.
+      * intros x Hfv.
+        apply H1; assumption.        
+      * assumption.
+  - split.
+    + apply term_sub with (fv t0).
+      
+    +
+    
 Definition eqc_trans (t u: pterm) := trans eqc_ctx t u.
 Notation "t =c+ u" := (eqc_trans t u) (at level 66).
 
