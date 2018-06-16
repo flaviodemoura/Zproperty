@@ -204,13 +204,13 @@ Lemma red_regular_trans: forall R, red_regular R -> red_regular (trans R).
 Proof.
 Admitted.
 
-Lemma red_regular_refltrans: forall R, red_regular R -> red_regular (refltrans R).
-Proof.
-  intros R Hreg.
-  unfold red_regular.
-  intros t t' Hrefl.
-  induction Hrefl.
-  - Admitted. (* corrigir *)
+(* Lemma red_regular_refltrans: forall R, red_regular R -> red_regular (refltrans R). *)
+(* Proof. *)
+(*   intros R Hreg. *)
+(*   unfold red_regular. *)
+(*   intros t t' Hrefl. *)
+(*   induction Hrefl. *)
+(*   - Admitted. (* corrigir *) *)
 
 (* (** Specialized induction principle for preterms. *) *)
 (* Theorem pterm_induction : forall P : pterm -> Prop, *)
@@ -557,11 +557,11 @@ Qed.
 Definition eqC (t : pterm) (u : pterm) := refltrans eqc_ctx t u.
 Notation "t =e u" := (eqC t u) (at level 66).
 
-Corollary red_regular_eqC: red_regular eqC.
-Proof.
-  apply red_regular_refltrans.
-  apply red_regular_eqc_ctx.
-Qed.
+(* Corollary red_regular_eqC: red_regular eqC. *)
+(* Proof. *)
+(*   apply red_regular_refltrans. *)
+(*   apply red_regular_eqc_ctx. *)
+(* Qed. *)
   
 (** =e is an equivalence relation *)
 
@@ -946,11 +946,15 @@ Admitted.
 Definition refltrans_lex t u := refltrans lex t u.
 Notation "t ->_lex* u" := (refltrans_lex t u) (at level 59, left associativity).
 
-Corollary red_regular_refltrans_lex : red_regular refltrans_lex.
-Proof.
-  apply red_regular_refltrans.
-  apply red_regular_lex.
-Qed.
+(* Lemma red_regular_refltrans_lex : red_regular refltrans_lex. *)
+(* Proof. *)
+(*   unfold red_regular. *)
+(*   intros t t' Hlex. *)
+(*   induction Hlex. *)
+                                            (* REVISAR *)
+(*   apply red_regular_refltrans. *)
+(*   apply red_regular_lex. *)
+(* Qed. *)
 
 Lemma lex_trans: forall t u v, t ->_lex* u -> u ->_lex* v -> t ->_lex* v.
 Proof.
@@ -967,7 +971,7 @@ Lemma sys_BxEqc: forall a a' b b', a ->_lex b -> a =e a' -> b =e b' -> a' ->_lex
 Proof.
 Admitted.  
 
-(** Superdevelpment function *)
+(** Superdevelopment function *)
 Fixpoint sd (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => t
@@ -997,8 +1001,17 @@ Lemma refltrans_app: forall t u t' u', t ->_lex* t' -> u ->_lex* u' -> pterm_app
 Proof.
   intros t u t' u' Htt' Huu'.
   apply refltrans_composition with (pterm_app t u').
-  - assert (H: red_regular (refltrans lex)).
+  - assert (H: term t /\ term t').
     {
+      clear Huu'.
+      induction Htt'.
+      - 
+      -
+        
+      split.
+      -
+      -
+        
       apply red_regular_refltrans.
       apply red_regular
     }
