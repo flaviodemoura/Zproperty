@@ -1172,7 +1172,7 @@ Proof.
   induction 1.
   - apply refl.
   - apply refltrans_composition with (pterm_app (sd t1) (sd t2)).
-    + apply refltrans_app; assumption.
+    + apply lex_refltrans_app; assumption.
     + apply sd_app.
   - clear H.
     generalize dependent L.
@@ -1185,19 +1185,8 @@ Proof.
     + apply trans_to_refltrans.
       apply trans_ex_to_lex.
       apply full_comp.
-      * pick_fresh y.
-        assert (Ht1: term (t1 ^ y)).
-        {
-          apply H.
-          apply notin_union in Fr.
-          destruct Fr as [HFr Ht2].
-          apply notin_union in HFr.
-          apply HFr.
-        }
-        admit.
-      * apply sd_term; assumption.
-Admitted.
-        
+Qed.
+
 Lemma BxZlex: forall a b, a ->_lex b -> b ->_lex* (sd a) /\ (sd a) ->_lex* (sd b).
 Proof.
 Admitted.
