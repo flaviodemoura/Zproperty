@@ -357,7 +357,26 @@ Proof.
       intros x Hfv.
       admit.
     + Admitted.
-      
+
+Lemma lc_at_open_rec_rename: forall t x y m n, lc_at m (open_rec n (pterm_fvar x) t) -> lc_at m (open_rec n (pterm_fvar y) t).
+Proof.
+  Admitted.
+  (* induction t. simpl. introv H. case_nat. constructor. assumption. *)
+(*   simpl. intros; trivial. simpl. introv H. destruct H. *)
+(*   apply (IHt1 x y) in H. apply (IHt2 x y) in H0. *)
+(*   split; assumption. simpl. *)
+(*   introv H. apply IHt with x. assumption. simpl. *)
+(*   introv H. destruct H. split. apply IHt1 with x; assumption. apply IHt2 with x; assumption. *)
+(*   simpl. trivial. *)
+(* Qed.   *)
+
+Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
+Proof.
+  Admitted.
+(*   introv H. apply term_eq_term' in H. apply term_eq_term'. *)
+(*   apply lc_at_open_rec_rename with x. assumption. *)
+(* Qed. *)
+
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => if k === i then (pterm_bvar (S k))
@@ -420,9 +439,9 @@ Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
 	  		       ES_contextual_closure R (pterm_app t u) (pterm_app t u')
   | ES_abs_in : forall t t' L, (forall x, x \notin L -> ES_contextual_closure R (t^x) (t'^x)) ->
                                ES_contextual_closure R (pterm_abs t) (pterm_abs t')
-  | ES_subst_left : forall t t' u L, (forall x, x \notin L -> ES_contextual_closure R (t^x) (t'^x)) ->
+  | ES_sub : forall t t' u L, (forall x, x \notin L -> ES_contextual_closure R (t^x) (t'^x)) ->
 	                        ES_contextual_closure R  (t [u]) (t' [u])
-  | ES_subst_right : forall t u u', ES_contextual_closure R u u' ->
+  | ES_sub_in : forall t u u', ES_contextual_closure R u u' ->
 	  	               ES_contextual_closure R  (t [u]) (t [u']).
 
 Lemma term_regular_ctx: forall R, term_regular R -> term_regular (ES_contextual_closure R).
@@ -883,6 +902,20 @@ Proof.
     apply ES_app_right; assumption.
 Qed.    
 
+Lemma Bx_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_Bx t'^x) -> pterm_sub t u ->_Bx pterm_sub t' u. 
+Proof.
+Admitted.
+
+Lemma Bx_sub_in: forall u u' t, u ->_Bx u' -> pterm_sub t u ->_Bx pterm_sub t u'. 
+Proof.
+  intros u u' t HBx.
+  inversion HBx; subst; clear HBx.
+  - apply b_ctx_rule.
+    apply ES_sub_in; assumption.
+  - apply x_ctx_rule.
+    apply ES_sub_in; assumption.
+Qed.    
+
 Corollary term_regular_lx: term_regular lx.
 Proof.
   unfold term_regular.
@@ -917,6 +950,21 @@ Proof.
     + assumption.    
 Qed.    
 
+Lemma x_trans_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_x+ t'^x) -> pterm_sub t u ->_x+ pterm_sub t' u. 
+Proof.
+Admitted.
+
+Lemma x_trans_sub_in: forall u u' t, u ->_x+ u' -> pterm_sub t u ->_x+ pterm_sub t u'. 
+Proof.
+  intros u u' t Hred.
+  induction Hred.
+  - apply singl.
+    apply ES_sub_in; assumption.
+  - apply transit with (t[b]). 
+    + apply ES_sub_in; assumption.
+    + assumption.
+Qed.
+    
 Corollary term_regular_trans_x: term_regular trans_x.
 Proof.
   apply term_regular_trans.
@@ -956,6 +1004,25 @@ Proof.
     + rewrite Heq'; apply refl.
 Qed.
 
+Lemma ex_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_ex t'^x) -> pterm_sub t u ->_ex pterm_sub t' u. 
+Proof.
+Admitted.
+
+Lemma ex_sub_in: forall u u' t, u ->_ex u' -> pterm_sub t u ->_ex pterm_sub t u'. 
+Proof.
+  intros u u' t Hred.
+  unfold ex in *.
+  unfold red_ctx_mod_eqC in *.
+  destruct Hred as [v [v' [Heq [Hx Heq']]]].
+  exists (t[v]). exists (t[v']). split.
+  - rewrite Heq.
+    apply refl.
+  - split.
+    + apply ES_sub_in; assumption.
+    + rewrite Heq'.
+      apply refl.
+Qed.
+  
 Corollary term_regular_ex: term_regular ex.
 Proof.
   unfold term_regular.
@@ -990,6 +1057,21 @@ Proof.
     + assumption.
 Qed.
 
+Lemma ex_trans_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_ex+ t'^x) -> (t[u]) ->_ex+ (t'[u]). 
+Proof.
+Admitted.
+
+Lemma ex_trans_sub_in: forall u u' t, u ->_ex+ u' -> (t[u]) ->_ex+ (t[u']).
+Proof.
+  intros u u' t Hex.
+  induction Hex.
+  - apply singl.
+    apply ex_sub_in; assumption.
+  - apply transit with (t[b]).
+    + apply ex_sub_in; assumption.            
+    + assumption.    
+Qed.
+  
 Corollary term_regular_trans_ex : term_regular trans_ex.
 Proof.
   apply term_regular_trans.
@@ -1033,6 +1115,25 @@ Proof.
     + rewrite Heq'; apply refl.
 Qed.
 
+Lemma lex_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_lex t'^x) -> (t[u]) ->_lex (t'[u]). 
+Proof.
+Admitted.
+
+Lemma lex_sub_in: forall u u' t, u ->_lex u' -> (t[u]) ->_lex (t[u']).
+Proof.
+  intros u u' t Hlex.
+  unfold lex in *.
+  unfold red_ctx_mod_eqC in *.
+  destruct Hlex as [v [v' [Heq [HBx Heq']]]].
+  exists (t[v]). exists (t[v']). split.
+  - rewrite Heq.
+    apply refl.
+  - split.
+    + apply Bx_sub_in; assumption.
+    + rewrite Heq'.
+      apply refl.
+Qed.      
+    
 Corollary term_regular_lex : term_regular lex.
 Proof.
   apply term_regular_red_ctx_mod_eqC.
@@ -1063,7 +1164,22 @@ Proof.
     + apply lex_app_right; assumption.
     + assumption.
 Qed.
-    
+
+Lemma lex_trans_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_lex+ t'^x) -> (t[u]) ->_lex+ (t'[u]). 
+Proof.
+Admitted.
+
+Lemma lex_trans_sub_in: forall u u' t, u ->_lex+ u' -> (t[u]) ->_lex+ (t[u']).
+Proof.
+  intros u u' t Hlex.
+  induction Hlex.
+  - apply singl.
+    apply lex_sub_in; assumption.
+  - apply transit with (t[b]).
+    + apply lex_sub_in; assumption.
+    + assumption.
+Qed.
+
 Corollary term_regular_trans_lex : term_regular trans_lex.
 Proof.
   apply term_regular_trans.
@@ -1097,6 +1213,20 @@ Proof.
     + assumption.
 Qed.
 
+Lemma lex_refltrans_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_lex* t'^x) -> (t[u]) ->_lex* (t'[u]). 
+Proof.
+Admitted.
+
+Lemma lex_refltrans_sub_in: forall u u' t, u ->_lex* u' -> (t[u]) ->_lex* (t[u']).
+Proof.
+  intros u u' t Hlex.
+  induction Hlex.
+  - apply refl.
+  - apply rtrans with (t[b]).
+    + apply lex_sub_in; assumption.
+    + assumption.
+Qed.
+      
 Lemma term_regular_refltrans_lex : term_regular refltrans_lex.
 Proof.
   unfold term_regular.
@@ -1163,7 +1293,7 @@ Lemma abs_sd: forall t1 L , (forall x, x \notin L -> t1 ^ x ->_lex* sd (t1 ^ x))
 Proof.
   Admitted.
 
-Lemma refltrans_sub: forall t L u t' u', (forall x, x \notin L -> t ^ x ->_lex* sd (t ^ x)) -> u ->_lex* u' -> (t [ u ])  ->_lex* (t' [ u' ]).
+Lemma lex_refltrans_sd_sub: forall t L u t' u', (forall x, x \notin L -> t ^ x ->_lex* sd (t ^ x)) -> u ->_lex* u' -> (t [ u ])  ->_lex* (t' [ u' ]).
 Proof.
   Admitted.
 
@@ -1179,7 +1309,7 @@ Proof.
     apply abs_sd.
   - simpl.
     apply refltrans_composition with ((sd t1) [(sd t2)]).
-    + apply refltrans_sub with L.
+    + apply lex_refltrans_sd_sub with L.
       * assumption.
       * assumption.
     + apply trans_to_refltrans.
