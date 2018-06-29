@@ -194,6 +194,12 @@ Hint Constructors term.
 Definition term_regular (R : Rel pterm) :=
   forall t t', R t t' -> term t -> term t'.
 
+Definition red_rename (R : Rel pterm) :=
+  forall x t t' y,
+  x \notin (fv t) -> x \notin (fv t') ->
+  R (t ^ x) (t' ^ x) -> 
+  R (t ^ y) (t' ^ y).
+
 Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
 
 Lemma body_to_term: forall t x, x \notin fv t -> body t -> term (t^x).
@@ -430,6 +436,74 @@ Proof.
     assumption. assumption. assumption. assumption.
 Qed.  
 
+Lemma lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
+Proof.
+  induction k.
+  - induction t0.
+    + intros.
+  apply Nat.nlt_0_r in H0.
+  contradiction.
+    + trivial.
+    + intros.
+      destruct H0.
+      assert (H': 0 <> 1).
+      {
+        assumption.
+      }
+    apply IHt0_1 in H.
+      * apply IHt0_2 in H'.
+        ** simpl.
+           split.
+            *** assumption.
+            *** assumption.
+        ** assumption.
+      * assumption.
+Admitted.
+
+Lemma bswap_rec_id : forall n t, bswap_rec n (bswap_rec n t)  = t.
+Proof.
+ intros n t. generalize dependent n. 
+ induction t.
+ Admitted.
+
+(*  (* bvar *) *)
+(*  intros n'. unfolds bswap_rec. *)
+(*  case (n' === n). intro H1. *)
+(*  case (n' === S n'). intros H2. *)
+(*  assert (Q: n' <> S n'). omega. *)
+(*  contradiction. intro H2. *)
+(*  case (S n' === S n'). intro H3. *)
+(*  rewrite H1. trivial. intro H3. *)
+(*  assert (Q: S n' = S n'). trivial. *)
+(*  contradiction. intro H. fold bswap_rec. *)
+(*  case (S n' === n). intro H1. unfolds bswap_rec. *)
+(*  case (n' === n'). intro H2. rewrite H1. trivial. *)
+(*  intros H2. assert (Q: n' = n'). trivial. *)
+(*  contradiction. intro H1. unfolds bswap_rec. *)
+(*  case (n' === n). intro H2. contradiction. intro H2. *)
+(*  case (S n' === n). intro H3. contradiction. intro H3. *)
+(*  trivial. *)
+(*  (* fvar *) *)
+(*  intro n. simpl. trivial. *)
+(*  (* app *) *)
+(*  intro n. simpl. rewrite (IHt1 n). rewrite (IHt2 n). *)
+(*  trivial. *)
+(*  (* abs *) *)
+(*  intro n. simpl. rewrite (IHt (S n)). trivial. *)
+(*  (* sub *) *)
+(*  intro n. simpl. rewrite (IHt1 (S n)). rewrite (IHt2 n). *)
+(*  trivial. *)
+(*  (* sub' *) *)
+(*  intro n. simpl. rewrite (IHt1 (S n)). rewrite (IHt2 n). *)
+(*  trivial. *)
+(* Qed. *)
+
+Lemma bswap_idemp : forall t, (& (& t)) = t.
+Proof.
+  intro t. unfold bswap.
+  apply bswap_rec_id.
+Qed.
+
 (** Contextual closure of terms. *)
 Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
   | ES_redex : forall t s, R t s -> ES_contextual_closure R t s
@@ -488,6 +562,14 @@ Proof.
     
 Inductive eqc : Rel pterm :=
 | eqc_def: forall t u v, term u -> term v -> eqc (t[u][v]) ((& t)[v][u]).
+
+Lemma eqc_sym : forall t u, eqc t u -> eqc u t.
+Proof.
+ intros t u H. inversion H; subst. 
+ replace t0 with (&(& t0)) at 2.
+ - apply eqc_def; assumption.
+ - apply bswap_idemp.
+Qed.
 
 Lemma term_regular_eqc : term_regular eqc.
 Proof.
@@ -624,82 +706,6 @@ Proof.
     apply eqC_trans with y; trivial.
 Qed.
     
-Lemma lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
-Proof.
-  induction k.
-  - induction t0.
-    + intros.
-  apply Nat.nlt_0_r in H0.
-  contradiction.
-    + trivial.
-    + intros.
-      destruct H0.
-      assert (H': 0 <> 1).
-      {
-        assumption.
-      }
-    apply IHt0_1 in H.
-      * apply IHt0_2 in H'.
-        ** simpl.
-           split.
-            *** assumption.
-            *** assumption.
-        ** assumption.
-      * assumption.
-Admitted.
-
-Lemma bswap_rec_id : forall n t, bswap_rec n (bswap_rec n t)  = t.
-Proof.
- intros n t. generalize dependent n. 
- induction t.
- Admitted.
-
-(*  (* bvar *) *)
-(*  intros n'. unfolds bswap_rec. *)
-(*  case (n' === n). intro H1. *)
-(*  case (n' === S n'). intros H2. *)
-(*  assert (Q: n' <> S n'). omega. *)
-(*  contradiction. intro H2. *)
-(*  case (S n' === S n'). intro H3. *)
-(*  rewrite H1. trivial. intro H3. *)
-(*  assert (Q: S n' = S n'). trivial. *)
-(*  contradiction. intro H. fold bswap_rec. *)
-(*  case (S n' === n). intro H1. unfolds bswap_rec. *)
-(*  case (n' === n'). intro H2. rewrite H1. trivial. *)
-(*  intros H2. assert (Q: n' = n'). trivial. *)
-(*  contradiction. intro H1. unfolds bswap_rec. *)
-(*  case (n' === n). intro H2. contradiction. intro H2. *)
-(*  case (S n' === n). intro H3. contradiction. intro H3. *)
-(*  trivial. *)
-(*  (* fvar *) *)
-(*  intro n. simpl. trivial. *)
-(*  (* app *) *)
-(*  intro n. simpl. rewrite (IHt1 n). rewrite (IHt2 n). *)
-(*  trivial. *)
-(*  (* abs *) *)
-(*  intro n. simpl. rewrite (IHt (S n)). trivial. *)
-(*  (* sub *) *)
-(*  intro n. simpl. rewrite (IHt1 (S n)). rewrite (IHt2 n). *)
-(*  trivial. *)
-(*  (* sub' *) *)
-(*  intro n. simpl. rewrite (IHt1 (S n)). rewrite (IHt2 n). *)
-(*  trivial. *)
-(* Qed. *)
-
-Lemma bswap_idemp : forall t, (& (& t)) = t.
-Proof.
-  intro t. unfold bswap.
-  apply bswap_rec_id.
-Qed.
-
-Lemma eqc_sym : forall t u, eqc t u -> eqc u t.
-Proof.
- intros t u H. inversion H; subst. 
- replace t0 with (&(& t0)) at 2.
- - apply eqc_def; assumption.
- - apply bswap_idemp.
-Qed.
-
 Definition red_ctx_mod_eqC (R: Rel pterm) (t: pterm) (u : pterm) :=
            exists t', exists u', (t =e t')/\(R t' u')/\(u' =e u).
 
@@ -845,6 +851,28 @@ Lemma term_regular_b: term_regular rule_b.
 Proof.
   Admitted.
 
+Lemma red_rename_b: red_rename rule_b.
+Proof.
+  unfold red_rename.
+  intros x t t' y Hfv Hfv' Hb.
+  unfold open in *.
+  inversion Hb; subst.
+  assert (Hc: t = (close (pterm_app (pterm_abs t0) u) x)).
+  {
+    admit.
+  }
+  assert (Hc': t' = (close (t0 [u]) x)).
+  {
+    admit.
+  }
+  rewrite Hc.
+  rewrite Hc'.
+  unfold open in *.
+  simpl.
+  
+  inversion H0.
+Admitted.
+
 Definition b_ctx t u := ES_contextual_closure rule_b t u. 
 Notation "t ->_B u" := (b_ctx t u) (at level 66).
 
@@ -902,8 +930,22 @@ Proof.
     apply ES_app_right; assumption.
 Qed.    
 
-Lemma Bx_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_Bx t'^x) -> pterm_sub t u ->_Bx pterm_sub t' u. 
+Lemma Bx_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_Bx t'^x) -> (t[u]) ->_Bx (t'[u]). 
 Proof.
+  intros t t' u L H.
+  pick_fresh y.
+  apply notin_union in Fr.
+  destruct Fr as [Fr Hu].
+  apply notin_union in Fr.
+  destruct Fr as [Fr Ht'].
+  apply notin_union in Fr.
+  destruct Fr as [Fr Ht].
+  apply H in Fr.
+  inversion Fr; subst; clear Fr.
+  - apply b_ctx_rule.
+    apply ES_sub with (fv t).
+    intros x Hfv.
+    apply red_rename_b_ctx.
 Admitted.
 
 Lemma Bx_sub_in: forall u u' t, u ->_Bx u' -> pterm_sub t u ->_Bx pterm_sub t u'. 
@@ -1251,7 +1293,11 @@ Qed.
   
 Lemma sys_BxEqc: forall a a' b b', a ->_lex b -> a =e a' -> b =e b' -> a' ->_lex b'.
 Proof.
-Admitted.  
+  intros a a' b b' Hlex Heq Heq'.
+  rewrite <- Heq.
+  rewrite <- Heq'.
+  assumption.
+Qed.
 
 (** Superdevelopment function *)
 Fixpoint sd (t : pterm) : pterm :=
