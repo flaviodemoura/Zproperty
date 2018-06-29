@@ -30,7 +30,64 @@ Notation "i === j" := (Peano_dec.eq_nat_dec i j) (at level 67).
 Lemma notin_union : forall x E F,
   x \notin (E \u F) <-> (x \notin E) /\ (x \notin F).
 Proof.
-Admitted.
+assert (demorgan: forall (A B: Prop), ~(A \/ B) <-> ~ A /\ ~ B).
+{
+split.
+apply Decidable.not_or.
+intro.
+destruct H.
+assert (not_or: (A \/ B) -> False).
+{
+intros.
+destruct H1; contradiction.
+}
+assumption.
+}
+assert (union_spec: forall (s s' : t) (x : elt), x \in s \u s' <-> x \in s \/ x \in s').
+{
+apply union_spec.
+}
+assert (not_union_spec: forall (s s' : t) (x : elt), ~(x \in s \/ x \in s') <-> ~(x \in s \u s')).
+{
+assert (union_spec_r: forall (s s' :t) (x : elt), x \in s \u s' -> x  \in s \/ x \in s').
+{
+apply union_spec.
+}
+assert (union_spec_l: forall (s s' :t) (x : elt), x  \in s \/ x \in s' -> x \in s \u s').
+{
+apply union_spec.
+}
+clear union_spec.
+split.
+intro.
+assert (r_false: x \in s \u s' -> False).
+{
+intro.
+apply union_spec_r in H0.
+contradiction.
+}
+assumption.
+intro.
+assert (l_false: x \in s \/ x \in s' -> False).
+{
+intro.
+apply union_spec_l in H0.
+contradiction.
+}
+assumption.
+}
+assert (not_or_and_not: forall (s s': t) (x: elt), ~ (x \in s \/ x \in s') <-> x \notin s /\ x \notin s').
+{
+intros.
+split.
+apply demorgan.
+apply demorgan.
+}
+intros.
+specialize (not_union_spec E F x).
+specialize (not_or_and_not E F x).
+apply iff_stepl with (~ (x \in E \/ x \in F)); assumption.
+Qed.
 
 Inductive pterm : Set :=
   | pterm_bvar : nat -> pterm
