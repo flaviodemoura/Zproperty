@@ -36,12 +36,8 @@ split.
 apply Decidable.not_or.
 intro.
 destruct H.
-assert (not_or: (A \/ B) -> False).
-{
-intros.
-destruct H1; contradiction.
-}
-assumption.
+intro H'.
+destruct H'; contradiction.
 }
 assert (union_spec: forall (s s' : t) (x : elt), x \in s \u s' <-> x \in s \/ x \in s').
 {
@@ -1005,7 +1001,7 @@ Proof.
     apply red_rename_b_ctx.
 Admitted.
 
-Lemma Bx_sub_in: forall u u' t, u ->_Bx u' -> pterm_sub t u ->_Bx pterm_sub t u'. 
+Lemma Bx_sub_in: forall u u' t, u ->_Bx u' -> (t[u]) ->_Bx (t[u']). 
 Proof.
   intros u u' t HBx.
   inversion HBx; subst; clear HBx.
@@ -1049,11 +1045,11 @@ Proof.
     + assumption.    
 Qed.    
 
-Lemma x_trans_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_x+ t'^x) -> pterm_sub t u ->_x+ pterm_sub t' u. 
+Lemma x_trans_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_x+ t'^x) -> (t[u]) ->_x+ (t'[u]). 
 Proof.
 Admitted.
 
-Lemma x_trans_sub_in: forall u u' t, u ->_x+ u' -> pterm_sub t u ->_x+ pterm_sub t u'. 
+Lemma x_trans_sub_in: forall u u' t, u ->_x+ u' -> (t[u]) ->_x+ (t[u']). 
 Proof.
   intros u u' t Hred.
   induction Hred.
@@ -1103,11 +1099,11 @@ Proof.
     + rewrite Heq'; apply refl.
 Qed.
 
-Lemma ex_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_ex t'^x) -> pterm_sub t u ->_ex pterm_sub t' u. 
+Lemma ex_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_ex t'^x) -> (t[u]) ->_ex (t'[u]). 
 Proof.
 Admitted.
 
-Lemma ex_sub_in: forall u u' t, u ->_ex u' -> pterm_sub t u ->_ex pterm_sub t u'. 
+Lemma ex_sub_in: forall u u' t, u ->_ex u' -> (t[u]) ->_ex (t[u']). 
 Proof.
   intros u u' t Hred.
   unfold ex in *.
