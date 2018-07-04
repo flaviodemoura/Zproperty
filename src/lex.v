@@ -1,7 +1,7 @@
 (** Confluence of the Lex-calculus through Z property. *)
 
 Require Import ZtoConfl.
-        
+
 Definition var := nat.
 
 Require Import Arith MSetList Setoid.
@@ -30,59 +30,28 @@ Notation "i === j" := (Peano_dec.eq_nat_dec i j) (at level 67).
 Lemma notin_union : forall x E F,
   x \notin (E \u F) <-> (x \notin E) /\ (x \notin F).
 Proof.
-assert (demorgan: forall (A B: Prop), ~(A \/ B) <-> ~ A /\ ~ B).
+assert (not_or: forall (A B: Prop), ~(A \/ B) <-> ~ A /\ ~ B).
 {
-split.
-apply Decidable.not_or.
-intro.
-destruct H.
-intro H'.
-destruct H'; contradiction.
+  unfold not.
+  split.
+  - intro H.
+    split.
+    + intro H0.
+      destruct H.
+      left. 
+      assumption.
+    + intro H0.
+      destruct H.
+      right.
+      assumption.
+  - intros H H0.
+    destruct H.
+    destruct H0; contradiction.
 }
-assert (union_spec: forall (s s' : t) (x : elt), x \in s \u s' <-> x \in s \/ x \in s').
-{
-apply union_spec.
-}
-assert (not_union_spec: forall (s s' : t) (x : elt), ~(x \in s \/ x \in s') <-> ~(x \in s \u s')).
-{
-assert (union_spec_r: forall (s s' :t) (x : elt), x \in s \u s' -> x  \in s \/ x \in s').
-{
-apply union_spec.
-}
-assert (union_spec_l: forall (s s' :t) (x : elt), x  \in s \/ x \in s' -> x \in s \u s').
-{
-apply union_spec.
-}
-clear union_spec.
-split.
-intro.
-assert (r_false: x \in s \u s' -> False).
-{
-intro.
-apply union_spec_r in H0.
-contradiction.
-}
-assumption.
-intro.
-assert (l_false: x \in s \/ x \in s' -> False).
-{
-intro.
-apply union_spec_l in H0.
-contradiction.
-}
-assumption.
-}
-assert (not_or_and_not: forall (s s': t) (x: elt), ~ (x \in s \/ x \in s') <-> x \notin s /\ x \notin s').
-{
-intros.
-split.
-apply demorgan.
-apply demorgan.
-}
-intros.
-specialize (not_union_spec E F x).
-specialize (not_or_and_not E F x).
-apply iff_stepl with (~ (x \in E \/ x \in F)); assumption.
+intros x E F.
+apply iff_stepl with (~((x \in E) \/ (x \in F))).
+- apply not_or.
+- split; unfold not; intros; destruct H; apply union_spec in H0; assumption.
 Qed.
 
 Inductive pterm : Set :=
@@ -261,7 +230,13 @@ Proof.
 
 Lemma term_regular_trans: forall R, term_regular R -> term_regular (trans R).
 Proof.
-Admitted.
+unfold term_regular.
+intros R H t' t0 H0 H1.
+induction H0.
+- apply H with a; assumption.
+- apply IHtrans.
+  apply H with a; assumption.
+Qed.
 
 (* Lemma red_regular_refltrans: forall R, red_regular R -> red_regular (refltrans R). *)
 (* Proof. *)
@@ -675,14 +650,13 @@ Qed.
 Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
 Proof.
   intros t u H. induction H.
-  - Admitted.  
-(*   apply ES_redex. apply eqc_sym; assumption. *)
-(*   apply ES_app_left; assumption. *)
-(*   apply ES_app_right; assumption. *)
-(*   apply ES_abs_in with L; assumption. *)
-(*   apply ES_subst_left with L; assumption. *)
-(*   apply ES_subst_right; assumption. *)
-(* Qed. *)
+  - apply ES_redex. apply eqc_sym; assumption. 
+  - apply ES_app_left; assumption. 
+  - apply ES_app_right; assumption. 
+  - apply ES_abs_in with L; assumption. 
+  - apply ES_sub with L; assumption.
+  - apply ES_sub_in; assumption.
+Qed.
 
         
 Definition eqc_trans (t u: pterm) := trans eqc_ctx t u.
