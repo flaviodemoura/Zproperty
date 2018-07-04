@@ -122,15 +122,13 @@ Lemma finite_nat_list_max : forall (l : list nat),
 Proof.
   induction l as [ | l ls IHl ].
   - exists 0; intros x H; inversion H.
-  - inversion IHl as [x H].
- Admitted.
-(*     exists (max x l); intros y J; simpl in J. *)
-(*     inversion J; subst; auto with arith. *)
-(*     destruct J. *)
-(*     assert (y <= x); auto using max_lt_l. *)
-(*       apply H. *)
-(*     +  *)
-(* Qed. *)
+  - inversion IHl as [x H]; clear IHl.
+    exists (max x l).
+    intros x' Hin.
+    inversion Hin; subst.
+    + auto with arith.
+    + assert (x' <= x); auto using max_lt_l.
+Qed.      
 
 Lemma finite_nat_list_max' : forall (l : list nat),
   { n : nat | ~ In n l }.
@@ -147,14 +145,13 @@ Proof.
   unfold var_gen. intros E.
   destruct (finite_nat_list_max' (elements E)) as [n pf].
   simpl. intros a. 
-  destruct pf. Admitted.
-(*   rewrite elements_iff in a. *)
-(*   rewrite InA_alt in a. *)
-(*   destruct a as [y [H1 H2]]. *)
-(*   subst. *)
-(*   assumption. *)
-(* Qed. *)
-
+  destruct pf.
+  apply elements_spec1 in a.
+  rewrite InA_alt in a.
+  destruct a as [y [H1 H2]].
+  subst; assumption.
+Qed.
+  
 Lemma var_fresh : forall (L : vars), { x : var | x \notin L }.
 Proof.
   intros L. exists (var_gen L). apply var_gen_spec.
