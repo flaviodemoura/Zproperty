@@ -274,7 +274,36 @@ Qed.
 Lemma lc_at_weaken_ind : forall k1 k2 t,
   lc_at k1 t -> k1 <= k2 -> lc_at k2 t.
 Proof.
-  Admitted.
+  intros k1 k2 t.
+  generalize dependent k2.
+  generalize dependent k1.
+  induction t.
+  - intros k1 k2 Hlc H.
+    simpl in *.
+    apply Nat.lt_le_trans with k1; assumption.
+  - intros k1 k2 Hlc Hle.
+    simpl. auto.
+  - intros k1 k2 Hlc Hle.
+    simpl in *.
+    destruct Hlc as [H1 H2].
+    split.
+    + apply IHt1 with k1; assumption.
+    + apply IHt2 with k1; assumption.
+  - intros k1 k2 Hlc Hle.
+    simpl.
+    simpl in Hlc.
+    apply IHt with (S k1).
+    + assumption.
+    + apply Peano.le_n_S; assumption.
+  - intros k1 k2 Hlc Hle.
+    simpl in *.
+    destruct Hlc as [H1 H2].
+    split.
+    + apply IHt1 with (S k1).
+      * assumption.
+      * apply Peano.le_n_S; assumption.
+    + apply IHt2 with k1; assumption.
+Qed.
 
 Lemma term_to_lc_at : forall t, term t -> lc_at 0 t.
 Proof.
