@@ -221,10 +221,6 @@ Definition red_rename (R : Rel pterm) :=
 
 Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
 
-Lemma body_to_term: forall t x, x \notin fv t -> body t -> term (t^x).
-Proof.
-  Admitted.
-
 Lemma term_regular_trans: forall R, term_regular R -> term_regular (trans R).
 Proof.
 unfold term_regular.
@@ -234,52 +230,6 @@ induction H0.
 - apply IHtrans.
   apply H with a; assumption.
 Qed.
-
-(* Lemma red_regular_refltrans: forall R, red_regular R -> red_regular (refltrans R). *)
-(* Proof. *)
-(*   intros R Hreg. *)
-(*   unfold red_regular. *)
-(*   intros t t' Hrefl. *)
-(*   induction Hrefl. *)
-(*   - Admitted. (* corrigir *) *)
-
-(* (** Specialized induction principle for preterms. *) *)
-(* Theorem pterm_induction : forall P : pterm -> Prop, *)
-(*        (forall n : nat, P (pterm_bvar n)) -> *)
-(*        (forall v : var, P (pterm_fvar v)) -> *)
-(*        (forall t1, P t1 -> forall t2, P t2 -> P (pterm_app t1 t2)) -> *)
-(*        (forall L t, (forall x, x \notin L -> P (t ^ x)) -> P (pterm_abs t)) -> *)
-(*        (forall L t1, (forall x, x \notin L -> P (t1 ^ x)) -> forall t2, P t2 -> P (t1 [t2])) -> *)
-(*        forall t, P t. *)
-(* Proof. *)
-(*   intros P Hbvar Hfvar Happ Habs Hsubs t. *)
-(*   induction t. *)
-(*   - apply Hbvar. *)
-(*   - apply Hfvar. *)
-(*   - apply Happ; assumption. *)
-(*   - apply Habs with (fv t0). *)
-(*     intros x Hfv. *)
-(*     unfold open. *)
-(*     induction t0.     *)
-(*     + case n eqn: Hn. *)
-(*       * simpl. *)
-(*         apply Hfvar. *)
-(*       * subst. *)
-(*         simpl. *)
-(*         assumption. *)
-(*     + simpl. *)
-(*       apply Hfvar. *)
-(*     + simpl. *)
-(*       apply Happ. *)
-(*       assert (H:  P t0_1). *)
-(*       { *)
-        
-(*       } *)
-(*       * apply IHt0_1. *)
-(*       * *)
-(*     + *)
-(*     + *)
-(*   - *)
     
 (** Local closure of terms *)
 Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
@@ -291,61 +241,116 @@ Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   | pterm_sub t1 t2 => (lc_at (S k) t1) /\ lc_at k t2
   end.
 
+Lemma lc_rec_open_var_rec : forall x t k,
+  lc_at k (open_rec k x t) -> lc_at (S k) t.
+Proof.
+  intros x t.
+  induction t; simpl. 
+  - intro k.
+    case (k === n).
+    + intros Heq Hlc.
+      subst.
+      auto with arith.
+    + intros Hneq Hlc.
+      simpl in Hlc.
+      apply lt_trans with k.
+      * assumption.
+      * auto with arith.
+  - intros n t; auto.
+  - intros k H.
+    destruct H as [Ht1 Ht2].
+    split.
+    + apply IHt1; assumption.
+    + apply IHt2; assumption.
+  - intros k Hlc.
+    apply IHt; assumption.
+  - intros k H.
+    destruct H as [Ht1 Ht2].
+    split.
+    + apply IHt1; assumption.
+    + apply IHt2; assumption.
+Qed.
+
+Lemma lc_at_weaken_ind : forall k1 k2 t,
+  lc_at k1 t -> k1 <= k2 -> lc_at k2 t.
+Proof.
+  Admitted.
+
+Lemma term_to_lc_at : forall t, term t -> lc_at 0 t.
+Proof.
+  intros t Hterm.
+  induction Hterm.
+  - simpl; auto.
+  - simpl; split; assumption.
+  - pick_fresh y.
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hfv].
+    apply H0 in Fr.
+    apply lc_rec_open_var_rec in Fr.
+    simpl; assumption.
+  - simpl.
+    split.
+    + pick_fresh y.
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hfv].
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hfv'].
+    apply H0 in Fr.
+    apply lc_rec_open_var_rec in Fr.
+    assumption.
+    + assumption.
+Qed.  
+
 Lemma lc_at_open : forall n t u, term u -> (lc_at (S n) t <-> lc_at n (open_rec n u t)).
 Proof.
- intros n t u T; split. Admitted.
-(* (* -> *) *)
-(*  generalize n; clear n. *)
-(*  induction t. *)
-(*  (* bvar *) *)
-(*  intros n' H0. unfolds open_rec. *)
-(*  case (n' === n). intro H1. *)
-(*  rewrite H1 in H0. rewrite H1. simpl in *|-*.  *)
-(*  apply term_to_term' in T. unfold term' in T. *)
-(*  apply lc_at_weaken_ind with (k1 := 0); try omega; trivial. *)
-(*  intro H1. simpl in *|-*. omega. *)
-(*  (* fvar *) *)
-(*  intros n H. simpl. trivial. *)
-(*  (* app *) *)
-(*  intros n H. simpl in *|-*. *)
-(*  case H; clear H; intros Ht1 Ht2; split. *)
-(*  apply (IHt1 n Ht1).  *)
-(*  apply (IHt2 n Ht2). *)
-(*  (* abs *) *)
-(*  intros n H. simpl in *|-*. *)
-(*  apply (IHt (S n) H). *)
-(*  (* sub *) *)
-(*  intros n H. simpl in *|-*. *)
-(*  case H; clear H; intros Ht1 Ht2; split. *)
-(*  apply (IHt1 (S n) Ht1).  *)
-(*  apply (IHt2 n Ht2). *)
-(*  (* sub' *) *)
-(*  simpl. intros. contradiction. *)
-(* (* <- *) *)
-(*  generalize n; clear n. *)
-(*  induction t. *)
-(*  (* bvar *) *)
-(*  intros n' H0. simpl in H0. *)
-(*  case (n' === n) in H0. simpl. omega. *)
-(*  simpl in *|-*. omega. *)
-(*  (* fvar *) *)
-(*  simpl. trivial.  *)
-(*  (* app *) *)
-(*  simpl in *|-*. intros n H. *)
-(*  case H; clear H; intros Ht1 Ht2; split. *)
-(*  apply (IHt1 n Ht1).  *)
-(*  apply (IHt2 n Ht2). *)
-(*  (* abs *) *)
-(*  simpl in *|-*. intros n H.  *)
-(*  apply (IHt (S n) H). *)
-(*  (* sub *) *)
-(*  simpl in *|-*. intros n H.  *)
-(*  case H; clear H; intros Ht1 Ht2; split. *)
-(*  apply (IHt1 (S n) Ht1).  *)
-(*  apply (IHt2 n Ht2). *)
-(*  (* sub' *) *)
-(*  simpl. intros. contradiction. *)
+  intros n t u T; split.
+  - intro H.
+    induction t.
+    + simpl.
+      case (n === n0).
+      * intro Heq.
+        subst.
+        apply term_to_lc_at in T.
+        apply lc_at_weaken_ind with 0.
+        ** assumption.
+        ** auto with arith.
+      * intro Hneq.
+        simpl in *.
+Admitted.
+
+Lemma lc_at_open_rec_rename: forall t x y m n, lc_at m (open_rec n (pterm_fvar x) t) -> lc_at m (open_rec n (pterm_fvar y) t).
+Proof.
+  Admitted.
+  (* induction t. simpl. introv H. case_nat. constructor. assumption. *)
+(*   simpl. intros; trivial. simpl. introv H. destruct H. *)
+(*   apply (IHt1 x y) in H. apply (IHt2 x y) in H0. *)
+(*   split; assumption. simpl. *)
+(*   introv H. apply IHt with x. assumption. simpl. *)
+(*   introv H. destruct H. split. apply IHt1 with x; assumption. apply IHt2 with x; assumption. *)
+(*   simpl. trivial. *)
+(* Qed.   *)
+
+Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
+Proof.
+  Admitted.
+(*   introv H. apply term_eq_term' in H. apply term_eq_term'. *)
+(*   apply lc_at_open_rec_rename with x. assumption. *)
 (* Qed. *)
+
+Lemma body_to_term: forall t x, x \notin fv t -> body t -> term (t^x).
+Proof.
+  intros t x Hfc Hbody.
+  unfold body in Hbody.
+  destruct Hbody as [L H].
+  pick_fresh y.
+  apply notin_union in Fr.
+  destruct Fr as [Fr Hfvt].
+  apply notin_union in Fr.
+  destruct Fr as [Fr Hfvx].
+  apply H in Fr.
+  apply term_open_rename with y.
+  assumption.
+Qed.
 
 Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
 Proof.
@@ -388,25 +393,6 @@ Proof.
       intros x Hfv.
       admit.
     + Admitted.
-
-Lemma lc_at_open_rec_rename: forall t x y m n, lc_at m (open_rec n (pterm_fvar x) t) -> lc_at m (open_rec n (pterm_fvar y) t).
-Proof.
-  Admitted.
-  (* induction t. simpl. introv H. case_nat. constructor. assumption. *)
-(*   simpl. intros; trivial. simpl. introv H. destruct H. *)
-(*   apply (IHt1 x y) in H. apply (IHt2 x y) in H0. *)
-(*   split; assumption. simpl. *)
-(*   introv H. apply IHt with x. assumption. simpl. *)
-(*   introv H. destruct H. split. apply IHt1 with x; assumption. apply IHt2 with x; assumption. *)
-(*   simpl. trivial. *)
-(* Qed.   *)
-
-Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
-Proof.
-  Admitted.
-(*   introv H. apply term_eq_term' in H. apply term_eq_term'. *)
-(*   apply lc_at_open_rec_rename with x. assumption. *)
-(* Qed. *)
 
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   match t with
