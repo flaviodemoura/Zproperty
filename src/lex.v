@@ -240,37 +240,7 @@ Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   | pterm_abs t1    => lc_at (S k) t1
   | pterm_sub t1 t2 => (lc_at (S k) t1) /\ lc_at k t2
   end.
-
-Lemma lc_rec_open_var_rec : forall x t k,
-  lc_at k (open_rec k x t) -> lc_at (S k) t.
-Proof.
-  intros x t.
-  induction t; simpl. 
-  - intro k.
-    case (k === n).
-    + intros Heq Hlc.
-      subst.
-      auto with arith.
-    + intros Hneq Hlc.
-      simpl in Hlc.
-      apply lt_trans with k.
-      * assumption.
-      * auto with arith.
-  - intros n t; auto.
-  - intros k H.
-    destruct H as [Ht1 Ht2].
-    split.
-    + apply IHt1; assumption.
-    + apply IHt2; assumption.
-  - intros k Hlc.
-    apply IHt; assumption.
-  - intros k H.
-    destruct H as [Ht1 Ht2].
-    split.
-    + apply IHt1; assumption.
-    + apply IHt2; assumption.
-Qed.
-
+    
 Lemma lc_at_weaken_ind : forall k1 k2 t,
   lc_at k1 t -> k1 <= k2 -> lc_at k2 t.
 Proof.
@@ -305,6 +275,36 @@ Proof.
     + apply IHt2 with k1; assumption.
 Qed.
 
+Lemma lc_rec_open_var_rec : forall x t k,
+  lc_at k (open_rec k x t) -> lc_at (S k) t.
+Proof.
+  intros x t.
+  induction t; simpl. 
+  - intro k.
+    case (k === n).
+    + intros Heq Hlc.
+      subst.
+      auto with arith.
+    + intros Hneq Hlc.
+      simpl in Hlc.
+      apply lt_trans with k.
+      * assumption.
+      * auto with arith.
+  - intros n t; auto.
+  - intros k H.
+    destruct H as [Ht1 Ht2].
+    split.
+    + apply IHt1; assumption.
+    + apply IHt2; assumption.
+  - intros k Hlc.
+    apply IHt; assumption.
+  - intros k H.
+    destruct H as [Ht1 Ht2].
+    split.
+    + apply IHt1; assumption.
+    + apply IHt2; assumption.
+Qed.
+
 Lemma term_to_lc_at : forall t, term t -> lc_at 0 t.
 Proof.
   intros t Hterm.
@@ -330,22 +330,51 @@ Proof.
     + assumption.
 Qed.  
 
-Lemma lc_at_open : forall n t u, term u -> (lc_at (S n) t <-> lc_at n (open_rec n u t)).
+Lemma lc_at_open_rec : forall n t u, term u -> (lc_at (S n) t -> lc_at n (open_rec n u t)).
 Proof.
-  intros n t u T; split.
-  - intro H.
-    induction t.
-    + simpl.
-      case (n === n0).
-      * intro Heq.
-        subst.
-        apply term_to_lc_at in T.
-        apply lc_at_weaken_ind with 0.
-        ** assumption.
-        ** auto with arith.
-      * intro Hneq.
-        simpl in *.
-Admitted.
+  intros n t u T H.
+  generalize dependent n.
+  induction t.
+  - intros n' Hlc.
+    simpl in *.
+    case (n' === n).
+    + intro H; subst.
+      apply term_to_lc_at in T.
+      apply lc_at_weaken_ind with 0.
+      * assumption.
+      * auto with arith.
+    + intro Hneq.
+      simpl.
+      apply lt_n_Sm_le in Hlc.
+      apply le_lt_or_eq in Hlc.
+      destruct Hlc.
+      * assumption.
+      * symmetry in H. contradiction.
+  - intros n Hlc.
+    simpl in *.
+    auto.
+  - intros n Hlc.
+    simpl in *.
+    destruct Hlc as [H1 H2].
+    split.
+    + apply IHt1; assumption.
+    + apply IHt2; assumption.
+  - intros n Hlc.
+    apply IHt.
+    simpl in Hlc; assumption.    
+  - intros n H.
+    inversion H; subst; clear H.
+    simpl; split.
+    + apply IHt1; assumption.      
+    + apply IHt2; assumption.
+Qed.
+
+Corollary lc_at_open : forall n t u, term u -> (lc_at (S n) t <-> lc_at n (open_rec n u t)).
+Proof.
+  intros n t u; split.
+  - apply lc_at_open_rec; assumption. 
+  - apply lc_rec_open_var_rec.
+Qed.
 
 Lemma lc_at_open_rec_rename: forall t x y m n, lc_at m (open_rec n (pterm_fvar x) t) -> lc_at m (open_rec n (pterm_fvar y) t).
 Proof.
