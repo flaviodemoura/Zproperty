@@ -215,7 +215,8 @@ Definition term_regular (R : Rel pterm) :=
 
 Definition red_rename (R : Rel pterm) :=
   forall x t t' y,
-  x \notin (fv t) -> x \notin (fv t') ->
+    x \notin (fv t) ->
+    x \notin (fv t') ->
   R (t ^ x) (t' ^ x) -> 
   R (t ^ y) (t' ^ y).
 
@@ -378,19 +379,59 @@ Qed.
 
 Lemma lc_at_open_rec_rename: forall t x y m n, lc_at m (open_rec n (pterm_fvar x) t) -> lc_at m (open_rec n (pterm_fvar y) t).
 Proof.
-  Admitted.
-  (* induction t. simpl. introv H. case_nat. constructor. assumption. *)
-(*   simpl. intros; trivial. simpl. introv H. destruct H. *)
-(*   apply (IHt1 x y) in H. apply (IHt2 x y) in H0. *)
-(*   split; assumption. simpl. *)
-(*   introv H. apply IHt with x. assumption. simpl. *)
-(*   introv H. destruct H. split. apply IHt1 with x; assumption. apply IHt2 with x; assumption. *)
-(*   simpl. trivial. *)
-(* Qed.   *)
+  intro t; induction t.
+  - intros x y m k.
+    simpl.
+    case (k === n).
+    + intros Heq Hlc; subst.
+      simpl; auto.
+    + intros Hneq Hlc.
+      simpl; auto.
+  - intros x y m n H.
+    simpl; auto.
+  - intros x y m n H.
+    simpl in *.
+    inversion H as [H1 H2]; split.
+    + apply IHt1 with x; assumption.
+    + apply IHt2 with x; assumption.
+  - intros x y m n H.
+    simpl in *.
+    apply IHt with x; assumption.
+  - intros x y m n Hlc.
+    simpl in *.
+    destruct Hlc as [H1 H2]; split.
+    + apply IHt1 with x; assumption.      
+    + apply IHt2 with x; assumption.
+Qed.
+
+Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
+Proof.
+  intro t; split.
+  - apply term_to_lc_at.
+  - intro Hlc.
+    induction t.
+    + inversion Hlc.
+    + apply term_var.
+    + simpl in Hlc.
+      destruct Hlc as [Hlc1 Hlc2]. 
+      apply term_app.
+      * apply IHt1; assumption.
+      * apply IHt2; assumption.
+    + apply term_abs with (fv t0).
+      intros x Hfv.
+      simpl in Hlc.
+      
+      admit.
+    + Admitted.
 
 Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
 Proof.
-  Admitted.
+  intros t x y H.
+  apply term_to_lc_at in H.
+  unfold open in *.
+
+  simpl in *.
+Admitted.
 (*   introv H. apply term_eq_term' in H. apply term_eq_term'. *)
 (*   apply lc_at_open_rec_rename with x. assumption. *)
 (* Qed. *)
@@ -410,47 +451,6 @@ Proof.
   assumption.
 Qed.
 
-Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
-Proof.
-  intro t; split.
-  - intro Hterm.
-    induction Hterm.
-    + simpl; auto.
-    + simpl; split.
-      * apply IHHterm1.
-      * apply IHHterm2.
-    + pick_fresh y.
-      unfold open in H0.
-      simpl.
-      apply lc_at_open with (pterm_fvar y).
-      * apply term_var.
-      * apply H0.
-        apply notin_union in Fr.
-        apply Fr.
-    + simpl; split.
-      * pick_fresh y.
-        unfold open in H0.
-        apply lc_at_open with (pterm_fvar y).
-        ** apply term_var.
-        ** apply H0.
-           apply notin_union in Fr.
-           destruct Fr.
-           apply notin_union in H1.
-           apply H1.
-      * assumption.
-  - intro Hlc.
-    induction t.
-    + inversion Hlc.
-    + apply term_var.
-    + simpl in Hlc.
-      destruct Hlc as [Hlc1 Hlc2]. 
-      apply term_app.
-      * apply IHt1; assumption.
-      * apply IHt2; assumption.
-    + apply term_abs with (fv t0).
-      intros x Hfv.
-      admit.
-    + Admitted.
 
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   match t with
