@@ -223,10 +223,10 @@ Lemma pterm_size_induction :
  forall P : pterm -> Prop,
  (forall n, P (pterm_bvar n)) ->
  (forall x, P (pterm_fvar x)) ->
+ (forall t1 t2, P t1 -> P t2 -> P (pterm_app t1 t2)) ->
  (forall t1,
     (forall t2 x, x \notin fv t2 -> pterm_size t2 = pterm_size t1 ->
     P (t2 ^ x)) -> P (pterm_abs t1)) ->
- (forall t1 t2, P t1 -> P t2 -> P (pterm_app t1 t2)) ->
  (forall t1 t3, P t3 -> 
     (forall t2 x, x \notin fv t2 -> pterm_size t2 = pterm_size t1 ->
              P (t2 ^ x)) -> P (t1[t3])) ->
@@ -432,9 +432,23 @@ Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
 Proof.
   intro t; split.
   - apply term_to_lc_at.
-  - generalize dependent t.
-    apply pterm_size_induction.
- Admitted. 
+  - induction t using pterm_size_induction.
+    + admit.
+    + intro H. apply term_var.
+    + intro H.
+      admit.
+    + intro H'.
+      apply term_abs with (fv t0).
+      intros x Hfv.
+      apply H.
+      * assumption.
+      * reflexivity.
+      * simpl in *.
+        unfold open.
+        apply lc_at_open_rec.
+        ** apply term_var.
+        ** assumption.
+    + Admitted. 
 
 Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
 Proof.
