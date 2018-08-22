@@ -210,6 +210,30 @@ Inductive term : pterm -> Prop :=
       term (pterm_sub t1 t2).
 Hint Constructors term.
 
+Fixpoint pterm_size (t : pterm) {struct t} : nat :=
+ match t with
+ | pterm_bvar i    => 1
+ | pterm_fvar x    => 1
+ | pterm_abs t1    => 1 + (pterm_size t1)
+ | pterm_app t1 t2 => 1 + (pterm_size t1) + (pterm_size t2)
+ | pterm_sub t1 t2 => 1 + (pterm_size t1) + (pterm_size t2)
+ end.
+
+Lemma pterm_size_induction :
+ forall P : pterm -> Prop,
+ (forall n, P (pterm_bvar n)) ->
+ (forall x, P (pterm_fvar x)) ->
+ (forall t1,
+    (forall t2 x, x \notin fv t2 -> pterm_size t2 = pterm_size t1 ->
+    P (t2 ^ x)) -> P (pterm_abs t1)) ->
+ (forall t1 t2, P t1 -> P t2 -> P (pterm_app t1 t2)) ->
+ (forall t1 t3, P t3 -> 
+    (forall t2 x, x \notin fv t2 -> pterm_size t2 = pterm_size t1 ->
+             P (t2 ^ x)) -> P (t1[t3])) ->
+ (forall t, P t).
+Proof.
+  Admitted.
+  
 Definition term_regular (R : Rel pterm) :=
   forall t t', R t t' -> term t -> term t'.
 
@@ -408,21 +432,9 @@ Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
 Proof.
   intro t; split.
   - apply term_to_lc_at.
-  - intro Hlc.
-    induction t.
-    + inversion Hlc.
-    + apply term_var.
-    + simpl in Hlc.
-      destruct Hlc as [Hlc1 Hlc2]. 
-      apply term_app.
-      * apply IHt1; assumption.
-      * apply IHt2; assumption.
-    + apply term_abs with (fv t0).
-      intros x Hfv.
-      simpl in Hlc.
-      
-      admit.
-    + Admitted.
+  - generalize dependent t.
+    apply pterm_size_induction.
+ Admitted. 
 
 Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
 Proof.
