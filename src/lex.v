@@ -232,6 +232,18 @@ Lemma pterm_size_induction :
              P (t2 ^ x)) -> P (t1[t3])) ->
  (forall t, P t).
 Proof.
+  intros.
+  induction t0.
+  + apply H.
+  + apply H0.
+  + apply H1; assumption.
+  + apply H2.
+    intros.
+    admit.
+  + apply H3.
+    - assumption.
+    - intros.
+      admit.
   Admitted.
   
 Definition term_regular (R : Rel pterm) :=
@@ -433,10 +445,16 @@ Proof.
   intro t; split.
   - apply term_to_lc_at.
   - induction t using pterm_size_induction.
-    + admit.
+    + intros.
+      inversion H.
     + intro H. apply term_var.
     + intro H.
-      admit.
+      simpl in H.
+      apply term_app.
+      * apply IHt1.
+        apply H.
+      * apply IHt2.
+        apply H.
     + intro H'.
       apply term_abs with (fv t0).
       intros x Hfv.
@@ -444,11 +462,22 @@ Proof.
       * assumption.
       * reflexivity.
       * simpl in *.
-        unfold open.
         apply lc_at_open_rec.
         ** apply term_var.
         ** assumption.
-    + Admitted. 
+    + intro H'.
+      apply term_sub with (fv t1).
+      * intros x H''.
+        apply H.
+        ** assumption.
+        ** reflexivity.
+        ** simpl in *.
+           apply lc_at_open.
+           *** apply term_var.
+           *** apply H'. 
+      * apply IHt1.
+        apply H'.
+Qed.
 
 Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
 Proof.
@@ -1039,7 +1068,6 @@ Proof.
   - apply b_ctx_rule.
     apply ES_sub with (fv t).
     intros x Hfv.
-    apply red_rename_b_ctx.
 Admitted.
 
 Lemma Bx_sub_in: forall u u' t, u ->_Bx u' -> (t[u]) ->_Bx (t[u']). 
