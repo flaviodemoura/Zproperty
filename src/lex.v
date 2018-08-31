@@ -1,6 +1,7 @@
-(** Confluence of the Lex-calculus through Z property. *)
+(** * An application: Proving Confluence of a Calculus with Explicit Substitutions *)
 
-Require Import ZtoConfl.
+(* begin hide *)
+Require Import Arith ZtoConfl.
 
 Definition var := nat.
 
@@ -54,6 +55,9 @@ apply iff_stepl with (~((x \in E) \/ (x \in F))).
 - split; unfold not; intros; destruct H; apply union_spec in H0; assumption.
 Qed.
 
+(* end hide *)
+
+(** Pre-terms are defined according to the following grammar: *)
 Inductive pterm : Set :=
   | pterm_bvar : nat -> pterm
   | pterm_fvar : var -> pterm
@@ -62,7 +66,7 @@ Inductive pterm : Set :=
   | pterm_sub : pterm -> pterm -> pterm.
 
 Notation "t [ u ]" := (pterm_sub t u) (at level 70).
-
+(* begin hide *)
 Fixpoint fv (t : pterm) {struct t} : vars :=
   match t with
   | pterm_bvar i    => {}
@@ -72,8 +76,7 @@ Fixpoint fv (t : pterm) {struct t} : vars :=
   | pterm_sub t1 t2 => (fv t1) \u (fv t2)
   end.
 
-(** From Metatheory_Tactics - Arthur Chargueraud. REVISAR *)
-
+(* From Metatheory_Tactics - Arthur Chargueraud. REVISAR *)
 Ltac gather_vars_with F :=
   let rec gather V :=
     match goal with
@@ -165,7 +168,6 @@ Ltac pick_fresh_gen L Y :=
 Ltac pick_fresh Y :=
   let L := gather_vars in (pick_fresh_gen L Y).
 
-(** Opening up abstractions and substitutions *)
 Fixpoint open_rec (k : nat) (u : pterm) (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => if k === i then u else (pterm_bvar i)
@@ -192,8 +194,9 @@ Fixpoint close_rec  (k : nat) (x : var) (t : pterm) : pterm :=
   end.
 
 Definition close t x := close_rec 0 x t.
-
+(* end hide *)
 (** ES terms are expressions without dangling deBruijn indexes. *)
+
 Inductive term : pterm -> Prop :=
   | term_var : forall x,
       term (pterm_fvar x)
@@ -208,6 +211,7 @@ Inductive term : pterm -> Prop :=
      (forall x, x \notin L -> term (t1 ^ x)) ->
       term t2 -> 
       term (pterm_sub t1 t2).
+(* begin hide *)
 Hint Constructors term.
 
 Fixpoint pterm_size (t : pterm) {struct t} : nat :=
@@ -219,7 +223,38 @@ Fixpoint pterm_size (t : pterm) {struct t} : nat :=
  | pterm_sub t1 t2 => 1 + (pterm_size t1) + (pterm_size t2)
  end.
 
+Lemma pterm_size_positive: forall t, 0 < pterm_size t.
+Proof.
+  Admitted.
+
+Lemma pterm_size_open: forall t x, pterm_size (t^x) = pterm_size t.
+Admitted.
+(* end hide *)  
 Lemma pterm_size_induction :
+ forall P : pterm -> Prop,
+ (forall t,
+    (forall t', pterm_size t' < pterm_size t ->
+    P t') -> P t) ->
+ (forall t, P t).
+(* begin hide *)
+Proof.
+  intros P IH t.
+  generalize dependent  t.
+  apply pterm_ind.
+  - intro n.
+    apply IH.
+    simpl.
+    intros t Hlt.
+    admit.
+    - intros v.
+      admit.
+    - intros t1 Ht1 t2 Ht2.
+      apply IH.
+      simpl.
+      intros t' Hlt.
+Admitted.
+(* end hide *)  
+Lemma pterm_eq_size_induction :
  forall P : pterm -> Prop,
  (forall n, P (pterm_bvar n)) ->
  (forall x, P (pterm_fvar x)) ->
@@ -231,6 +266,7 @@ Lemma pterm_size_induction :
     (forall t2 x, x \notin fv t2 -> pterm_size t2 = pterm_size t1 ->
              P (t2 ^ x)) -> P (t1[t3])) ->
  (forall t, P t).
+(* begin hide *)
 Proof.
   intros.
   induction t0.
@@ -245,10 +281,10 @@ Proof.
     - intros.
       admit.
   Admitted.
-  
+(* end hide *)  
 Definition term_regular (R : Rel pterm) :=
   forall t t', R t t' -> term t -> term t'.
-
+(* begin hide *)
 Definition red_rename (R : Rel pterm) :=
   forall x t t' y,
     x \notin (fv t) ->
@@ -268,7 +304,7 @@ induction H0.
   apply H with a; assumption.
 Qed.
     
-(** Local closure of terms *)
+(* end hide *)
 Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   match t with
   | pterm_bvar i    => i < k
@@ -277,7 +313,7 @@ Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   | pterm_abs t1    => lc_at (S k) t1
   | pterm_sub t1 t2 => (lc_at (S k) t1) /\ lc_at k t2
   end.
-    
+(* begin hide *)    
 Lemma lc_at_weaken_ind : forall k1 k2 t,
   lc_at k1 t -> k1 <= k2 -> lc_at k2 t.
 Proof.
@@ -439,45 +475,85 @@ Proof.
     + apply IHt1 with x; assumption.      
     + apply IHt2 with x; assumption.
 Qed.
-
+(* end hide *)
 Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
+(* begin hide *)
 Proof.
   intro t; split.
   - apply term_to_lc_at.
   - induction t using pterm_size_induction.
-    + intros.
-      inversion H.
-    + intro H. apply term_var.
-    + intro H.
-      simpl in H.
+    induction t0.
+    + intro Hlc.
+      inversion Hlc.
+    + intro Hlc.
+      apply term_var.
+    + simpl.
+      intro Hlc.
+      destruct Hlc as [Hlc1 Hlc2].
       apply term_app.
-      * apply IHt1.
-        apply H.
-      * apply IHt2.
-        apply H.
-    + intro H'.
+      * apply H.
+        ** simpl.
+           apply lt_trans with (pterm_size t0_1 + pterm_size t0_2).
+           *** apply Nat.lt_add_pos_r.
+               apply pterm_size_positive.
+           *** auto.
+        ** assumption.
+      * apply H.
+        ** simpl.
+           apply lt_trans with (pterm_size t0_1 + pterm_size t0_2).
+           *** apply Nat.lt_add_pos_l.
+               apply pterm_size_positive.
+           *** auto.
+        ** assumption.
+    + intro Hlc. 
       apply term_abs with (fv t0).
       intros x Hfv.
       apply H.
-      * assumption.
-      * reflexivity.
-      * simpl in *.
-        apply lc_at_open_rec.
+      * rewrite pterm_size_open.
+        simpl; auto.
+      * simpl in Hlc.
+        apply lc_at_open.
         ** apply term_var.
         ** assumption.
-    + intro H'.
-      apply term_sub with (fv t1).
-      * intros x H''.
-        apply H.
-        ** assumption.
-        ** reflexivity.
-        ** simpl in *.
-           apply lc_at_open.
-           *** apply term_var.
-           *** apply H'. 
-      * apply IHt1.
-        apply H'.
-Qed.
+    + Admitted.
+
+      (* Proof. *)
+(*   intro t; split. *)
+(*   - apply term_to_lc_at. *)
+(*   - induction t using pterm_eq_size_induction. *)
+(*     + intros. *)
+(*       inversion H. *)
+(*     + intro H. apply term_var. *)
+(*     + intro H. *)
+(*       simpl in H. *)
+(*       apply term_app. *)
+(*       * apply IHt1. *)
+(*         apply H. *)
+(*       * apply IHt2. *)
+(*         apply H. *)
+(*     + intro H'. *)
+(*       apply term_abs with (fv t0). *)
+(*       intros x Hfv. *)
+(*       apply H. *)
+(*       * assumption. *)
+(*       * reflexivity. *)
+(*       * simpl in *. *)
+(*         apply lc_at_open_rec. *)
+(*         ** apply term_var. *)
+(*         ** assumption. *)
+(*     + intro H'. *)
+(*       apply term_sub with (fv t1). *)
+(*       * intros x H''. *)
+(*         apply H. *)
+(*         ** assumption. *)
+(*         ** reflexivity. *)
+(*         ** simpl in *. *)
+(*            apply lc_at_open. *)
+(*            *** apply term_var. *)
+(*            *** apply H'.  *)
+(*       * apply IHt1. *)
+(*         apply H'. *)
+(* Qed. *)
 
 Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
 Proof.
@@ -627,7 +703,7 @@ Proof.
   intro t. unfold bswap.
   apply bswap_rec_id.
 Qed.
-
+(* end hide *)
 (** Contextual closure of terms. *)
 Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
   | ES_redex : forall t s, R t s -> ES_contextual_closure R t s
@@ -641,7 +717,7 @@ Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
 	                        ES_contextual_closure R  (t [u]) (t' [u])
   | ES_sub_in : forall t u u', ES_contextual_closure R u u' ->
 	  	               ES_contextual_closure R  (t [u]) (t [u']).
-
+(* begin hide *)
 Lemma term_regular_ctx: forall R, term_regular R -> term_regular (ES_contextual_closure R).
 Proof.
   intros R Hred.
@@ -683,10 +759,10 @@ Proof.
 (*         apply body_to_term; assumption. *)
 (*       * apply IHES_contextual_closure. *)
 (* Qed. *)
-    
+(* end hide *)    
 Inductive eqc : Rel pterm :=
 | eqc_def: forall t u v, term u -> term v -> eqc (t[u][v]) ((& t)[v][u]).
-
+(* begin hide *)
 Lemma eqc_sym : forall t u, eqc t u -> eqc u t.
 Proof.
  intros t u H. inversion H; subst. 
@@ -1420,8 +1496,9 @@ Proof.
   rewrite <- Heq'.
   assumption.
 Qed.
-
+(* end hide *)
 (** Superdevelopment function *)
+
 Fixpoint sd (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => t
@@ -1434,7 +1511,7 @@ Fixpoint sd (t : pterm) : pterm :=
                       end 
   | pterm_sub t1 t2 => (sd t1) ^^ (sd t2)
   end.
-
+(* begin hide *)
 Lemma sd_term: forall t, term t -> term (sd t).
 Proof.
 Admitted.
@@ -1484,8 +1561,9 @@ Proof.
       apply trans_ex_to_lex.
       apply full_comp.
 Qed.
-
+(* end hide *)
 Lemma BxZlex: forall a b, a ->_lex b -> b ->_lex* (sd a) /\ (sd a) ->_lex* (sd b).
+(* begin hide *)
 Proof.
 Admitted.
   
@@ -1501,3 +1579,4 @@ Proof.
   apply Zprop_implies_Confl.
   apply Zlex.
 Qed.
+(* end hide *)

@@ -1,8 +1,18 @@
+(** * Introduction *)
+
+(** 
+
+    This work is about term rewriting systems. Term rewriting is a
+    model of computation based on the notion of reduction.
+
+*)
+
+(** * Z Property implies Confluence *)
+(* begin hide *)
 Definition Rel (A:Type) := A -> A -> Prop.
 
 Definition NF {A:Type} (a:A) (R: Rel A) := ~(exists b, R a b).
 
-(* Transitive closure of a reduction relation *)
 Inductive trans {A} (red: Rel A) : Rel A :=
 | singl: forall a b,  red a b -> trans red a b
 | transit: forall b a c,  red a b -> trans red b c -> trans red a c
@@ -59,14 +69,11 @@ Proof.
     + apply refl.
   - apply rtrans with b; assumption.
 Qed.    
-  
-Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b))
-.
+(* end hide *)  
+Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
 
-Definition Confl {A:Type} (R: Rel A) :=
-  forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d)
-.
-
+Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
+(* begin hide *)
 Lemma CompReflTrans {A} (R: Rel A): forall a b c, refltrans R a b -> refltrans R b c -> refltrans R a c
 .
 Proof.
@@ -76,8 +83,9 @@ induction H.
 - apply IHrefltrans in H0.
   apply rtrans with b; assumption.
 Qed.
-  
+(* end hide *)  
 Theorem Zprop_implies_Confl {A:Type}: forall R: Rel A, Zprop R -> Confl R.
+(* begin hide *)
 Proof.
   intros R HZprop.
   unfold Zprop in HZprop.
@@ -138,4 +146,4 @@ Proof.
           *** assumption.
         ** assumption. 
 Qed.
-
+(* end hide *)
