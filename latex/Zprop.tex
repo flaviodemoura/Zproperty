@@ -1,47 +1,36 @@
-\documentclass[sigplan,10pt,review]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
-
+\documentclass[a4paper,envcountsame]{llncs}
 \usepackage[utf8]{inputenc}
-\usepackage[color]{coqdoc}
+\usepackage[T1]{fontenc}
 \usepackage[british]{babel}
-\usepackage{pdfsync}
+\usepackage{lmodern}
+%\usepackage{fullpage}
+\usepackage[color]{coqdoc}
 \usepackage{amsmath,amssymb}
 \usepackage{amsfonts, color}
 \usepackage{url}
 \usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage[backend=bibtex,style=numeric-comp,sorting=none,firstinits=true]{biblatex}
 
-\bibliographystyle{ACM-Reference-Format}
+\newcommand{\flavio}[1]{{\color{red} #1}}
+
+\title{A formalisation that the Z property implies Confluence}
+\author{Flávio L. C. de Moura and Leandro Oliveira Rezende}
+
+\institute{Departamento de Ciência da Computação, Universidade de Brasília, Brazil\\
+  \email{flaviomoura@unb.br,l-ordo.ab.chao@hotmail.com}}
 
 \begin{document}
-
-\title[Z property implies Confluence]{A formal proof that Z property implies Confluence with Applications}
-\author{Flávio L. C. de Moura}
-\affiliation{
-  \department{Departamento de Ciência da Computação}
-  \institution{Universidade de Brasília}
-  \city{Brasília}
-  \country{Brazil}
-}
-\email{flaviomoura@unb.br}
-
-\author{Leandro Oliveira Rezende}
-\affiliation{
-  \department{Departamento de Ciência da Computação}
-  \institution{Universidade de Brasília}
-  \city{Brasília}
-  \country{Brazil}
-}
-\email{l-ordo.ab.chao@hotmail.com}
+\maketitle
 
 \begin{abstract}
-  
-  In this work we present a formalisation that the Z property implies
-  confluence in the Coq proof assistant. As an application of the
-  formalisation, we prove confluence of a calculus with explicit
-  substitutions.
+
+  We present a formalisation in the Coq proof assistant that the Z
+  property implies confluence for abstract rewriting systems. As an
+  application, we show how it can be used to prove confluence of a
+  calculus with explicit substitutions.
   
 \end{abstract}
-
-\maketitle
 
 \input{ZtoConfl.v}
 \input{lex.v}
