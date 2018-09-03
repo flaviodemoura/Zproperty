@@ -225,10 +225,32 @@ Fixpoint pterm_size (t : pterm) {struct t} : nat :=
 
 Lemma pterm_size_positive: forall t, 0 < pterm_size t.
 Proof.
-  Admitted.
+  induction t0; simpl; auto with arith.
+Qed.
 
 Lemma pterm_size_open: forall t x, pterm_size (t^x) = pterm_size t.
+Proof.
+  intros.
+  induction t0.
+  - unfold open.
+    unfold open_rec.
+    case n; reflexivity.
+  - reflexivity.
+  - simpl.
+    destruct IHt0_1.
+    destruct IHt0_2.
+    reflexivity.
+  - simpl.
+    destruct IHt0.
+    unfold open.
+    admit.
+  - simpl.
+    destruct IHt0_1.
+    destruct IHt0_2.
+    unfold open.
+    admit.
 Admitted.
+
 (* end hide *)  
 Lemma pterm_size_induction :
  forall P : pterm -> Prop,
@@ -559,13 +581,12 @@ Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).
 Proof.
   intros t x y H.
   apply term_to_lc_at in H.
-  unfold open in *.
-
+  apply term_equiv_lc_at.
   simpl in *.
-Admitted.
-(*   introv H. apply term_eq_term' in H. apply term_eq_term'. *)
-(*   apply lc_at_open_rec_rename with x. assumption. *)
-(* Qed. *)
+  unfold open in H.
+  apply lc_at_open_rec_rename with x.
+  assumption.
+Qed.
 
 Lemma body_to_term: forall t x, x \notin fv t -> body t -> term (t^x).
 Proof.
@@ -744,21 +765,21 @@ Proof.
   - inversion Hterm; subst; clear Hterm.
     apply term_sub with (L \u L0).
     + intros x HL.
-       Admitted.
-(*       * assumption. *)
-(*     + apply term_sub with L. *)
-(*       * apply H1. *)
-(*       * assumption. *)
-(*   - split. *)
-(*     + apply term_sub with (fv t0). *)
-(*       * intros x Hfv. *)
-(*         apply body_to_term; assumption. *)
-(*       * apply IHES_contextual_closure. *)
-(*     + apply term_sub with (fv t0). *)
-(*       * intros x Hfv. *)
-(*         apply body_to_term; assumption. *)
-(*       * apply IHES_contextual_closure. *)
-(* Qed. *)
+      apply H0.
+      * apply notin_union in HL.
+        apply HL.
+      * apply H3.
+        apply notin_union in HL.
+        apply HL.
+    + assumption.
+  - inversion Hterm; subst; clear Hterm.
+    apply term_sub with L.
+    + intros x HL.
+      apply H2.
+      assumption.
+    + apply IHES_contextual_closure.
+      assumption.
+Qed.
 (* end hide *)    
 Inductive eqc : Rel pterm :=
 | eqc_def: forall t u v, term u -> term v -> eqc (t[u][v]) ((& t)[v][u]).
