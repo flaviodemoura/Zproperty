@@ -4,7 +4,6 @@
 *.idx
 *.log
 *.out
-*.v.tex
 *.glob
 *.v.d
 *.vo

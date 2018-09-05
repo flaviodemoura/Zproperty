@@ -227,30 +227,27 @@ Lemma pterm_size_positive: forall t, 0 < pterm_size t.
 Proof.
   induction t0; simpl; auto with arith.
 Qed.
-
-Lemma pterm_size_open_rec: forall t x n, pterm_size ({n ~> pterm_fvar x} t) = pterm_size t.
+    
+Lemma pterm_size_open: forall t x, pterm_size (t^x) = pterm_size t.
 Proof.
-  induction t0.
+  unfold open.
+  intros t x.
+  generalize dependent 0.
+  generalize dependent x.
+  induction t.
   - unfold open_rec.
     intros x n'.
     destruct (n' === n); reflexivity.
   - reflexivity.
   - simpl.
     intros x n.
-    destruct (IHt0_1 x n).
-    destruct (IHt0_2 x n).
+    destruct (IHt1 x n).
+    destruct (IHt2 x n).
     reflexivity.
   - simpl.
     intros x n.
-    destruct (IHt0 x (S n)); reflexivity.
+    destruct (IHt x (S n)); reflexivity.
   - Admitted.
-    
-Corollary pterm_size_open: forall t x, pterm_size (t^x) = pterm_size t.
-Proof.
-  unfold open.
-  intros t x.
-  apply pterm_size_open_rec.
-Qed.
 
 (* end hide *)  
 Lemma pterm_size_induction :

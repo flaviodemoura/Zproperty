@@ -1,0 +1,171 @@
+\section{An application: Proving Confluence of a Calculus with Explicit Substitutions}
+
+\begin{coqdoccode}
+\coqdocemptyline
+\coqdocemptyline
+\end{coqdoccode}
+Pre-terms are defined according to the following grammar: \begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Inductive} \coqdocvar{pterm} : \coqdockw{Set} :=\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_bvar} : \coqdocvar{nat} \ensuremath{\rightarrow} \coqdocvar{pterm}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_fvar} : \coqdocvar{var} \ensuremath{\rightarrow} \coqdocvar{pterm}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_app}  : \coqdocvar{pterm} \ensuremath{\rightarrow} \coqdocvar{pterm} \ensuremath{\rightarrow} \coqdocvar{pterm}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_abs}  : \coqdocvar{pterm} \ensuremath{\rightarrow} \coqdocvar{pterm}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_sub} : \coqdocvar{pterm} \ensuremath{\rightarrow} \coqdocvar{pterm} \ensuremath{\rightarrow} \coqdocvar{pterm}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Notation} "t [ u ]" := (\coqdocvar{pterm\_sub} \coqdocvar{t} \coqdocvar{u}) (\coqdoctac{at} \coqdockw{level} 70).\coqdoceol
+\end{coqdoccode}
+ES terms are expressions without dangling deBruijn indexes. \begin{coqdoccode}
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Inductive} \coqdocvar{term} : \coqdocvar{pterm} \ensuremath{\rightarrow} \coqdockw{Prop} :=\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{term\_var} : \coqdockw{\ensuremath{\forall}} \coqdocvar{x},\coqdoceol
+\coqdocindent{3.00em}
+\coqdocvar{term} (\coqdocvar{pterm\_fvar} \coqdocvar{x})\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{term\_app} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t1} \coqdocvar{t2},\coqdoceol
+\coqdocindent{3.00em}
+\coqdocvar{term} \coqdocvar{t1} \ensuremath{\rightarrow} \coqdoceol
+\coqdocindent{3.00em}
+\coqdocvar{term} \coqdocvar{t2} \ensuremath{\rightarrow} \coqdoceol
+\coqdocindent{3.00em}
+\coqdocvar{term} (\coqdocvar{pterm\_app} \coqdocvar{t1} \coqdocvar{t2})\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{term\_abs} : \coqdockw{\ensuremath{\forall}} \coqdocvar{L} \coqdocvar{t1},\coqdoceol
+\coqdocindent{3.00em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{x}, \coqdocvar{x} \symbol{92}\coqdocvar{notin} \coqdocvar{L} \ensuremath{\rightarrow} \coqdocvar{term} (\coqdocvar{t1} \^{} \coqdocvar{x})) \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{3.00em}
+\coqdocvar{term} (\coqdocvar{pterm\_abs} \coqdocvar{t1})\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{term\_sub} : \coqdockw{\ensuremath{\forall}} \coqdocvar{L} \coqdocvar{t1} \coqdocvar{t2},\coqdoceol
+\coqdocindent{2.50em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{x}, \coqdocvar{x} \symbol{92}\coqdocvar{notin} \coqdocvar{L} \ensuremath{\rightarrow} \coqdocvar{term} (\coqdocvar{t1} \^{} \coqdocvar{x})) \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{3.00em}
+\coqdocvar{term} \coqdocvar{t2} \ensuremath{\rightarrow} \coqdoceol
+\coqdocindent{3.00em}
+\coqdocvar{term} (\coqdocvar{pterm\_sub} \coqdocvar{t1} \coqdocvar{t2}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Lemma} \coqdocvar{pterm\_size\_induction} :\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{\ensuremath{\forall}} \coqdocvar{P} : \coqdocvar{pterm} \ensuremath{\rightarrow} \coqdockw{Prop},\coqdoceol
+\coqdocindent{0.50em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{t},\coqdoceol
+\coqdocindent{2.00em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{t'}, \coqdocvar{pterm\_size} \coqdocvar{t'} < \coqdocvar{pterm\_size} \coqdocvar{t} \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{2.00em}
+\coqdocvar{P} \coqdocvar{t'}) \ensuremath{\rightarrow} \coqdocvar{P} \coqdocvar{t}) \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{0.50em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{t}, \coqdocvar{P} \coqdocvar{t}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Lemma} \coqdocvar{pterm\_eq\_size\_induction} :\coqdoceol
+\coqdocindent{0.50em}
+\coqdockw{\ensuremath{\forall}} \coqdocvar{P} : \coqdocvar{pterm} \ensuremath{\rightarrow} \coqdockw{Prop},\coqdoceol
+\coqdocindent{0.50em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{n}, \coqdocvar{P} (\coqdocvar{pterm\_bvar} \coqdocvar{n})) \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{0.50em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{x}, \coqdocvar{P} (\coqdocvar{pterm\_fvar} \coqdocvar{x})) \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{0.50em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{t1} \coqdocvar{t2}, \coqdocvar{P} \coqdocvar{t1} \ensuremath{\rightarrow} \coqdocvar{P} \coqdocvar{t2} \ensuremath{\rightarrow} \coqdocvar{P} (\coqdocvar{pterm\_app} \coqdocvar{t1} \coqdocvar{t2})) \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{0.50em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{t1},\coqdoceol
+\coqdocindent{2.00em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{t2} \coqdocvar{x}, \coqdocvar{x} \symbol{92}\coqdocvar{notin} \coqdocvar{fv} \coqdocvar{t2} \ensuremath{\rightarrow} \coqdocvar{pterm\_size} \coqdocvar{t2} = \coqdocvar{pterm\_size} \coqdocvar{t1} \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{2.00em}
+\coqdocvar{P} (\coqdocvar{t2} \^{} \coqdocvar{x})) \ensuremath{\rightarrow} \coqdocvar{P} (\coqdocvar{pterm\_abs} \coqdocvar{t1})) \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{0.50em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{t1} \coqdocvar{t3}, \coqdocvar{P} \coqdocvar{t3} \ensuremath{\rightarrow} \coqdoceol
+\coqdocindent{2.00em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{t2} \coqdocvar{x}, \coqdocvar{x} \symbol{92}\coqdocvar{notin} \coqdocvar{fv} \coqdocvar{t2} \ensuremath{\rightarrow} \coqdocvar{pterm\_size} \coqdocvar{t2} = \coqdocvar{pterm\_size} \coqdocvar{t1} \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{6.50em}
+\coqdocvar{P} (\coqdocvar{t2} \^{} \coqdocvar{x})) \ensuremath{\rightarrow} \coqdocvar{P} (\coqdocvar{t1}[\coqdocvar{t3}])) \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{0.50em}
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{t}, \coqdocvar{P} \coqdocvar{t}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Definition} \coqdocvar{term\_regular} (\coqdocvar{R} : \coqdocvar{Rel} \coqdocvar{pterm}) :=\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{t'}, \coqdocvar{R} \coqdocvar{t} \coqdocvar{t'} \ensuremath{\rightarrow} \coqdocvar{term} \coqdocvar{t} \ensuremath{\rightarrow} \coqdocvar{term} \coqdocvar{t'}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Fixpoint} \coqdocvar{lc\_at} (\coqdocvar{k}:\coqdocvar{nat}) (\coqdocvar{t}:\coqdocvar{pterm}) : \coqdockw{Prop} :=\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{match} \coqdocvar{t} \coqdockw{with}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_bvar} \coqdocvar{i}    \ensuremath{\Rightarrow} \coqdocvar{i} < \coqdocvar{k}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_fvar} \coqdocvar{x}    \ensuremath{\Rightarrow} \coqdocvar{True}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_app} \coqdocvar{t1} \coqdocvar{t2} \ensuremath{\Rightarrow} \coqdocvar{lc\_at} \coqdocvar{k} \coqdocvar{t1} \ensuremath{\land} \coqdocvar{lc\_at} \coqdocvar{k} \coqdocvar{t2}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_abs} \coqdocvar{t1}    \ensuremath{\Rightarrow} \coqdocvar{lc\_at} (\coqdocvar{S} \coqdocvar{k}) \coqdocvar{t1}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_sub} \coqdocvar{t1} \coqdocvar{t2} \ensuremath{\Rightarrow} (\coqdocvar{lc\_at} (\coqdocvar{S} \coqdocvar{k}) \coqdocvar{t1}) \ensuremath{\land} \coqdocvar{lc\_at} \coqdocvar{k} \coqdocvar{t2}\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{end}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Theorem} \coqdocvar{term\_equiv\_lc\_at}: \coqdockw{\ensuremath{\forall}} \coqdocvar{t}, \coqdocvar{term} \coqdocvar{t} \ensuremath{\leftrightarrow} \coqdocvar{lc\_at} 0 \coqdocvar{t}.\coqdoceol
+\end{coqdoccode}
+Contextual closure of terms. \begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Inductive} \coqdocvar{ES\_contextual\_closure} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{pterm}) : \coqdocvar{Rel} \coqdocvar{pterm} :=\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{ES\_redex} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{s}, \coqdocvar{R} \coqdocvar{t} \coqdocvar{s} \ensuremath{\rightarrow} \coqdocvar{ES\_contextual\_closure} \coqdocvar{R} \coqdocvar{t} \coqdocvar{s}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{ES\_app\_left} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{t'} \coqdocvar{u}, \coqdocvar{ES\_contextual\_closure} \coqdocvar{R} \coqdocvar{t} \coqdocvar{t'} \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{15.00em}
+\coqdocvar{ES\_contextual\_closure} \coqdocvar{R} (\coqdocvar{pterm\_app} \coqdocvar{t} \coqdocvar{u}) (\coqdocvar{pterm\_app} \coqdocvar{t'} \coqdocvar{u})\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{ES\_app\_right} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{u} \coqdocvar{u'}, \coqdocvar{ES\_contextual\_closure} \coqdocvar{R} \coqdocvar{u} \coqdocvar{u'} \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{15.50em}
+\coqdocvar{ES\_contextual\_closure} \coqdocvar{R} (\coqdocvar{pterm\_app} \coqdocvar{t} \coqdocvar{u}) (\coqdocvar{pterm\_app} \coqdocvar{t} \coqdocvar{u'})\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{ES\_abs\_in} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{t'} \coqdocvar{L}, (\coqdockw{\ensuremath{\forall}} \coqdocvar{x}, \coqdocvar{x} \symbol{92}\coqdocvar{notin} \coqdocvar{L} \ensuremath{\rightarrow} \coqdocvar{ES\_contextual\_closure} \coqdocvar{R} (\coqdocvar{t}\^{}\coqdocvar{x}) (\coqdocvar{t'}\^{}\coqdocvar{x})) \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{15.50em}
+\coqdocvar{ES\_contextual\_closure} \coqdocvar{R} (\coqdocvar{pterm\_abs} \coqdocvar{t}) (\coqdocvar{pterm\_abs} \coqdocvar{t'})\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{ES\_sub} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{t'} \coqdocvar{u} \coqdocvar{L}, (\coqdockw{\ensuremath{\forall}} \coqdocvar{x}, \coqdocvar{x} \symbol{92}\coqdocvar{notin} \coqdocvar{L} \ensuremath{\rightarrow} \coqdocvar{ES\_contextual\_closure} \coqdocvar{R} (\coqdocvar{t}\^{}\coqdocvar{x}) (\coqdocvar{t'}\^{}\coqdocvar{x})) \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{16.00em}
+\coqdocvar{ES\_contextual\_closure} \coqdocvar{R}  (\coqdocvar{t} [\coqdocvar{u}]) (\coqdocvar{t'} [\coqdocvar{u}])\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{ES\_sub\_in} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{u} \coqdocvar{u'}, \coqdocvar{ES\_contextual\_closure} \coqdocvar{R} \coqdocvar{u} \coqdocvar{u'} \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{15.50em}
+\coqdocvar{ES\_contextual\_closure} \coqdocvar{R}  (\coqdocvar{t} [\coqdocvar{u}]) (\coqdocvar{t} [\coqdocvar{u'}]).\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdocvar{eqc} : \coqdocvar{Rel} \coqdocvar{pterm} :=\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdocvar{eqc\_def}: \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{u} \coqdocvar{v}, \coqdocvar{term} \coqdocvar{u} \ensuremath{\rightarrow} \coqdocvar{term} \coqdocvar{v} \ensuremath{\rightarrow} \coqdocvar{eqc} (\coqdocvar{t}[\coqdocvar{u}][\coqdocvar{v}]) ((\& \coqdocvar{t})[\coqdocvar{v}][\coqdocvar{u}]).\coqdoceol
+\end{coqdoccode}
+Superdevelopment function \begin{coqdoccode}
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Fixpoint} \coqdocvar{sd} (\coqdocvar{t} : \coqdocvar{pterm}) : \coqdocvar{pterm} :=\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{match} \coqdocvar{t} \coqdockw{with}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_bvar} \coqdocvar{i}    \ensuremath{\Rightarrow} \coqdocvar{t}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_fvar} \coqdocvar{x}    \ensuremath{\Rightarrow} \coqdocvar{t}\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_abs} \coqdocvar{t1}    \ensuremath{\Rightarrow} \coqdocvar{pterm\_abs} (\coqdocvar{sd} \coqdocvar{t1})\coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_app} \coqdocvar{t1} \coqdocvar{t2} \ensuremath{\Rightarrow} \coqdockw{let} \coqdocvar{t0} := (\coqdocvar{sd} \coqdocvar{t1}) \coqdoctac{in}\coqdoceol
+\coqdocindent{11.00em}
+\coqdockw{match} \coqdocvar{t0} \coqdockw{with}\coqdoceol
+\coqdocindent{11.00em}
+\ensuremath{|} \coqdocvar{pterm\_abs} \coqdocvar{t'} \ensuremath{\Rightarrow} \coqdocvar{t'} \^{}\^{} (\coqdocvar{sd} \coqdocvar{t2})\coqdoceol
+\coqdocindent{11.00em}
+\ensuremath{|} \coqdocvar{\_} \ensuremath{\Rightarrow} \coqdocvar{pterm\_app} (\coqdocvar{sd} \coqdocvar{t1}) (\coqdocvar{sd} \coqdocvar{t2})\coqdoceol
+\coqdocindent{11.00em}
+\coqdockw{end} \coqdoceol
+\coqdocindent{1.00em}
+\ensuremath{|} \coqdocvar{pterm\_sub} \coqdocvar{t1} \coqdocvar{t2} \ensuremath{\Rightarrow} (\coqdocvar{sd} \coqdocvar{t1}) \^{}\^{} (\coqdocvar{sd} \coqdocvar{t2})\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{end}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Lemma} \coqdocvar{BxZlex}: \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvar{a} \ensuremath{\rightarrow}\coqdocvar{\_lex} \coqdocvar{b} \ensuremath{\rightarrow} \coqdocvar{b} \ensuremath{\rightarrow}\coqdocvar{\_lex}\ensuremath{\times} (\coqdocvar{sd} \coqdocvar{a}) \ensuremath{\land} (\coqdocvar{sd} \coqdocvar{a}) \ensuremath{\rightarrow}\coqdocvar{\_lex}\ensuremath{\times} (\coqdocvar{sd} \coqdocvar{b}).\coqdoceol
+\end{coqdoccode}
