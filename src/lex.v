@@ -1,7 +1,7 @@
 (** * An application: Proving Confluence of a Calculus with Explicit Substitutions *)
 
 (* begin hide *)
-Require Import Arith ZtoConfl.
+Require Import ZtoConfl.
 
 Definition var := nat.
 
@@ -228,28 +228,29 @@ Proof.
   induction t0; simpl; auto with arith.
 Qed.
 
-Lemma pterm_size_open: forall t x, pterm_size (t^x) = pterm_size t.
+Lemma pterm_size_open_rec: forall t x n, pterm_size ({n ~> pterm_fvar x} t) = pterm_size t.
 Proof.
-  intros.
   induction t0.
-  - unfold open.
-    unfold open_rec.
-    case n; reflexivity.
+  - unfold open_rec.
+    intros x n'.
+    destruct (n' === n); reflexivity.
   - reflexivity.
   - simpl.
-    destruct IHt0_1.
-    destruct IHt0_2.
+    intros x n.
+    destruct (IHt0_1 x n).
+    destruct (IHt0_2 x n).
     reflexivity.
   - simpl.
-    destruct IHt0.
-    unfold open.
-    admit.
-  - simpl.
-    destruct IHt0_1.
-    destruct IHt0_2.
-    unfold open.
-    admit.
-Admitted.
+    intros x n.
+    destruct (IHt0 x (S n)); reflexivity.
+  - Admitted.
+    
+Corollary pterm_size_open: forall t x, pterm_size (t^x) = pterm_size t.
+Proof.
+  unfold open.
+  intros t x.
+  apply pterm_size_open_rec.
+Qed.
 
 (* end hide *)  
 Lemma pterm_size_induction :
