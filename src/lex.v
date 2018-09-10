@@ -247,7 +247,12 @@ Proof.
   - simpl.
     intros x n.
     destruct (IHt x (S n)); reflexivity.
-  - Admitted.
+  - simpl.
+    intros x n.
+    destruct (IHt1 x (S n)).
+    destruct (IHt2 x n).
+    reflexivity.
+Qed.
 
 (* end hide *)  
 Lemma pterm_size_induction :
@@ -535,7 +540,44 @@ Proof.
         apply lc_at_open.
         ** apply term_var.
         ** assumption.
-    + Admitted.
+    + intro Hlc.
+      apply term_sub with (fv t0_1).
+      * intros x Hfv.
+        apply H.
+        ** rewrite pterm_size_open.
+           simpl; auto with arith.
+        ** simpl in Hlc.
+           apply lc_at_open.
+           *** apply term_var.
+           *** apply Hlc.
+      * apply IHt0_2.
+        ** intros t H0 H1.
+           apply H.
+           *** simpl.
+               assert (a_lt_ab: forall a b c, a < c -> a < b + c).
+               {
+                 intros a b c Habc.
+                 induction b.
+                 auto with arith.
+                 assert (S_in_out: S b + c = S (b + c)).
+                 {
+                   auto with arith.
+                 }
+                 rewrite S_in_out.
+                 auto with arith.
+               }
+               assert (S_out_in: forall t1 t2, S (pterm_size t2 + pterm_size t1) = pterm_size t2 + S (pterm_size t1)).
+               {
+                 intros.
+                 apply plus_n_Sm.
+               }
+               rewrite S_out_in.
+               apply a_lt_ab.
+               auto with arith.
+           *** assumption.
+        ** simpl in Hlc.
+           apply Hlc.
+Qed.
 
       (* Proof. *)
 (*   intro t; split. *)
@@ -683,7 +725,48 @@ Lemma bswap_rec_id : forall n t, bswap_rec n (bswap_rec n t)  = t.
 Proof.
  intros n t. generalize dependent n. 
  induction t.
- Admitted.
+ - intros n'.
+   unfold bswap_rec.
+   case (n' === n). 
+   + intro H1.
+     case (n' === S n').
+     * assert (Q: n' <> S n'). auto with arith.
+       contradiction.
+     * rewrite H1.
+       intro H2.
+       case (S n === S n).
+       ** reflexivity.
+       ** contradiction.
+   + intro H1.
+     case (S n' === n).
+     * intro H2.
+       case (n' === n').
+       ** rewrite H2.
+          reflexivity.
+       ** contradiction.
+     * intro H2.
+       case (n' === n).
+       ** contradiction.
+       ** intro H3.
+          case (S n' === n).
+          *** contradiction.
+          *** reflexivity.
+ - reflexivity.
+ - intro n.
+   simpl.
+   rewrite (IHt1 n).
+   rewrite (IHt2 n).
+   reflexivity.
+ - intro n.
+   simpl.
+   rewrite (IHt (S n)).
+   reflexivity.
+ - intro n.
+   simpl.
+   rewrite (IHt1 (S n)).
+   rewrite (IHt2 n).
+   reflexivity.
+Qed.
 
 (*  (* bvar *) *)
 (*  intros n'. unfolds bswap_rec. *)
@@ -792,6 +875,35 @@ Qed.
 
 Lemma term_regular_eqc : term_regular eqc.
 Proof.
+ unfold term_regular.
+ intros t t' Heqc.
+ inversion Heqc; subst. clear Heqc.
+ intro H1.
+ apply term_sub with (fv t0 \u fv u).
+ - intros x Hfv. unfold open. simpl.
+   apply term_sub with (fv t0 \u {{x}}).
+   + intros x' Hfv'.
+     apply term_equiv_lc_at.
+     apply lc_at_open.
+     * apply term_var.
+     * apply lc_at_open.
+       ** apply term_var.
+       ** apply term_equiv_lc_at in H1.
+          simpl in H1.
+          destruct H1.
+          destruct H1.
+          apply lc_at_bswap.
+          *** auto.
+          *** assumption.
+   + apply term_equiv_lc_at.
+     apply lc_at_open.
+     * apply term_var.
+     * apply term_equiv_lc_at in H0.
+       apply lc_at_weaken_ind with 0.
+       ** assumption.
+       ** auto.
+ - assumption.
+Qed.
   (* unfold red_regular. intros t t' Heqc; split. *)
   (* - inversion Heqc; subst. clear Heqc. *)
   (*   apply term_sub with (fv t0 \u fv u). *)
@@ -806,7 +918,6 @@ Proof.
   (*          *** assumption. *)
   (*     * admit. *)
   (*   + admit. *)
-  - Admitted.
 (*   apply term'_to_term. unfold term'. *)
 (*   apply lc_at_open; trivial. *)
 (*   apply lc_at_open; trivial. *)
@@ -1057,7 +1168,8 @@ Proof.
 
 Instance eqC_equiv: Equivalence eqC.
 Proof.
-Admitted.
+ apply eqC_eq. (** prova redundante com eqC_eq *)
+Qed.
 
 (** Lex rules *)
 
@@ -1067,7 +1179,14 @@ Inductive rule_b : Rel pterm  :=
 
 Lemma term_regular_b: term_regular rule_b.
 Proof.
-  Admitted.
+ unfold term_regular.
+ intros t t' Hr Ht.
+ induction t'; inversion Hr.
+ destruct Hr.
+ inversion Ht; subst.
+ inversion H4.
+ apply term_sub with L; assumption.
+Qed.
 
 Lemma red_rename_b: red_rename rule_b.
 Proof.
