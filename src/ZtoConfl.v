@@ -1,9 +1,16 @@
 (** * Introduction *)
 
-(** 
+(**
 
-    This work is about term rewriting systems. Term rewriting is a
-    model of computation based on the notion of reduction.
+    This work is about confluence of abstract rewriting systems, which
+    is a model of computation based on the notion of
+    reduction. Confluence of abstract rewriting systems is concerned
+    about the decidability of the reduction relation. This property is
+    undecidable in general.
+
+    In ??, Oomstrom presents a property called Z, which turns out to be a sufficient condiction to get confluence. For a given abstract rewriting system [(A,\to)], one says that it satisfies the Z property if, forall [a,b \in A] there exists a function [f: A \to A] such that 
+
+We present a formalisation ...
 
 *)
 

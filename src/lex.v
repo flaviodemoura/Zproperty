@@ -183,7 +183,6 @@ Notation "{ k ~> u } t" := (open_rec k u t) (at level 67).
 Notation "t ^^ u" := (open t u) (at level 67). 
 Notation "t ^ x" := (open t (pterm_fvar x)).   
 
-(** Variable closing *)
 Fixpoint close_rec  (k : nat) (x : var) (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => pterm_bvar i
@@ -254,6 +253,30 @@ Proof.
     reflexivity.
 Qed.
 
+Definition strong_induction_nat :=
+  forall Q: nat -> Prop,
+    (forall n, (forall m, m<n -> Q m) -> Q n) ->
+    forall n, Q n.
+
+Lemma nat_ind_to_strong: strong_induction_nat.
+Proof.
+  unfold strong_induction_nat.
+  intros Q Hstr n.
+  apply Hstr. 
+  assert (HPQ := Hstr (fun n => forall m : nat, m < n -> Q m)).
+  apply HPQ.
+  - intros m H.
+    inversion H.
+  - intros n' H m0 Hlt.
+    apply Hif.
+    intros m Hlt'.
+    assert (Hlt'': m < n').
+    { apply lt_n_Sm_le in Hlt.
+      apply Nat.lt_le_trans with m0; assumption. }
+    apply H; assumption.
+Qed.
+
+
 (* end hide *)  
 Lemma pterm_size_induction :
  forall P : pterm -> Prop,
@@ -263,20 +286,40 @@ Lemma pterm_size_induction :
  (forall t, P t).
 (* begin hide *)
 Proof.
-  intros P IH t.
-  generalize dependent  t.
-  apply pterm_ind.
-  - intro n.
-    apply IH.
+  intros P IH.
+  induction t0.
+  - apply IH.
     simpl.
     intros t Hlt.
-    admit.
-    - intros v.
+    assert (H: 0 < pterm_size t).
+    {
+      apply pterm_size_positive.
+    }
+    inversion Hlt.
+    rewrite H1 in H.
+    inversion H.
+    inversion H1.
+  - apply IH.
+    simpl.
+    intros t Hlt.
+    inversion Hlt.
+    assert (H: 0 < pterm_size t).
+    {
+      apply pterm_size_positive.
+    }
+    rewrite H0 in H.
+    inversion H.
+    inversion H0.
+  - apply IH.
+    simpl.
+    intros t Hlt.
+    inversion Hlt.
+    assert (H: pterm_size t0_1 < pterm_size t).
+    {
       admit.
-    - intros t1 Ht1 t2 Ht2.
-      apply IH.
-      simpl.
-      intros t' Hlt.
+    }
+    apply IH.
+    
 Admitted.
 (* end hide *)  
 Lemma pterm_eq_size_induction :
@@ -293,13 +336,13 @@ Lemma pterm_eq_size_induction :
  (forall t, P t).
 (* begin hide *)
 Proof.
-  intros.
+  intros P Hbvar Hfvar Happ Habs Hsub.
   induction t0.
-  + apply H.
-  + apply H0.
-  + apply H1; assumption.
-  + apply H2.
-    intros.
+  + apply Hbvar.
+  + apply Hfvar.
+  + apply Happ; assumption.
+  + apply Habs.
+    intros t1 x Hfv Heq.
     admit.
   + apply H3.
     - assumption.
