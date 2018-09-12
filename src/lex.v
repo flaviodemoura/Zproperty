@@ -253,30 +253,29 @@ Proof.
     reflexivity.
 Qed.
 
-Definition strong_induction_nat :=
-  forall Q: nat -> Prop,
-    (forall n, (forall m, m<n -> Q m) -> Q n) ->
+Lemma strong_induction :  forall Q: nat -> Prop,
+    (forall n, (forall m, m < n -> Q m) -> Q n) ->
     forall n, Q n.
-
-Lemma nat_ind_to_strong: strong_induction_nat.
 Proof.
-  unfold strong_induction_nat.
-  intros Q Hstr n.
-  apply Hstr. 
-  assert (HPQ := Hstr (fun n => forall m : nat, m < n -> Q m)).
-  apply HPQ.
-  - intros m H.
-    inversion H.
-  - intros n' H m0 Hlt.
-    apply Hif.
-    intros m Hlt'.
-    assert (Hlt'': m < n').
-    { apply lt_n_Sm_le in Hlt.
-      apply Nat.lt_le_trans with m0; assumption. }
-    apply H; assumption.
-Qed.
+Admitted.
 
-
+Lemma pterm_induction:  forall P : pterm -> Prop,
+       (forall n : nat, P (pterm_bvar n)) ->
+       (forall v : var, P (pterm_fvar v)) ->
+       (forall p : pterm, P p -> forall p0 : pterm, P p0 -> P (pterm_app p p0)) ->
+       (forall L p,  (forall x : elt, x \notin L -> P (p ^ x)) -> P (pterm_abs p)) ->
+       (forall L p, (forall x : elt, x \notin L -> P (p ^ x)) -> forall p0 : pterm, P p0 -> P (p [p0])) ->
+       forall p : pterm, P p.
+Proof.
+  intros P Hbvar Hfvar Happ Habs Hsub t.
+  induction t.
+  - apply Hbvar.
+  - apply Hfvar.
+  - apply Happ; assumption.
+  - apply Habs with (fv t0).
+    intros x Hfv.
+    Admitted.
+    
 (* end hide *)  
 Lemma pterm_size_induction :
  forall P : pterm -> Prop,
@@ -286,41 +285,49 @@ Lemma pterm_size_induction :
  (forall t, P t).
 (* begin hide *)
 Proof.
-  intros P IH.
-  induction t0.
-  - apply IH.
-    simpl.
-    intros t Hlt.
-    assert (H: 0 < pterm_size t).
-    {
-      apply pterm_size_positive.
-    }
-    inversion Hlt.
-    rewrite H1 in H.
-    inversion H.
-    inversion H1.
-  - apply IH.
-    simpl.
-    intros t Hlt.
-    inversion Hlt.
-    assert (H: 0 < pterm_size t).
-    {
-      apply pterm_size_positive.
-    }
-    rewrite H0 in H.
-    inversion H.
-    inversion H0.
-  - apply IH.
-    simpl.
-    intros t Hlt.
-    inversion Hlt.
-    assert (H: pterm_size t0_1 < pterm_size t).
-    {
-      admit.
-    }
-    apply IH.
-    
+  intros P IH t.
+  apply IH.
+  remember (pterm_size t) as n eqn:H.
 Admitted.
+  (* induction t using nat_ind. *)
+  (* generalize dependent t. *)
+  (* apply nat_ind. *)
+  (* induction  t using strong_induction_nat. *)
+  (* apply IH. *)
+  (* assert (H: nat_ind (fun (n:nat) => forall t':pterm, pterm_size t' < pterm_size t -> P t')). *)
+  (* induction t0 using strong_induction_nat. *)
+  (* - apply IH. *)
+  (*   simpl. *)
+  (*   intros t Hlt. *)
+  (*   assert (H: 0 < pterm_size t). *)
+  (*   { *)
+  (*     apply pterm_size_positive. *)
+  (*   } *)
+  (*   inversion Hlt. *)
+  (*   rewrite H1 in H. *)
+  (*   inversion H. *)
+  (*   inversion H1. *)
+  (* - apply IH. *)
+  (*   simpl. *)
+  (*   intros t Hlt. *)
+  (*   inversion Hlt. *)
+  (*   assert (H: 0 < pterm_size t). *)
+  (*   { *)
+  (*     apply pterm_size_positive. *)
+  (*   } *)
+  (*   rewrite H0 in H. *)
+  (*   inversion H. *)
+  (*   inversion H0. *)
+  (* - apply IH. *)
+  (*   simpl. *)
+  (*   intros t Hlt. *)
+  (*   inversion Hlt. *)
+  (*   assert (H: pterm_size t0_1 < pterm_size t). *)
+  (*   { *)
+  (*     admit. *)
+  (*   } *)
+  (*   apply IH. *)    
+
 (* end hide *)  
 Lemma pterm_eq_size_induction :
  forall P : pterm -> Prop,
@@ -330,7 +337,7 @@ Lemma pterm_eq_size_induction :
  (forall t1,
     (forall t2 x, x \notin fv t2 -> pterm_size t2 = pterm_size t1 ->
     P (t2 ^ x)) -> P (pterm_abs t1)) ->
- (forall t1 t3, P t3 -> 
+ (forall t1 t3, P t3 ->
     (forall t2 x, x \notin fv t2 -> pterm_size t2 = pterm_size t1 ->
              P (t2 ^ x)) -> P (t1[t3])) ->
  (forall t, P t).
@@ -343,7 +350,9 @@ Proof.
   + apply Happ; assumption.
   + apply Habs.
     intros t1 x Hfv Heq.
-    admit.
+    replace (pterm_size t1) with (pterm_size (t1^x)) in Heq.
+    * admit.
+    * apply pterm_size_open. 
   + apply H3.
     - assumption.
     - intros.
@@ -622,43 +631,6 @@ Proof.
            apply Hlc.
 Qed.
 
-      (* Proof. *)
-(*   intro t; split. *)
-(*   - apply term_to_lc_at. *)
-(*   - induction t using pterm_eq_size_induction. *)
-(*     + intros. *)
-(*       inversion H. *)
-(*     + intro H. apply term_var. *)
-(*     + intro H. *)
-(*       simpl in H. *)
-(*       apply term_app. *)
-(*       * apply IHt1. *)
-(*         apply H. *)
-(*       * apply IHt2. *)
-(*         apply H. *)
-(*     + intro H'. *)
-(*       apply term_abs with (fv t0). *)
-(*       intros x Hfv. *)
-(*       apply H. *)
-(*       * assumption. *)
-(*       * reflexivity. *)
-(*       * simpl in *. *)
-(*         apply lc_at_open_rec. *)
-(*         ** apply term_var. *)
-(*         ** assumption. *)
-(*     + intro H'. *)
-(*       apply term_sub with (fv t1). *)
-(*       * intros x H''. *)
-(*         apply H. *)
-(*         ** assumption. *)
-(*         ** reflexivity. *)
-(*         ** simpl in *. *)
-(*            apply lc_at_open. *)
-(*            *** apply term_var. *)
-(*            *** apply H'.  *)
-(*       * apply IHt1. *)
-(*         apply H'. *)
-(* Qed. *)
 
 Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
 Proof.
@@ -811,38 +783,6 @@ Proof.
    reflexivity.
 Qed.
 
-(*  (* bvar *) *)
-(*  intros n'. unfolds bswap_rec. *)
-(*  case (n' === n). intro H1. *)
-(*  case (n' === S n'). intros H2. *)
-(*  assert (Q: n' <> S n'). omega. *)
-(*  contradiction. intro H2. *)
-(*  case (S n' === S n'). intro H3. *)
-(*  rewrite H1. trivial. intro H3. *)
-(*  assert (Q: S n' = S n'). trivial. *)
-(*  contradiction. intro H. fold bswap_rec. *)
-(*  case (S n' === n). intro H1. unfolds bswap_rec. *)
-(*  case (n' === n'). intro H2. rewrite H1. trivial. *)
-(*  intros H2. assert (Q: n' = n'). trivial. *)
-(*  contradiction. intro H1. unfolds bswap_rec. *)
-(*  case (n' === n). intro H2. contradiction. intro H2. *)
-(*  case (S n' === n). intro H3. contradiction. intro H3. *)
-(*  trivial. *)
-(*  (* fvar *) *)
-(*  intro n. simpl. trivial. *)
-(*  (* app *) *)
-(*  intro n. simpl. rewrite (IHt1 n). rewrite (IHt2 n). *)
-(*  trivial. *)
-(*  (* abs *) *)
-(*  intro n. simpl. rewrite (IHt (S n)). trivial. *)
-(*  (* sub *) *)
-(*  intro n. simpl. rewrite (IHt1 (S n)). rewrite (IHt2 n). *)
-(*  trivial. *)
-(*  (* sub' *) *)
-(*  intro n. simpl. rewrite (IHt1 (S n)). rewrite (IHt2 n). *)
-(*  trivial. *)
-(* Qed. *)
-
 Lemma bswap_idemp : forall t, (& (& t)) = t.
 Proof.
   intro t. unfold bswap.
@@ -947,41 +887,6 @@ Proof.
        ** auto.
  - assumption.
 Qed.
-  (* unfold red_regular. intros t t' Heqc; split. *)
-  (* - inversion Heqc; subst. clear Heqc. *)
-  (*   apply term_sub with (fv t0 \u fv u). *)
-  (*   + intros x Hfv. unfold open; simpl. *)
-  (*     apply term_sub with (fv t0 \u {{x}}). *)
-  (*     * intros x' Hfv'. *)
-  (*       apply term_equiv_lc_at. *)
-  (*       apply lc_at_open. *)
-  (*       ** apply term_var. *)
-  (*       ** apply lc_at_open. *)
-  (*          *** apply term_var. *)
-  (*          *** assumption. *)
-  (*     * admit. *)
-  (*   + admit. *)
-(*   apply term'_to_term. unfold term'. *)
-(*   apply lc_at_open; trivial. *)
-(*   apply lc_at_open; trivial. *)
-(*   apply term'_to_term. *)
-(*   apply lc_at_open; trivial. *)
-(*   apply term_to_term' in H1. unfold term' in H1. *)
-(*   apply lc_at_weaken_ind with 0. assumption. auto. assumption. *)
-
-(*   inversion H; subst. clear H. *)
-(*   apply term_sub with (fv t0 \u fv u). *)
-(*   intros_all. unfold open. simpl. *)
-(*   apply term_sub with (fv t0 \u {{x}}). *)
-(*   intros_all. apply term'_to_term. unfold term'. *)
-(*   apply lc_at_open; trivial. *)
-(*   apply lc_at_open; trivial.   *)
-(*   apply lc_at_bswap. auto. assumption. *)
-(*   apply term'_to_term. *)
-(*   apply lc_at_open; trivial. *)
-(*   apply term_to_term' in H2. unfold term' in H2. *)
-(*   apply lc_at_weaken_ind with 0. assumption. auto. assumption. *)
-(* Qed. *)
   
 Definition eqc_ctx (t u: pterm) := ES_contextual_closure eqc t u.
 Notation "t =c u" := (eqc_ctx t u) (at level 66).
@@ -1208,11 +1113,6 @@ Proof.
 (*  constructor 2. induction H. constructor 1; auto. constructor 6. auto. admit. *)
 (*  constructor 2 with (t [u]). constructor 6; auto. admit. auto. *)
 (* Qed. *)
-
-Instance eqC_equiv: Equivalence eqC.
-Proof.
- apply eqC_eq. (** prova redundante com eqC_eq *)
-Qed.
 
 (** Lex rules *)
 
