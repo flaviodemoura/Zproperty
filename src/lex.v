@@ -998,68 +998,156 @@ Proof.
 
 Instance rw_eqC_red : forall R, Proper (eqC ==> eqC ==> iff) (red_ctx_mod_eqC R).
 Proof.
-Admitted.
-(*  intros_all. split. intro H1. *)
-(*  unfold red_ctx_mod_eqC in *. *)
-(*  destruct H1. destruct H1. destruct H1. destruct H2. *)
-(*  exists x1 x2. split.  *)
-(*  apply eqC_sym in H. *)
-(*  apply eqC_trans with x; assumption. *)
-(*  split. assumption. *)
-(*  apply eqC_trans with x0; assumption. *)
-(*  intro H1. *)
-(*  unfold red_ctx_mod_eqC in *. *)
-(*  destruct H1. destruct H1. destruct H1. destruct H2. *)
-(*  exists x1 x2. split.  *)
-(*  rewrite <- H1; assumption. split; trivial. *)
-(*  rewrite H3. rewrite H0.  *)
-(*  reflexivity. *)
-(* Qed. *)
+ intro R.
+ split.
+ - intro H1.
+   unfold red_ctx_mod_eqC in *.
+   destruct H1.
+   destruct H1.
+   destruct H1.
+   destruct H2.
+   exists x1.
+   exists x2.
+   split.
+   + apply eqC_sym in H.
+     apply eqC_trans with x; assumption.
+   + split.
+     * assumption.
+     * apply eqC_trans with x0; assumption.
+ - intro H1.
+   unfold red_ctx_mod_eqC in *.
+   destruct H1.
+   destruct H1.
+   destruct H1.
+   destruct H2.
+   exists x1.
+   exists x2.
+   split.
+   + apply eqC_trans with y; assumption. 
+   + split.
+     * assumption.
+     * apply eqC_sym in H0.
+       apply eqC_trans with y0; assumption.
+Qed.
 
 Instance rw_eqC_trs : forall R, Proper (eqC ==> eqC ==> iff) (trans (red_ctx_mod_eqC R)).
 Proof.
-Admitted.
-(*     intros_all. split.  *)
-(*     intro H'. *)
-(*     inversion H'; subst. *)
-(*     apply one_step_reduction. *)
-(*     destruct H1. destruct H1.  destruct H1. destruct H2. *)
-(*     exists x1 x2. *)
-(*     split. rewrite <- H; auto. *)
-(*     split; auto. rewrite <- H0; auto. *)
-(*     constructor 2 with u. rewrite <- H; auto. *)
-(*     apply transitive_star_derivation' in H2. *)
-(*     destruct H2. *)
-(*     constructor 1. *)
-(*     destruct H2. destruct H2.  destruct H2. destruct H3. *)
-(*     unfold red_ctx_mod_eqC. exists x1 x2. *)
-(*     split; auto. split; auto. rewrite H4; auto. *)
-(*     destruct H2. destruct H2. destruct H3. destruct H3. *)
-(*     apply transitive_star_derivation'. *)
-(*     right. exists x1. split; auto. exists x2. split; auto. *)
-(*     destruct H4. destruct H4.  destruct H4. destruct H5. *)
-(*     exists x3 x4. split; auto. split; auto. rewrite H6; auto. *)
-
-(*     intro H'. *)
-(*     inversion H'; subst. *)
-(*     apply one_step_reduction. *)
-(*     destruct H1. destruct H1.  destruct H1. destruct H2. *)
-(*     exists x1 x2. *)
-(*     split. rewrite H; auto. *)
-(*     split; auto. rewrite H0; auto. *)
-(*     constructor 2 with u. rewrite H; auto. *)
-(*     apply transitive_star_derivation' in H2. *)
-(*     destruct H2. *)
-(*     constructor 1. *)
-(*     destruct H2. destruct H2.  destruct H2. destruct H3. *)
-(*     unfold red_ctx_mod_eqC. exists x1 x2. *)
-(*     split; auto. split; auto. rewrite H4; auto. symmetry; auto. *)
-(*     destruct H2. destruct H2. destruct H3. destruct H3. *)
-(*     apply transitive_star_derivation'. *)
-(*     right. exists x1. split; auto. exists x2. split; auto. *)
-(*     destruct H4. destruct H4.  destruct H4. destruct H5. *)
-(*     exists x3 x4. split; auto. split; auto. rewrite H6; auto. symmetry; auto. *)
-(* Qed. *)
+ intro R.
+ split.
+ - intro H1.
+   inversion H1; subst.
+   + apply singl.
+     destruct H2.
+     destruct H2.
+     destruct H2.
+     destruct H3.
+     exists x1.
+     exists x2.
+     split.
+     * apply eqC_sym in H.
+       apply eqC_trans with x; assumption.
+     * split.
+       ** assumption.
+       ** apply eqC_trans with x0; assumption.
+   + apply transit with b.
+     * destruct H2.
+       destruct H2.
+       destruct H2.
+       destruct H4.
+       exists x1.
+       exists x2.
+       split.
+       ** apply eqC_sym in H.
+          apply eqC_trans with x; assumption.
+       ** split; assumption.
+     * clear x y H H1 H2.
+       apply trans_composition' in H3.
+       destruct H3.
+       ** apply singl.
+          destruct H.
+          destruct H.
+          destruct H.
+          destruct H1.
+          exists x.
+          exists x1.
+          split.
+          *** assumption.
+          *** split. 
+              **** assumption.
+              **** apply eqC_trans with x0; assumption.
+       ** destruct H.
+          destruct H.
+          apply transit' with x.
+          *** assumption.
+          *** destruct H1.
+              destruct H1.
+              destruct H1.
+              destruct H2.
+              exists x1.
+              exists x2.
+              split.
+              **** assumption.
+              **** split.
+                   ***** assumption.
+                   ***** apply eqC_trans with x0; assumption.
+ - intro H1.
+   inversion H1; subst.
+   + apply singl.
+     destruct H2.
+     destruct H2.
+     destruct H2.
+     destruct H3.
+     exists x1.
+     exists x2.
+     split.
+     * apply eqC_trans with y; assumption.
+     * split.
+       ** assumption.
+       ** apply eqC_sym in H0.
+          apply eqC_trans with y0; assumption.
+   + apply transit with b.
+     * destruct H2.
+       destruct H2.
+       destruct H2.
+       destruct H4.
+       exists x1.
+       exists x2.
+       split.
+       ** apply eqC_trans with y; assumption.
+       ** split; assumption.
+     * clear x y H H1 H2.
+       apply trans_composition' in H3.
+       destruct H3.
+       ** apply singl.
+          destruct H.
+          destruct H.
+          destruct H.
+          destruct H1.
+          exists x.
+          exists x1.
+          split.
+          *** assumption.
+          *** split. 
+              **** assumption.
+              **** apply eqC_sym in H0.
+                   apply eqC_trans with y0; assumption.
+       ** destruct H.
+          destruct H.
+          apply transit' with x.
+          *** assumption.
+          *** destruct H1.
+              destruct H1.
+              destruct H1.
+              destruct H2.
+              exists x1.
+              exists x2.
+              split.
+              **** assumption.
+              **** split.
+                   ***** assumption.
+                   ***** apply eqC_sym in H0.
+                         apply eqC_trans with y0; assumption.
+Qed.
 
 Instance rw_eqC_lc_at : forall n, Proper (eqC ==> iff) (lc_at n).
 Proof.
