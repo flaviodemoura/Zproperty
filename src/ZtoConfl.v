@@ -76,10 +76,12 @@ Proof.
     + apply refl.
   - apply rtrans with b; assumption.
 Qed.    
-(* end hide *)  
+(* end hide *)
+
 Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
 
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
+
 (* begin hide *)
 Lemma CompReflTrans {A} (R: Rel A): forall a b c, refltrans R a b -> refltrans R b c -> refltrans R a c
 .
