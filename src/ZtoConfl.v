@@ -38,6 +38,41 @@ Proof.
     + apply IHtrans; assumption.
 Qed.
 
+Lemma transit' {A:Type}:
+  forall (R: Rel A) t u v, trans R t u -> R u v -> trans R t v
+.
+Proof.
+  intros R t u v H1 H2. induction H1.
+  - apply transit with b. 
+    + assumption.
+    + apply singl.
+      assumption.
+  - apply IHtrans in H2.
+    apply transit with b; assumption.
+Qed.
+
+Lemma trans_composition' {A}:
+  forall (R: Rel A) t v, trans R t v -> (R t v \/ exists u, trans R t u /\ R u v).
+Proof.
+ intros R t v H.
+ induction H.
+ - left; assumption.
+ - right.
+   destruct IHtrans.
+   + exists b.
+     split.
+     * apply singl.
+       assumption.
+     * assumption.
+   + destruct H1.
+     exists x.
+     split.
+     * apply transit with b.
+       ** assumption.
+       ** apply H1.
+     * apply H1.
+Qed.
+
 Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
 | refl: forall a, (refltrans R) a a
 | rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c
