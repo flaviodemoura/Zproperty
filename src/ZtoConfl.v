@@ -76,13 +76,7 @@ Proof.
     + apply refl.
   - apply rtrans with b; assumption.
 Qed.    
-(* end hide *)
 
-Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
-
-Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
-
-(* begin hide *)
 Lemma CompReflTrans {A} (R: Rel A): forall a b c, refltrans R a b -> refltrans R b c -> refltrans R a c
 .
 Proof.
@@ -93,6 +87,11 @@ induction H.
   apply rtrans with b; assumption.
 Qed.
 (* end hide *)  
+
+Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
+
+Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
+
 Theorem Zprop_implies_Confl {A:Type}: forall R: Rel A, Zprop R -> Confl R.
 (* begin hide *)
 Proof.
@@ -156,3 +155,13 @@ Proof.
         ** assumption. 
 Qed.
 (* end hide *)
+
+(** Proof using semi-confluence *)
+Definition SemiConfl {A:Type} (R: Rel A) := forall a b c, R a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
+
+Theorem Zprop_implies_SemiConfl {A:Type}: forall R: Rel A, Zprop R -> SemiConfl R.
+Proof.
+  intros R H.
+  unfold Zprop in H.
+  unfold SemiConfl.
+  Admitted.

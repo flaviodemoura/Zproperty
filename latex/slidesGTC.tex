@@ -11,6 +11,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{xspace}
 \usepackage[color]{coqdoc}
+\usepackage[all]{xy}
 
 \newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
 
@@ -31,9 +32,65 @@
 \section{Abstract Rewriting Systems}
 
 \begin{frame}[fragile]{Confluence and the Z Property}
-\begin{itemize}
-  \item 
-  \end{itemize} 
+  
+  \begin{definition}[Z Property]
+    Let $(A,\to)$ be an abstract rewriting system (ARS). The system $(A,\to)$ has the Z property, if there exists a map $wb:A \to A$ such that:
+    
+    \[
+      \xymatrix{
+        a \ar[r] &  b \ar@{.>>}[dl]\\
+        wb(a) \ar@{.>>}[r] & wb(b) \\ 
+      }
+    \]
+\end{definition}
+
+  \begin{coqdoccode}
+    \coqdocemptyline \coqdocnoindent \coqdockw{Definition}
+    \coqdocvar{Zprop} \{\coqdocvar{A}:\coqdockw{Type}\}
+    (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}) :=
+    \coqdoctac{\ensuremath{\exists}} \coqdocvar{wb}:\coqdocvar{A}
+    \ensuremath{\rightarrow} \coqdocvar{A},
+    \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b},
+    \coqdocvar{R} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow}
+    ((\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{b}
+    (\coqdocvar{wb} \coqdocvar{a}) \ensuremath{\land}
+    (\coqdocvar{refltrans} \coqdocvar{R}) (\coqdocvar{wb}
+    \coqdocvar{a}) (\coqdocvar{wb} \coqdocvar{b})).\coqdoceol
+  \end{coqdoccode}
+\end{frame}
+
+\begin{frame}[fragile]{Confluence and the Z Property}
+  
+  \begin{definition}[Confluence]
+    An ARS $(A,\to)$ is confluent if
+    
+    \[
+      \xymatrix{
+        & a \ar@{->>}[dl] \ar@{->>}[dr] & \\
+        b \ar@{.>>}[dr] &  & c \ar@{.>>}[dl] \\
+        & d & 
+      }
+    \]
+  \end{definition}
+  
+  \begin{coqdoccode}
+    \coqdockw{Definition} \coqdocvar{Confl} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}) := \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b} \coqdocvar{c}, (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} \coqdocvar{c} \ensuremath{\rightarrow} (\coqdoctac{\ensuremath{\exists}} \coqdocvar{d}, (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{b} \coqdocvar{d} \ensuremath{\land} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{c} \coqdocvar{d}).\coqdoceol
+  \end{coqdoccode}
+\end{frame}
+
+\begin{frame}[fragile]{Confluence and the Z Property}
+  
+  \[
+    \xymatrix{
+      a \ar[r] &  b \ar@{.>>}[dl] & \ar@/^2.0pc/@{=>}@[red][rr] & &    & a \ar@{->>}[dl] \ar@{->>}[dr] & \\ 
+      wb(a) \ar@{.>>}[r] & wb(b) & & &   b \ar@{.>>}[dr] &  & c \ar@{.>>}[dl] \\
+      & & & &       & d & 
+            }
+  \]
+  
+  \begin{coqdoccode}
+    \coqdockw{Theorem} \coqdocvar{Zprop\_implies\_Confl} \{\coqdocvar{A}:\coqdockw{Type}\}: \coqdockw{\ensuremath{\forall}} \coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}, \coqdocvar{Zprop} \coqdocvar{R} \ensuremath{\rightarrow} \coqdocvar{Confl} \coqdocvar{R}.\coqdoceol
+  \end{coqdoccode}
 \end{frame}
 
 \section{Application: Explicit Substitutions}
