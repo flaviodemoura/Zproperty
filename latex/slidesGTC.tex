@@ -14,6 +14,9 @@
 \usepackage[all]{xy}
 
 \newcommand{\themename}{\textbf{\textsc{metropolis}}\xspace}
+\newcommand{\term}{{\mathcal{T}}}
+\newcommand{\fv}[1]{{\tt fv}(#1)}
+\newcommand{\set}[1]{\{#1\}}
 
 \title{A Formalisation that Z Property implies Confluence}
 \date{\today}
@@ -95,6 +98,29 @@
 
 \section{Application: Explicit Substitutions}
 
+\begin{frame}[fragile]{The set of free variables of a term}
+\begin{definition}
+  Let $t$ be a term. The set of free variables of $t$, notation $\fv{t}$, is inductively defined as:
+  \begin{itemize}
+  \item $\fv{x} = \set{x}$
+  \end{itemize}
+\end{definition}
+\end{frame}
+
+\begin{frame}[fragile]{The $\lambda{\tt ex}$-calculus}
+\begin{itemize}
+\item Developed by Delia Kesner \cite{kes09}
+
+  $$\term ::= x \mid \term\term \mid \lambda x.\term \mid \term[x/\term]$$
+
+  $$\begin{array}{llll}
+      t[x/u][y/v] & =_C & t[y/v][x/u] & \mbox{ if } y \notin\fv{u} \mbox{ and } x \notin \fv{v} \\[.5cm]
+      (\lambda x. t)\ u & \to_{\tt B} & t[x/u] & \\      
+      \end{array}$$
+  
+\end{itemize}
+\end{frame}
+
 \begin{frame}[fragile]{Locally Nameless Representation}
 \begin{itemize}
 \item Developed in Coq by Arthur Charguéraud.
@@ -103,7 +129,8 @@
 \end{itemize}
 \end{frame}
 
+\bibliographystyle{plain}
+\bibliography{Zprop.bib}
 
-\plain{Questions?}
 
 \end{document}
