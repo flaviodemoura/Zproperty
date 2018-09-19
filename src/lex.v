@@ -353,11 +353,7 @@ Proof.
     replace (pterm_size t1) with (pterm_size (t1^x)) in Heq.
     * admit.
     * apply pterm_size_open. 
-  + apply H3.
-    - assumption.
-    - intros.
-      admit.
-  Admitted.
+  + Admitted.
 (* end hide *)  
 Definition term_regular (R : Rel pterm) :=
   forall t t', R t t' -> term t -> term t'.
@@ -887,10 +883,10 @@ Proof.
        ** auto.
  - assumption.
 Qed.
-  
+(* end hide *)  
 Definition eqc_ctx (t u: pterm) := ES_contextual_closure eqc t u.
 Notation "t =c u" := (eqc_ctx t u) (at level 66).
-
+(* begin hide *)
 Corollary term_regular_eqc_ctx: term_regular eqc_ctx.
 Proof.
   apply term_regular_ctx.
@@ -928,10 +924,10 @@ Qed.
 (*       apply ES_app_left. *)
 (*     + *)   
 (*   - *)
-      
+(* end hide *)      
 Definition eqC (t : pterm) (u : pterm) := refltrans eqc_ctx t u.
 Notation "t =e u" := (eqC t u) (at level 66).
-
+(* begin hide *)
 (* Corollary red_regular_eqC: red_regular eqC. *)
 (* Proof. *)
 (*   apply red_regular_refltrans. *)
@@ -1203,11 +1199,11 @@ Proof.
 (* Qed. *)
 
 (** Lex rules *)
-
+(* end hide *)
 Inductive rule_b : Rel pterm  :=
    reg_rule_b : forall (t u:pterm),  
      rule_b (pterm_app(pterm_abs t) u) (t[u]).
-
+(* begin hide *)
 Lemma term_regular_b: term_regular rule_b.
 Proof.
  unfold term_regular.
@@ -1240,16 +1236,16 @@ Proof.
   
   inversion H0.
 Admitted.
-
+(* end hide *)
 Definition b_ctx t u := ES_contextual_closure rule_b t u. 
 Notation "t ->_B u" := (b_ctx t u) (at level 66).
-
+(* begin hide *)
 Corollary term_regular_b_ctx : term_regular b_ctx.
 Proof.
   apply term_regular_ctx.
   apply term_regular_b.
 Qed.
-  
+(* end hide *)  
 Inductive sys_x : Rel pterm :=
 | reg_rule_var : forall t, sys_x (pterm_bvar 0 [t]) t
 | reg_rule_gc : forall t u, sys_x (t[u]) t
@@ -1259,7 +1255,7 @@ Inductive sys_x : Rel pterm :=
   sys_x ((pterm_abs t)[u]) (pterm_abs ((& t)[u]))
 | reg_rule_comp : forall t u v, has_free_index 0 u ->
   sys_x (t[u][v]) (((& t)[v])[ u[ v ] ]).
-
+(* begin hide *)
 Lemma term_regular_sys_x: term_regular sys_x.
 Proof.
   Admitted.
@@ -1681,9 +1677,33 @@ Fixpoint sd (t : pterm) : pterm :=
   | pterm_sub t1 t2 => (sd t1) ^^ (sd t2)
   end.
 (* begin hide *)
+Lemma sd_open:  forall (x:elt) t, sd (t ^ x) = sd t ^ x.
+Proof.
+  intros x t.
+  generalize dependent x.
+  induction t.
+  - intros x; simpl.
+    unfold open.
+    case n; reflexivity.
+  - reflexivity.
+  - intros x. admit.
+  - intros x. simpl.
+Admitted.
+    
 Lemma sd_term: forall t, term t -> term (sd t).
 Proof.
-Admitted.
+  intros t Hterm.
+  induction Hterm.  
+  - admit.
+  - admit.
+  - simpl sd.
+    apply term_abs with L.
+    intro x.
+    (* Lemma sd_open:  forall x : elt, x \notin L ->  term (sd (t1 ^ x)) -> term (sd t1 ^ x) *)
+    replace (sd t1 ^ x) with (sd (t1 ^ x)).
+    apply H0.
+    apply sd_open.
+  - Admitted.
 
 Corollary sd_body: forall t, body t -> body (sd t).
 Proof.
@@ -1712,6 +1732,7 @@ Proof.
   Admitted.
 
 Lemma to_sd: forall t, term t -> t ->_lex* (sd t).
+(* begin hide *)
 Proof.
   induction 1.
   - apply refl.
@@ -1735,7 +1756,8 @@ Lemma BxZlex: forall a b, a ->_lex b -> b ->_lex* (sd a) /\ (sd a) ->_lex* (sd b
 (* begin hide *)
 Proof.
 Admitted.
-  
+(* end hide *)
+
 Theorem Zlex: Zprop lex.
 Proof.
   unfold Zprop.
@@ -1748,4 +1770,3 @@ Proof.
   apply Zprop_implies_Confl.
   apply Zlex.
 Qed.
-(* end hide *)

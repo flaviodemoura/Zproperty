@@ -1,3 +1,7 @@
+\coqlibrary{lex}{Library }{lex}
+
+\begin{coqdoccode}
+\end{coqdoccode}
 \section{An application: Proving Confluence of a Calculus with Explicit Substitutions}
 
 \begin{coqdoccode}
@@ -80,7 +84,7 @@ ES terms are expressions without dangling deBruijn indexes. \begin{coqdoccode}
 \coqdocindent{2.00em}
 \coqdocvar{P} (\coqdocvar{t2} \^{} \coqdocvar{x})) \ensuremath{\rightarrow} \coqdocvar{P} (\coqdocvar{pterm\_abs} \coqdocvar{t1})) \ensuremath{\rightarrow}\coqdoceol
 \coqdocindent{0.50em}
-(\coqdockw{\ensuremath{\forall}} \coqdocvar{t1} \coqdocvar{t3}, \coqdocvar{P} \coqdocvar{t3} \ensuremath{\rightarrow} \coqdoceol
+(\coqdockw{\ensuremath{\forall}} \coqdocvar{t1} \coqdocvar{t3}, \coqdocvar{P} \coqdocvar{t3} \ensuremath{\rightarrow}\coqdoceol
 \coqdocindent{2.00em}
 (\coqdockw{\ensuremath{\forall}} \coqdocvar{t2} \coqdocvar{x}, \coqdocvar{x} \symbol{92}\coqdocvar{notin} \coqdocvar{fv} \coqdocvar{t2} \ensuremath{\rightarrow} \coqdocvar{pterm\_size} \coqdocvar{t2} = \coqdocvar{pterm\_size} \coqdocvar{t1} \ensuremath{\rightarrow}\coqdoceol
 \coqdocindent{6.50em}
@@ -139,6 +143,42 @@ Contextual closure of terms. \begin{coqdoccode}
 \coqdockw{Inductive} \coqdocvar{eqc} : \coqdocvar{Rel} \coqdocvar{pterm} :=\coqdoceol
 \coqdocnoindent
 \ensuremath{|} \coqdocvar{eqc\_def}: \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{u} \coqdocvar{v}, \coqdocvar{term} \coqdocvar{u} \ensuremath{\rightarrow} \coqdocvar{term} \coqdocvar{v} \ensuremath{\rightarrow} \coqdocvar{eqc} (\coqdocvar{t}[\coqdocvar{u}][\coqdocvar{v}]) ((\& \coqdocvar{t})[\coqdocvar{v}][\coqdocvar{u}]).\coqdoceol
+\coqdocnoindent
+\coqdockw{Definition} \coqdocvar{eqc\_ctx} (\coqdocvar{t} \coqdocvar{u}: \coqdocvar{pterm}) := \coqdocvar{ES\_contextual\_closure} \coqdocvar{eqc} \coqdocvar{t} \coqdocvar{u}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Notation} "t =c u" := (\coqdocvar{eqc\_ctx} \coqdocvar{t} \coqdocvar{u}) (\coqdoctac{at} \coqdockw{level} 66).\coqdoceol
+\coqdocnoindent
+\coqdockw{Definition} \coqdocvar{eqC} (\coqdocvar{t} : \coqdocvar{pterm}) (\coqdocvar{u} : \coqdocvar{pterm}) := \coqdocvar{refltrans} \coqdocvar{eqc\_ctx} \coqdocvar{t} \coqdocvar{u}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Notation} "t =e u" := (\coqdocvar{eqC} \coqdocvar{t} \coqdocvar{u}) (\coqdoctac{at} \coqdockw{level} 66).\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdocvar{rule\_b} : \coqdocvar{Rel} \coqdocvar{pterm}  :=\coqdoceol
+\coqdocindent{1.50em}
+\coqdocvar{reg\_rule\_b} : \coqdockw{\ensuremath{\forall}} (\coqdocvar{t} \coqdocvar{u}:\coqdocvar{pterm}),  \coqdoceol
+\coqdocindent{2.50em}
+\coqdocvar{rule\_b} (\coqdocvar{pterm\_app}(\coqdocvar{pterm\_abs} \coqdocvar{t}) \coqdocvar{u}) (\coqdocvar{t}[\coqdocvar{u}]).\coqdoceol
+\coqdocnoindent
+\coqdockw{Definition} \coqdocvar{b\_ctx} \coqdocvar{t} \coqdocvar{u} := \coqdocvar{ES\_contextual\_closure} \coqdocvar{rule\_b} \coqdocvar{t} \coqdocvar{u}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Notation} "t ->\_B u" := (\coqdocvar{b\_ctx} \coqdocvar{t} \coqdocvar{u}) (\coqdoctac{at} \coqdockw{level} 66).\coqdoceol
+\coqdocnoindent
+\coqdockw{Inductive} \coqdocvar{sys\_x} : \coqdocvar{Rel} \coqdocvar{pterm} :=\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdocvar{reg\_rule\_var} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t}, \coqdocvar{sys\_x} (\coqdocvar{pterm\_bvar} 0 [\coqdocvar{t}]) \coqdocvar{t}\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdocvar{reg\_rule\_gc} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{u}, \coqdocvar{sys\_x} (\coqdocvar{t}[\coqdocvar{u}]) \coqdocvar{t}\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdocvar{reg\_rule\_app} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t1} \coqdocvar{t2} \coqdocvar{u}, \coqdoceol
+\coqdocindent{1.00em}
+\coqdocvar{sys\_x} ((\coqdocvar{pterm\_app} \coqdocvar{t1} \coqdocvar{t2})[\coqdocvar{u}]) (\coqdocvar{pterm\_app} (\coqdocvar{t1}[\coqdocvar{u}]) (\coqdocvar{t2}[\coqdocvar{u}]))\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdocvar{reg\_rule\_lamb} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{u}, \coqdoceol
+\coqdocindent{1.00em}
+\coqdocvar{sys\_x} ((\coqdocvar{pterm\_abs} \coqdocvar{t})[\coqdocvar{u}]) (\coqdocvar{pterm\_abs} ((\& \coqdocvar{t})[\coqdocvar{u}]))\coqdoceol
+\coqdocnoindent
+\ensuremath{|} \coqdocvar{reg\_rule\_comp} : \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{u} \coqdocvar{v}, \coqdocvar{has\_free\_index} 0 \coqdocvar{u} \ensuremath{\rightarrow}\coqdoceol
+\coqdocindent{1.00em}
+\coqdocvar{sys\_x} (\coqdocvar{t}[\coqdocvar{u}][\coqdocvar{v}]) (((\& \coqdocvar{t})[\coqdocvar{v}])[ \coqdocvar{u}[ \coqdocvar{v} ] ]).\coqdoceol
 \end{coqdoccode}
 Superdevelopment function \begin{coqdoccode}
 \coqdocemptyline
@@ -168,4 +208,28 @@ Superdevelopment function \begin{coqdoccode}
 \coqdockw{end}.\coqdoceol
 \coqdocnoindent
 \coqdockw{Lemma} \coqdocvar{BxZlex}: \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvar{a} \ensuremath{\rightarrow}\coqdocvar{\_lex} \coqdocvar{b} \ensuremath{\rightarrow} \coqdocvar{b} \ensuremath{\rightarrow}\coqdocvar{\_lex}\ensuremath{\times} (\coqdocvar{sd} \coqdocvar{a}) \ensuremath{\land} (\coqdocvar{sd} \coqdocvar{a}) \ensuremath{\rightarrow}\coqdocvar{\_lex}\ensuremath{\times} (\coqdocvar{sd} \coqdocvar{b}).\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Theorem} \coqdocvar{Zlex}: \coqdocvar{Zprop} \coqdocvar{lex}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{unfold} \coqdocvar{Zprop}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{\ensuremath{\exists}} \coqdocvar{sd}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{apply} \coqdocvar{BxZlex}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Corollary} \coqdocvar{lex\_is\_confluent}: \coqdocvar{Confl} \coqdocvar{lex}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{apply} \coqdocvar{Zprop\_implies\_Confl}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{apply} \coqdocvar{Zlex}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
 \end{coqdoccode}
