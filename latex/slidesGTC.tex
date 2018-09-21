@@ -18,6 +18,7 @@
 \newcommand{\term}{{\mathcal{T}}}
 \newcommand{\fv}[1]{{\tt fv}(#1)}
 \newcommand{\set}[1]{\{#1\}}
+\newcommand{\db}[1]{{\bf \underline{#1}}}
 
 \title{Confluence of a Good Calculus with Explicit Substitutions Formalized}
 \date{\today}
@@ -30,14 +31,35 @@
 \maketitle
 
 \begin{frame}[fragile]{Explicit Substitutions}
-  Intuition
+  \begin{itemize}
+  \item Starting point: $\lambda$-calculus
+    $$\term ::= x \mid \lambda x.\term \mid \term\term $$
+    $$(\lambda x.t)\ u \to_\beta t\{x/u\}$$
+    \pause
+    \item Extending the $\lambda$-calculus with an explicit substitution operator: {\color{red} calculi with explicit substitutions} 
+    $$\term ::= x \mid \lambda x.\term \mid \term\term\; {\color{red} \mid \term[x/\term]}$$ \pause
+    $$\begin{array}{lll}
+        (\lambda x.t)\ u &  \to &  {\color{red} t[x/u]} \\ \pause
+        {\color{red} x[x/u]} & {\color{red}\to} & {\color{red}u} \\
+        {\color{red} y[x/u]} & {\color{red}\to} & {\color{red}y} \\
+        {\color{red}(\lambda y.t')[x/u]} &  {\color{red} \to} &  {\color{red} \lambda y. t'[x/u]} \\
+        {\color{red} (t'\ t'')[x/u]} & {\color{red}\to} & {\color{red} t'[x/u]\ t''[x/u]} \\
+      \end{array}$$
+  \end{itemize}
 \end{frame}
+
+\begin{frame}{The $\lambda\sigma$-calculus}
+  $\begin{array}{llcl}
+      \mbox{\bf Terms} &  a,b & ::=  & \db{1} \mid \lambda a \mid a\ b \mid a[s]  \\ 
+     \mbox{\bf Substituições} & s,t & ::= & id \mid \uparrow \mid s.t \mid s \circ t$ \\
+    \end{array}$
+  \end{frame}
 
 \begin{frame}[fragile]{The $\lambda{\tt ex}$-calculus}
 \begin{itemize}
 \item Developed by Delia Kesner \cite{kes09}
 
-  $$\term ::= x \mid \term\term \mid \lambda x.\term \mid \term[x/\term]$$
+  $$\term ::= x \mid \lambda x.\term \mid \term\term \mid \term[x/\term]$$
 
   $$\begin{array}{llll}
       t[x/u][y/v] & =_C & t[y/v][x/u], & \mbox{ if } y \notin\fv{u} \mbox{ and } x \notin \fv{v} \\[.3cm]
@@ -58,8 +80,8 @@
     \item Proof assistant: Coq.
     \item Framework: Locally nameless representation (Arthur Charguéraud).
       \begin{itemize}
-      \item[{\color{blue}+}] No need for $\alpha$-conversion.
-      \item[{\color{blue}+}] No need referential contexts (free variables).
+      \item[{\color{blue}+}] No need for $\alpha$-conversion (bound variables are De Bruijn indexes).
+      \item[{\color{blue}+}] No need referential contexts (named free variables).
       \item[{\color{red}--}] The whole library is non-constructive.
       \end{itemize}
     \end{itemize}
