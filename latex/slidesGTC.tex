@@ -30,7 +30,7 @@
 
 \maketitle
 
-\begin{frame}[fragile]{Explicit Substitutions}
+\begin{frame}[fragile]{Motivation: Explicit Substitutions}
   \begin{itemize}
   \item Starting point: $\lambda$-calculus
     $$\term ::= x \mid \lambda x.\term \mid \term\term $$
@@ -51,14 +51,22 @@
 \begin{frame}{The $\lambda\sigma$-calculus}
   $\begin{array}{llcl}
       \mbox{\bf Terms} &  a,b & ::=  & \db{1} \mid \lambda a \mid a\ b \mid a[s]  \\ 
-     \mbox{\bf Substituições} & s,t & ::= & id \mid \uparrow \mid s.t \mid s \circ t$ \\
+     \mbox{\bf Substitutions} & s,t & ::= & id \mid \uparrow \mid s.t \mid s \circ t \\[.5cm]
+     \mbox{(Beta)} & (\lambda a)\ b & \to &  a[b.id] \\
+     \mbox{(VarId)} & \db{1}[id] & \to & \db{1} \\
+     \mbox{(VarCons)} & \db{1}[a.s] & \to & a \\
+     \mbox{(App)} & (a\ b)[s] & \to &  a[s]\ b[s] \\
+     \mbox{(Abs)} & (\lambda a)[s] & \to &  \lambda(a[\db{1}.(s \circ \uparrow)]) \\
+     \mbox{(Clos)} & a[s][t] & \to &  a[s\circ t] \\     
+     \mbox{(IdL)} & id\circ s & \to & s \\
+     \mbox{(ShiftId)} & \uparrow \circ id & \to & \uparrow \\
+     \mbox{(ShiftCons)} & \uparrow \circ (a.s) & \to & s \\
+     \mbox{(Map)} & (a.s) \circ t & \to & a[t].(s \circ t) \\
+     \mbox{(Ass)} & (s_1 \circ s_2) \circ s_3 & \to & s_1 \circ (s_2 \circ s_3)
     \end{array}$
   \end{frame}
 
 \begin{frame}[fragile]{The $\lambda{\tt ex}$-calculus}
-\begin{itemize}
-\item Developed by Delia Kesner \cite{kes09}
-
   $$\term ::= x \mid \lambda x.\term \mid \term\term \mid \term[x/\term]$$
 
   $$\begin{array}{llll}
@@ -70,7 +78,6 @@
       (\lambda y. t)[x/u] & \to_{\tt Lamb} & \lambda y.t[x/u] & \\
       t[x/u][y/v] & \to_{\tt Comp} & t[y/v][x/u[y/v]], & \mbox{ if } y \in\fv{u} \\            
       \end{array}$$
-\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{The $\lambda{\tt ex}$-calculus}
@@ -309,13 +316,13 @@
   \begin{itemize}
   \item Complete the proof that the formalized calculus satisfies the
     Z property.
-  \item Merge this formalization with the one of the PSN property.
+  \item Merge this formalization with the one that has the other properties (PSN and one-step $\beta$-simulation).
   \item Extract the code of the corresponding calculus with explicit substitutions.
   \end{itemize}
 \end{frame}
 
-\bibliographystyle{plain}
-\bibliography{Zprop.bib}
+% \bibliographystyle{plain}
+% \bibliography{Zprop.bib}
 
 
 \end{document}

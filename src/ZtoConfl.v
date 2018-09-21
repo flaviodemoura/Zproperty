@@ -155,13 +155,13 @@ Proof.
     induction Hrefl2.
     + intros b Hrefl1 IHHrefl1 Hbxa.
       destruct IHHrefl1 with (x a).
-      assumption.
-      exists x0.
-      split.
-      * apply H0.
-      * apply CompReflTrans with (x a).
-        ** assumption.
+      * assumption.
+      * exists x0.
+        split.
         ** apply H0.
+        ** apply CompReflTrans with (x a).
+        *** assumption.
+        *** apply H0.
     + intros b0 Hrefl1 IHHrefl1 Hb0xa.
       assert (Hb0xb : refltrans R b0 (x b)).
       {
@@ -175,12 +175,59 @@ Proof.
       * apply IHHrefl2 with b0.
         ** apply CompReflTrans with (x a); apply H; assumption.
         ** assumption.
-        ** destruct IHHrefl2 with b0.
-          *** apply CompReflTrans with (x a); apply H; assumption.
-          *** assumption.
-          *** assumption.
-          *** assumption.
-          *** assumption.
+        ** assumption.
+        ** assumption. 
+Qed.
+
+Theorem Zprop_implies_Confl' {A:Type}: forall R: Rel A, Zprop R -> Confl R.
+(* begin hide *)
+Proof.
+  intros R HZprop.
+  unfold Zprop in HZprop.
+  destruct HZprop.
+  unfold Confl.
+  intros a b c Hrefl1.
+  generalize dependent c.
+  induction Hrefl1.
+  - intros c Hrefl.
+    exists c. split.
+    + assumption.
+    + apply refl.
+  - intros c1 Hrefl2.
+    assert (Hbxa: refltrans R b (x a)).
+    {
+      apply H; assumption.
+    }
+    assert (Haxa: refltrans R a (x a)).
+    {
+      apply rtrans with b; assumption.
+    }
+    clear H0.
+    generalize dependent b.
+    induction Hrefl2.
+    + intros b Hrefl1 IHHrefl1 Hbxa.
+      destruct IHHrefl1 with (x a).
+      * assumption.
+      * exists x0.
+        split.
+        ** apply H0.
+        ** apply CompReflTrans with (x a).
+        *** assumption.
+        *** apply H0.
+    + intros b0 Hrefl1 IHHrefl1 Hb0xa.
+      assert (Hb0xb : refltrans R b0 (x b)).
+      {
+        apply CompReflTrans with (x a).
+        assumption.
+        apply H.
+        assumption.
+      }
+      destruct IHHrefl1 with (x b).
+      * assumption.
+      * apply IHHrefl2 with b0.
+        ** apply CompReflTrans with (x a); apply H; assumption.
+        ** assumption.
+        ** assumption.
         ** assumption. 
 Qed.
 (* end hide *)
