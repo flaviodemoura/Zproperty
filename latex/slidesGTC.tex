@@ -20,10 +20,10 @@
 \newcommand{\set}[1]{\{#1\}}
 \newcommand{\db}[1]{{\bf \underline{#1}}}
 
-\title{Confluence of a Good Calculus with Explicit Substitutions Formalized}
+\title{A FORMALISATION THAT THE Z PROPERTY IMPLIES CONFLUENCE}
 \date{\today}
 \author{Flávio L. C. de Moura and Leandro Oliveira Rezende}
-\institute{Universidade de Brasília}
+\institute{Seminário do GTC/UnB}
 \titlegraphic{\hfill\includegraphics[height=1.5cm]{unb-logo.png}}
 
 \begin{document}
@@ -291,8 +291,7 @@
   \end{coqdoccode}
 \end{frame}
 
-\begin{frame}[fragile]{Confluence and the Z Property}
-  
+\begin{frame}[fragile]{Confluence and the Z Property}  
   \[
     \xymatrix{
       a \ar[r] &  b \ar@{.>>}[dl] & \ar@/^2.0pc/@{=>}@[red][rr] & &    & a \ar@{->>}[dl] \ar@{->>}[dr] & \\ 
@@ -304,6 +303,15 @@
   \begin{coqdoccode}
     \coqdockw{Theorem} \coqdocvar{Zprop\_implies\_Confl} \{\coqdocvar{A}:\coqdockw{Type}\}: \coqdockw{\ensuremath{\forall}} \coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}, \coqdocvar{Zprop} \coqdocvar{R} \ensuremath{\rightarrow} \coqdocvar{Confl} \coqdocvar{R}.\coqdoceol
   \end{coqdoccode}
+\end{frame}
+
+\begin{frame}[fragile]{Future work}
+  \begin{itemize}
+  \item Complete the proof that the formalized calculus satisfies the
+    Z property.
+  \item Merge this formalization with the one of the PSN property.
+  \item Extract the code of the corresponding calculus with explicit substitutions.
+  \end{itemize}
 \end{frame}
 
 \bibliographystyle{plain}

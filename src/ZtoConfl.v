@@ -160,15 +160,9 @@ Proof.
       split.
       * apply H0.
       * apply CompReflTrans with (x a).
-        assumption.
-        apply H0.
+        ** assumption.
+        ** apply H0.
     + intros b0 Hrefl1 IHHrefl1 Hb0xa.
-      assert (IHHrefl1': forall c0 : A,
-           refltrans R b0 c0 ->
-           exists d : A, refltrans R c d /\ refltrans R c0 d).
-      {
-        assumption. 
-      }
       assert (Hb0xb : refltrans R b0 (x b)).
       {
         apply CompReflTrans with (x a).
