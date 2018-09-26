@@ -259,23 +259,6 @@ Lemma strong_induction :  forall Q: nat -> Prop,
 Proof.
 Admitted.
 
-Lemma pterm_induction:  forall P : pterm -> Prop,
-       (forall n : nat, P (pterm_bvar n)) ->
-       (forall v : var, P (pterm_fvar v)) ->
-       (forall p : pterm, P p -> forall p0 : pterm, P p0 -> P (pterm_app p p0)) ->
-       (forall L p,  (forall x : elt, x \notin L -> P (p ^ x)) -> P (pterm_abs p)) ->
-       (forall L p, (forall x : elt, x \notin L -> P (p ^ x)) -> forall p0 : pterm, P p0 -> P (p [p0])) ->
-       forall p : pterm, P p.
-Proof.
-  intros P Hbvar Hfvar Happ Habs Hsub t.
-  induction t.
-  - apply Hbvar.
-  - apply Hfvar.
-  - apply Happ; assumption.
-  - apply Habs with (fv t0).
-    intros x Hfv.
-    Admitted.
-    
 (* end hide *)  
 Lemma pterm_size_induction :
  forall P : pterm -> Prop,
@@ -286,75 +269,20 @@ Lemma pterm_size_induction :
 (* begin hide *)
 Proof.
   intros P IH t.
-  apply IH.
   remember (pterm_size t) as n eqn:H.
-Admitted.
-  (* induction t using nat_ind. *)
-  (* generalize dependent t. *)
-  (* apply nat_ind. *)
-  (* induction  t using strong_induction_nat. *)
-  (* apply IH. *)
-  (* assert (H: nat_ind (fun (n:nat) => forall t':pterm, pterm_size t' < pterm_size t -> P t')). *)
-  (* induction t0 using strong_induction_nat. *)
-  (* - apply IH. *)
-  (*   simpl. *)
-  (*   intros t Hlt. *)
-  (*   assert (H: 0 < pterm_size t). *)
-  (*   { *)
-  (*     apply pterm_size_positive. *)
-  (*   } *)
-  (*   inversion Hlt. *)
-  (*   rewrite H1 in H. *)
-  (*   inversion H. *)
-  (*   inversion H1. *)
-  (* - apply IH. *)
-  (*   simpl. *)
-  (*   intros t Hlt. *)
-  (*   inversion Hlt. *)
-  (*   assert (H: 0 < pterm_size t). *)
-  (*   { *)
-  (*     apply pterm_size_positive. *)
-  (*   } *)
-  (*   rewrite H0 in H. *)
-  (*   inversion H. *)
-  (*   inversion H0. *)
-  (* - apply IH. *)
-  (*   simpl. *)
-  (*   intros t Hlt. *)
-  (*   inversion Hlt. *)
-  (*   assert (H: pterm_size t0_1 < pterm_size t). *)
-  (*   { *)
-  (*     admit. *)
-  (*   } *)
-  (*   apply IH. *)    
+  assert (HsiInst := strong_induction (fun n => forall t, n = pterm_size t -> P t)).
+  generalize dependent t.
+  generalize dependent n.
+  apply HsiInst.
+  intros n' Hind t Hsz.
+  apply IH.
+  intros t' Hlt.
+  apply Hind with (pterm_size t').
+  - rewrite Hsz; assumption.  
+  - reflexivity.
+Qed.
+(* end hide *)  
 
-(* end hide *)  
-Lemma pterm_eq_size_induction :
- forall P : pterm -> Prop,
- (forall n, P (pterm_bvar n)) ->
- (forall x, P (pterm_fvar x)) ->
- (forall t1 t2, P t1 -> P t2 -> P (pterm_app t1 t2)) ->
- (forall t1,
-    (forall t2 x, x \notin fv t2 -> pterm_size t2 = pterm_size t1 ->
-    P (t2 ^ x)) -> P (pterm_abs t1)) ->
- (forall t1 t3, P t3 ->
-    (forall t2 x, x \notin fv t2 -> pterm_size t2 = pterm_size t1 ->
-             P (t2 ^ x)) -> P (t1[t3])) ->
- (forall t, P t).
-(* begin hide *)
-Proof.
-  intros P Hbvar Hfvar Happ Habs Hsub.
-  induction t0.
-  + apply Hbvar.
-  + apply Hfvar.
-  + apply Happ; assumption.
-  + apply Habs.
-    intros t1 x Hfv Heq.
-    replace (pterm_size t1) with (pterm_size (t1^x)) in Heq.
-    * admit.
-    * apply pterm_size_open. 
-  + Admitted.
-(* end hide *)  
 Definition term_regular (R : Rel pterm) :=
   forall t t', R t t' -> term t -> term t'.
 (* begin hide *)
@@ -730,7 +658,9 @@ Proof.
             *** assumption.
         ** assumption.
       * assumption.
-Admitted.
+    + admit.
+    + admit.
+  - Admitted.
 
 Lemma bswap_rec_id : forall n t, bswap_rec n (bswap_rec n t)  = t.
 Proof.
