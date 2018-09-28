@@ -257,7 +257,18 @@ Lemma strong_induction :  forall Q: nat -> Prop,
     (forall n, (forall m, m < n -> Q m) -> Q n) ->
     forall n, Q n.
 Proof.
-Admitted.
+  intros Q IH n.
+  assert (H := nat_ind (fun n => (forall m : nat, m < n -> Q m))).
+  apply IH.
+  apply H.
+  - intros m Hlt; inversion Hlt.
+  - intros n' H' m Hlt.
+    apply IH.
+    intros m0 Hlt'.
+    apply H'.
+    apply lt_n_Sm_le in Hlt.
+    apply lt_le_trans with m; assumption.
+Qed.
 
 (* end hide *)  
 Lemma pterm_size_induction :
