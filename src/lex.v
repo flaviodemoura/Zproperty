@@ -712,118 +712,25 @@ Proof.
     assumption. assumption. assumption. assumption.
 Qed.  
 
-Lemma lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
+Lemma lc_at_bswap_rec: forall t k i, k <> (S i) -> lc_at k t -> lc_at k (bswap_rec i t).
 Proof.
-  induction k.
-  - induction t0.
-    + intros.
-  apply Nat.nlt_0_r in H0.
-  contradiction.
-    + trivial.
-    + intros.
-      destruct H0.
-      assert (H': 0 <> 1).
-      {
-        assumption.
-      }
-    apply IHt0_1 in H.
-      * apply IHt0_2 in H'.
-        ** simpl.
-           split.
-            *** assumption.
-            *** assumption.
-        ** assumption.
-      * assumption.
-    + intros.
-      simpl.
-      induction (bswap_rec 1 t0).
-      * admit.
-      * simpl. auto.
-      * simpl.
-        split; assumption.
-      * simpl.
-        apply lc_at_weaken_ind with 1. 
-        ** assumption.
-        ** auto.
-      * simpl.
-        split.
-        ** apply lc_at_weaken_ind with 1.
-           *** assumption.
-           *** auto.
-        ** assumption.
-    + intros.
-      simpl.
-      split.
+  intro t; induction t.
+  - admit.
+  - admit. 
+  - admit.
+  - intros k i Hneq  Hlc .
+    simpl in *.
+    apply IHt.
+    + auto.
+    + assumption.
+  - Admitted.
 
-(** tentando fazer a indução em bswap_rec **)
-      * induction (bswap_rec 1 t0_1).
-        ** simpl. admit. (** impossível provar **)
-        ** simpl. auto.
-        ** simpl.
-           split; assumption.
-        ** simpl.
-           apply lc_at_weaken_ind with 1. 
-           *** assumption.
-           *** auto.
-        ** simpl.
-           split.
-           *** apply lc_at_weaken_ind with 1.
-               **** assumption.
-               **** auto.
-           *** assumption.
-
-(** tentando fazer a indução em t0_2 **)
-      * induction t0_2.
-        ** simpl in H0.
-           destruct H0.
-           auto.
-        ** simpl.
-           auto.
-        ** simpl.
-           split.
-           *** apply IHt0_2_1.
-               **** intros.
-                    simpl in IHt0_2.
-                    apply IHt0_2.
-                    ***** auto.
-                    ***** split.
-                          ****** assumption.
-                          ****** simpl in IHt0_2_2.
-                                 apply H0.
-               **** split; apply H0.
-           *** apply IHt0_2_2.
-               **** intros.
-                    simpl in IHt0_2.
-                    apply IHt0_2.
-                    ***** auto.
-                    ***** split.
-                          ****** simpl in IHt0_2_2.
-                                 apply H0.
-                          ****** assumption.
-               **** split; apply H0.
-         ** simpl. (** cai no mesmo problema de antes **)
-            
-
-
-
- induction (bswap_rec 0 t0_2).
-        ** admit.
-        ** simpl. auto.
-        ** simpl.
-           split; assumption.
-        ** simpl.
-           apply lc_at_weaken_ind with 0. 
-           *** assumption.
-           *** auto.
-        ** simpl.
-           split.
-           *** apply lc_at_weaken_ind with 0.
-               **** assumption.
-               **** auto.
-           *** assumption.
-  -
-Admitted.
-
+Corollary lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
+Proof.
+  intros t k.
+  apply lc_at_bswap_rec.
+Qed.
+  
 Lemma bswap_rec_id : forall n t, bswap_rec n (bswap_rec n t)  = t.
 Proof.
  intros n t. generalize dependent n. 
