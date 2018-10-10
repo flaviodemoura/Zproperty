@@ -353,7 +353,7 @@ Proof.
     replace (pterm_size t1) with (pterm_size (t1^x)) in Heq.
     * admit.
     * apply pterm_size_open. 
-  + apply H3.
+  + apply Hsub.
     - assumption.
     - intros.
       admit.
@@ -734,6 +734,94 @@ Proof.
             *** assumption.
         ** assumption.
       * assumption.
+    + intros.
+      simpl.
+      induction (bswap_rec 1 t0).
+      * admit.
+      * simpl. auto.
+      * simpl.
+        split; assumption.
+      * simpl.
+        apply lc_at_weaken_ind with 1. 
+        ** assumption.
+        ** auto.
+      * simpl.
+        split.
+        ** apply lc_at_weaken_ind with 1.
+           *** assumption.
+           *** auto.
+        ** assumption.
+    + intros.
+      simpl.
+      split.
+
+(** tentando fazer a indução em bswap_rec **)
+      * induction (bswap_rec 1 t0_1).
+        ** simpl. admit. (** impossível provar **)
+        ** simpl. auto.
+        ** simpl.
+           split; assumption.
+        ** simpl.
+           apply lc_at_weaken_ind with 1. 
+           *** assumption.
+           *** auto.
+        ** simpl.
+           split.
+           *** apply lc_at_weaken_ind with 1.
+               **** assumption.
+               **** auto.
+           *** assumption.
+
+(** tentando fazer a indução em t0_2 **)
+      * induction t0_2.
+        ** simpl in H0.
+           destruct H0.
+           auto.
+        ** simpl.
+           auto.
+        ** simpl.
+           split.
+           *** apply IHt0_2_1.
+               **** intros.
+                    simpl in IHt0_2.
+                    apply IHt0_2.
+                    ***** auto.
+                    ***** split.
+                          ****** assumption.
+                          ****** simpl in IHt0_2_2.
+                                 apply H0.
+               **** split; apply H0.
+           *** apply IHt0_2_2.
+               **** intros.
+                    simpl in IHt0_2.
+                    apply IHt0_2.
+                    ***** auto.
+                    ***** split.
+                          ****** simpl in IHt0_2_2.
+                                 apply H0.
+                          ****** assumption.
+               **** split; apply H0.
+         ** simpl. (** cai no mesmo problema de antes **)
+            
+
+
+
+ induction (bswap_rec 0 t0_2).
+        ** admit.
+        ** simpl. auto.
+        ** simpl.
+           split; assumption.
+        ** simpl.
+           apply lc_at_weaken_ind with 0. 
+           *** assumption.
+           *** auto.
+        ** simpl.
+           split.
+           *** apply lc_at_weaken_ind with 0.
+               **** assumption.
+               **** auto.
+           *** assumption.
+  -
 Admitted.
 
 Lemma bswap_rec_id : forall n t, bswap_rec n (bswap_rec n t)  = t.
