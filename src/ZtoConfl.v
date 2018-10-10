@@ -237,7 +237,7 @@ Definition SemiConfl {A:Type} (R: Rel A) := forall a b c, R a b -> (refltrans R)
 
 Theorem Zprop_implies_SemiConfl {A:Type}: forall R: Rel A, Zprop R -> SemiConfl R.
 Proof.
-  intros R H.
-  unfold Zprop in H.
+  intros R HZprop.
+  unfold Zprop in HZprop.
   unfold SemiConfl.
   Admitted.

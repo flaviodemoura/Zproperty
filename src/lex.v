@@ -647,32 +647,25 @@ Proof.
     assumption. assumption. assumption. assumption.
 Qed.  
 
-Lemma lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
+Lemma lc_at_bswap_rec: forall t k i, k <> (S i) -> lc_at k t -> lc_at k (bswap_rec i t).
 Proof.
-  induction k.
-  - induction t0.
-    + intros.
-  apply Nat.nlt_0_r in H0.
-  contradiction.
-    + trivial.
-    + intros.
-      destruct H0.
-      assert (H': 0 <> 1).
-      {
-        assumption.
-      }
-    apply IHt0_1 in H.
-      * apply IHt0_2 in H'.
-        ** simpl.
-           split.
-            *** assumption.
-            *** assumption.
-        ** assumption.
-      * assumption.
-    + admit.
-    + admit.
+  intro t; induction t.
+  - admit.
+  - admit. 
+  - admit.
+  - intros k i Hneq  Hlc .
+    simpl in *.
+    apply IHt.
+    + auto.
+    + assumption.
   - Admitted.
 
+Corollary lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
+Proof.
+  intros t k.
+  apply lc_at_bswap_rec.
+Qed.
+  
 Lemma bswap_rec_id : forall n t, bswap_rec n (bswap_rec n t)  = t.
 Proof.
  intros n t. generalize dependent n. 
