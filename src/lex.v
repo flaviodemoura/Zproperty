@@ -1611,6 +1611,39 @@ Fixpoint sd (t : pterm) : pterm :=
   | pterm_sub t1 t2 => (sd t1) ^^ (sd t2)
   end.
 (* begin hide *)
+Lemma sd_open_rec_preserves_structure: forall t t' k, sd t = t' -> forall x, sd (open_rec k (pterm_fvar x) t) = open_rec k (pterm_fvar x) t'. 
+Proof.
+  intro t; induction t.
+  - intros t k Hsd x.
+    generalize dependent Hsd.
+    case n.
+    + simpl.
+      intro H.
+      destruct (k === 0).
+      * rewrite <- H.
+        rewrite e.
+        reflexivity.
+      * rewrite <- H.
+        simpl.
+        destruct (k === 0).
+        ** contradiction.
+        ** reflexivity.
+    + intros n' Hsd.
+      rewrite <- Hsd.
+      simpl.
+      destruct (k === S n'); reflexivity.
+  - intros t k Hsd x.
+    rewrite <- Hsd; reflexivity.
+  - intros t k Hsd x.
+    rewrite <- Hsd.
+    admit.
+  - intros t k Hsd x.
+    rewrite <- Hsd.
+    simpl.
+    f_equal.
+    apply IHt; reflexivity.
+  - Admitted.
+    
 Lemma sd_open_preserves_structure: forall t t', sd t = t' -> forall x, sd (t^x) = t'^x. 
 Proof.
   intro t; induction t.
