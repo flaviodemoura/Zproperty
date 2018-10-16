@@ -650,15 +650,62 @@ Qed.
 Lemma lc_at_bswap_rec: forall t k i, k <> (S i) -> lc_at k t -> lc_at k (bswap_rec i t).
 Proof.
   intro t; induction t.
-  - admit.
-  - admit. 
-  - admit.
+  - intros k i Hneq Hlc.
+    simpl in *.
+    case (i === n).
+    + intro.
+      inversion e; subst.
+      simpl.
+      destruct Hlc. 
+      * contradiction.
+      * auto with arith.
+    + intro.
+      case (S i === n).
+      * intro.
+        destruct e.
+        case (i === i).
+        ** simpl.
+           auto with arith.
+        ** contradiction. 
+      * intro.
+        destruct n.
+        auto.
+        assert (ni: i <> n).
+        {
+         auto.
+        }
+        case (i === n).
+        ** contradiction. 
+        ** trivial.
+  - trivial.
+  - intros k i Hneq Hlc.
+    simpl in *.
+    split.
+    + apply IHt1 in Hneq.
+      * assumption.
+      * apply Hlc.
+    + apply IHt2 in Hneq.
+      * assumption.
+      * apply Hlc.
   - intros k i Hneq  Hlc .
     simpl in *.
     apply IHt.
     + auto.
     + assumption.
-  - Admitted.
+  - intros k i Hneq Hlc.
+    simpl in *.
+    split.
+    + assert (HneqS: S k <> S (S i)).
+      {
+        auto.
+      }
+      apply IHt1 in HneqS.
+      * assumption. 
+      * apply Hlc.
+    + apply IHt2 in Hneq.
+      * assumption.
+      * apply Hlc.
+Qed.
 
 Corollary lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
 Proof.
@@ -919,7 +966,7 @@ Definition red_ctx_mod_eqC (R: Rel pterm) (t: pterm) (u : pterm) :=
 Lemma term_regular_red_ctx_mod_eqC: forall R, term_regular R -> term_regular (red_ctx_mod_eqC R). 
 Proof.
   intros R Hreg.
-  unfold term_regular.
+  unfold term_regular in *.
   intros t t' Hctx.
   induction Hctx.
  Admitted.
@@ -1659,12 +1706,15 @@ Proof.
       reflexivity.
   - intros t H x.
     rewrite <- H.
-    unfold open.
     reflexivity.
   - intros t H x.
-    
-  -
-  -
+    specialize (IHt2 (sd t2)).
+    assert (Hsdt2: forall x : var, sd (t2 ^ x) = sd t2 ^ x).
+    {
+     apply IHt2.
+     reflexivity.
+    }
+Admitted.
   
 Lemma sd_open_rec:  forall t x i, sd ({i ~> x} t) = {i ~> x} (sd t).
 Proof.
@@ -1681,6 +1731,7 @@ Proof.
   - reflexivity.
   - intros x. admit.
   - intros x. simpl.
+    admit. 
 Admitted.
     
 Lemma sd_term: forall t, term t -> term (sd t).
