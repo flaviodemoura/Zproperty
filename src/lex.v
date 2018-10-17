@@ -1126,31 +1126,33 @@ Proof.
                          apply eqC_trans with y0; assumption.
 Qed.
 
-Instance rw_eqC_lc_at : forall n, Proper (eqC ==> iff) (lc_at n).
-Proof.
-  Admitted.
-(*  intros_all. apply lc_at_eqC; trivial. *)
-(* Qed. *)
+(* Instance rw_eqC_lc_at : forall n, Proper (eqC ==> iff) (lc_at n). *)
+(* Proof. *)
+(*   Admitted. *)
+(* (*  intros_all. apply lc_at_eqC; trivial. *) *)
+(* (* Qed. *) *)
 
-Instance rw_eqC_body : Proper (eqC ==> iff) body.
-Proof.
-  Admitted.
-(*  intros_all. rewrite body_eq_body'. rewrite body_eq_body'. *)
-(*  unfold body'. rewrite H. reflexivity. *)
-(* Qed. *)
+(* Instance rw_eqC_body : Proper (eqC ==> iff) body. *)
+(* Proof. *)
+(*   Admitted. *)
+(* (*  intros_all. rewrite body_eq_body'. rewrite body_eq_body'. *) *)
+(* (*  unfold body'. rewrite H. reflexivity. *) *)
+(* (* Qed. *) *)
 
-Instance rw_eqC_term : Proper (eqC ==> iff) term.
-Proof.
-  Admitted.
-(*  intros_all. rewrite term_eq_term'. rewrite term_eq_term'. *)
-(*  unfold term'. rewrite H. reflexivity. *)
-(* Qed. *)
+(* Instance rw_eqC_term : Proper (eqC ==> iff) term. *)
+(* Proof. *)
+(*   Admitted. *)
+(* (*  intros_all. rewrite term_eq_term'. rewrite term_eq_term'. *) *)
+(* (*  unfold term'. rewrite H. reflexivity. *) *)
+(* (* Qed. *) *)
 
-Instance rw_eqC_fv : Proper (eqC ==> VarSet.Equal) fv.
-Proof.
-  Admitted.
-(*  intros_all. apply eqC_fv; trivial. *)
-(* Qed. *)
+(* Instance rw_eqC_fv : Proper (eqC ==> VarSet.Equal) fv. *)
+(* Proof. *)
+(*   unfold Equal. *)
+(*   intros. *)
+(*   Admitted. *)
+(* (*  intros_all. apply eqC_fv; trivial. *) *)
+(* (* Qed. *) *)
 
 Instance rw_eqC_app : Proper (eqC ==> eqC ==> eqC) pterm_app.
 Proof.

@@ -22,3 +22,5 @@ bibliography:~/Dropbox/bibliography/references.bib
 ** cite:Paulin93
 ** cite:Geu09
 ** cite:KSF18
+** cite:ZPropertyDraft
+** cite:DO08

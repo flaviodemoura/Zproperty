@@ -217,3 +217,9 @@ Proof.
     + exists x0.
       assumption.
 Qed.
+
+Theorem Semi_equiv_Confl {A:Type}: forall R: Rel A, Confl R <-> SemiConfl R.
+Proof.
+  intro R; split.
+Admitted.
+
