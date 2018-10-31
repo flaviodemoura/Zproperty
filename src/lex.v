@@ -765,6 +765,27 @@ Proof.
   intro t. unfold bswap.
   apply bswap_rec_id.
 Qed.
+
+Lemma open_rec_term: forall t u n,  term t -> {n ~> u} t = t.
+Proof.
+  Admitted.
+
+Lemma open_rec_commute: forall t u k x, term u -> ({k ~> pterm_fvar x} ({S k ~> u} t)) = ({k ~> u}({S k ~> pterm_fvar x} (bswap_rec k t))).
+Proof.
+  intro t; induction t using pterm_size_induction.
+  generalize dependent H.
+  case t0.
+  - intros n IH u k x Hu.
+    case (n === k).
+    + intro H; subst.
+Admitted.
+
+Corollary bswap_commute: forall t u x, term u -> ({0 ~> pterm_fvar x} ({1 ~> u} t)) = ({0 ~> u}({1 ~> pterm_fvar x} (& t))).
+Proof.
+  intros t u x.
+  apply open_rec_commute.
+Qed.
+  
 (* end hide *)
 (** Contextual closure of terms. *)
 Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
@@ -1578,7 +1599,7 @@ Proof.
       unfold open.
       simpl.
       assert (H1: ({0 ~> pterm_fvar x} ({1 ~> u} t)) = ({0 ~> u}({1 ~> pterm_fvar x} (& t)))).
-      { admit. }
+      { apply bswap_commute; assumption. }
       rewrite H1.
       assert (H2: {1 ~> pterm_fvar x} (& t) = {0 ~> pterm_fvar x} t).
       { admit. }
