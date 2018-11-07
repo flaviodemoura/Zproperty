@@ -778,6 +778,30 @@ Proof.
   - intros n IH u k x Hu.
     case (n === k).
     + intro H; subst.
+      replace ({S k ~> u} pterm_bvar k) with (pterm_bvar k).
+      * replace (bswap_rec k (pterm_bvar k)) with (pterm_bvar (S k)).
+        ** simpl. destruct (k === k).
+           *** reflexivity.
+           *** contradiction.
+        ** unfold bswap_rec.
+           destruct (k === k).
+           *** reflexivity.
+           *** contradiction.
+      * unfold open_rec.
+        destruct (S k === k).
+        ** assert (H: S k <> k).
+           { apply Nat.neq_succ_diag_l. }
+           contradiction.
+        ** reflexivity.
+    + intro H.
+      destruct (n === S k); subst.
+      * replace ({S k ~> u} pterm_bvar (S k)) with u.
+        ** replace (bswap_rec k (pterm_bvar (S k))) with (pterm_bvar k).
+           *** simpl.
+           ***
+        **
+      *
+      
 Admitted.
 
 Corollary bswap_commute: forall t u x, term u -> ({0 ~> pterm_fvar x} ({1 ~> u} t)) = ({0 ~> u}({1 ~> pterm_fvar x} (& t))).
