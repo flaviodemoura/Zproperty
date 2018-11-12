@@ -16,6 +16,9 @@
 
 \newcommand{\fv}[1]{{\tt fv}(#1)}
 
+\newcommand{\flavio}[1]{{\color{red} #1}}
+\newcommand{\leandro}[1]{{\color{blue} #1}}
+
 \title{Confluence of Explicit Substitutions Calculi Formalized}
 \author{Flávio L. C. de Moura and Leandro O. Rezende}
 \institute{Departamento de Ciência da Computação, Universidade de Brasília}
@@ -82,7 +85,12 @@ So the first part of this work was to formally prove that if an ARS $(A,\to)$ sa
 
 The second part of this work is to use the first one to get confluence of an extension of the $\lambda$-calculus with explicit substitutions known as $\lambda$ex-calculus~\cite{kes09}.
 
-\subsection{The $\lambda$ex-calculus }
+\subsection{Explicit Substitutions Calculi}
+
+\flavio{Inserir um pequeno histórico sobre cálculos com substituições explícitas incluindo as propriedades importantes para estes cálculos: confluência (em termos fechados e abertos), simulação de um passo de $\beta$-conversão, terminação do cálculo de substituições associado e preservação da normalização forte.}
+
+\subsubsection{The $\lambda$ex-calculus }
+
 
 Calculi with explicit substitutions are extensions of the
 $\lambda$-calculus in which the substitution operation is a primitive
@@ -115,6 +123,8 @@ $$\begin{array}{llll}
   \end{array}$$
   
   \subsection{The Framework}
+
+  \flavio{Detalhar}
 
   A direct implementation or formalization of the $\lambda$ex-calculus
   is not straightforward because terms are considered modulo renaming
