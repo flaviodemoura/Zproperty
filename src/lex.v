@@ -182,7 +182,7 @@ Definition open t u := open_rec 0 u t.
 Notation "{ k ~> u } t" := (open_rec k u t) (at level 67).
 Notation "t ^^ u" := (open t u) (at level 67). 
 Notation "t ^ x" := (open t (pterm_fvar x)).   
-
+    
 Fixpoint close_rec  (k : nat) (x : var) (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => pterm_bvar i
@@ -603,7 +603,7 @@ Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   | pterm_abs t1    => pterm_abs (bswap_rec (S k) t1)
   | pterm_sub t1 t2 => pterm_sub (bswap_rec (S k) t1) (bswap_rec k t2)
   end.
-
+      
 Definition bswap t := bswap_rec 0 t.
 Notation "& t" := (bswap t) (at level 67).
 
@@ -766,43 +766,135 @@ Proof.
   apply bswap_rec_id.
 Qed.
 
-Lemma open_rec_term: forall t u n,  term t -> {n ~> u} t = t.
+Lemma open_rec_term: forall t n u,  term t -> {n ~> u} t = t.
 Proof.
-  Admitted.
+  intros t n u Hterm.
+  generalize dependent u.
+  generalize dependent n.
+  induction Hterm.
+  - intros n u; reflexivity.
+  - intros n u; simpl.
+    f_equal.
+    + apply IHHterm1; assumption.
+    + apply IHHterm2; assumption.
+  - intros n u; simpl.
+    pick_fresh y.
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hu].
+    apply notin_union in Fr.
+    destruct Fr as [Fr Ht1].
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hn].
+    
+
+(*       intro t; induction t. *)
+(*   - intros u n' Hterm. *)
+(*     inversion Hterm. *)
+(*   - intros u n' Hterm. *)
+(*     reflexivity. *)
+(*   - intros u n' Hterm; simpl. *)
+(*     inversion Hterm; subst. *)
+(*     clear Hterm. f_equal.     *)
+(*     + apply IHt1; assumption. *)
+(*     + apply IHt2; assumption. *)
+(*   - intros u n' Hterm. simpl. *)
+
+    
+(*   generalize dependent n. *)
+(*   generalize dependent u. *)
+(*     generalize dependent t0. *)
+(*   intro t; induction t. *)
+(*   - intros IH u n' Hterm. *)
+(*     inversion Hterm. *)
+(*   - intros IH u n' Hterm. *)
+(*     reflexivity. *)
+(*   - intros IH u n' Hterm. *)
+(*     inversion Hterm; subst. clear Hterm. *)
+(*     simpl. f_equal. *)
+(*     + apply IHt1. *)
+(*       * intros t Hlt u' n'' Hterm. *)
+(*         apply IH. *)
+(*         apply lt_trans with (pterm_size t1). *)
+(*         ** assumption. *)
+(*         ** simpl. *)
+(*            rewrite <- plus_Sn_m. *)
+(*            apply lt_plus_trans. *)
+(*            auto. *)
+(*         ** assumption. *)
+(*       * assumption. *)
+(*     + apply IHt2. *)
+(*       * intros t Hlt u' n'' Hterm. *)
+(*         apply IH. *)
+(*         apply lt_trans with (pterm_size t2). *)
+(*         ** assumption. *)
+(*         ** simpl. *)
+(*            rewrite plus_n_Sm. *)
+(*            rewrite plus_comm. *)
+(*            apply lt_plus_trans. *)
+(*            auto. *)
+(*         ** assumption. *)
+(*       * assumption. *)
+(*   - intros IH u n' Hterm. *)
+(*     simpl. f_equal. *)
+(*     apply IH. *)
+(*     + auto. *)
+(*     + assumption *)
+(*   Admitted. *)
 
 Lemma open_rec_commute: forall t u k x, term u -> ({k ~> pterm_fvar x} ({S k ~> u} t)) = ({k ~> u}({S k ~> pterm_fvar x} (bswap_rec k t))).
 Proof.
-  intro t; induction t using pterm_size_induction.
-  generalize dependent H.
-  case t0.
-  - intros n IH u k x Hu.
-    case (n === k).
+  intro t; induction t.
+  - intros u k x Hterm.
+    case ( n == S k).
     + intro H; subst.
-      replace ({S k ~> u} pterm_bvar k) with (pterm_bvar k).
-      * replace (bswap_rec k (pterm_bvar k)) with (pterm_bvar (S k)).
-        ** simpl. destruct (k === k).
-           *** reflexivity.
-           *** contradiction.
-        ** unfold bswap_rec.
-           destruct (k === k).
-           *** reflexivity.
-           *** contradiction.
-      * unfold open_rec.
-        destruct (S k === k).
-        ** assert (H: S k <> k).
-           { apply Nat.neq_succ_diag_l. }
+      simpl.
+      destruct (k === k); subst.
+      * destruct (k === S k).
+        ** assert (k <> S k).
+           { apply n_Sn. }
            contradiction.
-        ** reflexivity.
-    + intro H.
-      destruct (n === S k); subst.
-      * replace ({S k ~> u} pterm_bvar (S k)) with u.
-        ** replace (bswap_rec k (pterm_bvar (S k))) with (pterm_bvar k).
-           *** simpl.
-           ***
-        **
-      *
+        ** assert ({S k ~> pterm_fvar x} pterm_bvar k = pterm_bvar k).
+           { admit.
+           }
+           rewrite H.
+           simpl.
+           destruct (k === k).
+           *** apply open_rec_term. assumption.
+           *** contradiction.
+      * contradiction.
+    +Admitted. 
+  
+(*   intro t; induction t using pterm_size_induction. *)
+(*   generalize dependent H. *)
+(*   case t0. *)
+(*   - intros n IH u k x Hu. *)
+(*     clear IH. *)
+(*     destruct (k === n); subst. *)
+(*     + replace ({S n ~> u} pterm_bvar n) with (pterm_bvar n). *)
+(*       * replace (bswap_rec n (pterm_bvar n)) with (pterm_bvar (S n)). *)
+(*         ** destruct n. *)
+(*            *** reflexivity. *)
+(*            *** admit. *)
+(*         ** *)
+(*            destruct (k === k). *)
+(*            *** reflexivity. *)
+(*            *** contradiction. *)
+(*       * unfold open_rec. *)
+(*         destruct (S k === k). *)
+(*         ** assert (H: S k <> k). *)
+(*            { apply Nat.neq_succ_diag_l. } *)
+(*            contradiction. *)
+(*         ** reflexivity. *)
+(*     + intro H. *)
+(*       destruct (n === S k); subst. *)
+(*       * replace ({S k ~> u} pterm_bvar (S k)) with u. *)
+(*         ** replace (bswap_rec k (pterm_bvar (S k))) with (pterm_bvar k). *)
+(*            *** simpl. *)
+(*            *** *)
+(*         ** *)
+(*       * *)
       
-Admitted.
+(* Admitted. *)
 
 Corollary bswap_commute: forall t u x, term u -> ({0 ~> pterm_fvar x} ({1 ~> u} t)) = ({0 ~> u}({1 ~> pterm_fvar x} (& t))).
 Proof.
