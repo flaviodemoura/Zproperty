@@ -163,20 +163,14 @@ Proof.
         *** assumption.
         *** apply H0.
     + intros b0 Hrefl1 IHHrefl1 Hb0xa.
-      assert (Hb0xb : refltrans R b0 (x b)).
-      {
-        apply CompReflTrans with (x a).
-        assumption.
-        apply H.
-        assumption.
-      }
-      destruct IHHrefl1 with (x b).
+      apply IHHrefl2 with b0.
+      * apply CompReflTrans with (x a); apply H; assumption.
       * assumption.
-      * apply IHHrefl2 with b0.
-        ** apply CompReflTrans with (x a); apply H; assumption.
+      * assumption.
+      * apply CompReflTrans with (x a).
         ** assumption.
-        ** assumption.
-        ** assumption. 
+        ** apply H.
+           assumption.
 Qed.
 (* end hide *)
 
@@ -218,8 +212,39 @@ Proof.
       assumption.
 Qed.
 
-Theorem Semi_equiv_Confl {A:Type}: forall R: Rel A, Confl R <-> SemiConfl R.
+Theorem Semi_equiv_Confl {A: Type}: forall R: Rel A, Confl R <-> SemiConfl R.
 Proof.
-  intro R; split.
-Admitted.
-
+unfold Confl.
+unfold SemiConfl.
+intro R.
+split.
+- intros.
+  apply H with a.
+  + apply rtrans with b.
+    * assumption.
+    * apply refl.
+  + assumption.
+- intros.
+  generalize dependent c.
+  induction H0.
+  + intros.
+    exists c.
+    split.
+    * assumption.
+    * apply refl.
+  + intros. 
+    specialize (H a).
+    specialize (H b).
+    specialize (H c0).
+    apply H in H0.
+    * destruct H0.
+      destruct H0.
+      apply IHrefltrans in H0.
+      destruct H0.
+      destruct H0.
+      exists x0.
+      split.
+      ** assumption.
+      ** apply CompReflTrans with x; assumption.
+    * assumption.
+Qed.

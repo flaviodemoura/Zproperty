@@ -768,42 +768,55 @@ Qed.
 
 Lemma lc_at_bvar: forall k n, lc_at k (pterm_bvar n) -> n < k.
 Proof.
-Admitted.
+  auto.
+Qed.
 
 Lemma lc_at_least_open_rec: forall t k n u, k <= n -> lc_at k t -> {n ~> u} t = t.
 Proof.
   intro t; induction t.
-  - intros k n' u Hlc Hle.
-    Admitted.
-  (*   apply lc_at_bvar in Hlc. *)
-  (*   assert (H: n < n'). *)
-  (*   { *)
-  (*     apply Nat.lt_le_trans with k; assumption. *)
-  (*   } *)
-  (*   clear Hlc. *)
-  (*   clear Hle. *)
-  (*   unfold open_rec. *)
-  (*   destruct (n' === n). *)
-  (*   + subst. *)
-  (*     apply False_ind. *)
-  (*     generalize dependent H. *)
-  (*     apply Nat.lt_irrefl. *)
-  (*   + reflexivity. *)
-  (* - intros k n u Hlc Hle. *)
-  (*   reflexivity. *)
-  (* - intros k n u Hlc Hle. *)
-  (*   simpl in *. *)
-  (*   destruct Hlc as [Hlc1 Hlc2]. *)
-  (*   f_equal. *)
-  (*   + apply IHt1 with k; assumption. *)
-  (*   + apply IHt2 with k; assumption. *)
-  (* - intros k n u Hlc Hle. *)
-  (*   simpl in *. *)
-  (*   f_equal. *)
-  (*   apply IHt with (S k). *)
-  (*   + assumption. *)
-  (*   + apply Peano.le_n_S; assumption. *)
-  (* - Admitted. *)
+  - intros k n' u H H0.
+    apply lc_at_bvar in H0.
+    unfold open_rec.
+    assert (H1: n < n').
+    {
+      apply Nat.lt_le_trans with k; assumption.
+    }
+    destruct (n' === n).
+      + subst.
+        apply False_ind.
+        generalize dependent H1.
+        apply Nat.lt_irrefl.
+      + reflexivity.
+    - reflexivity.
+    - intros k n u H H0.
+      simpl in *.
+      assert (H': k <= n).
+      {
+        assumption.
+      }
+      f_equal.
+      + apply IHt1 with k.
+        * assumption.
+        * apply H0.
+      + apply IHt2 with k.
+        * assumption.
+        * apply H0.
+    - intros k n u H H0.
+      simpl in *.
+      f_equal.
+      apply IHt with (S k).
+      + auto with arith.
+      + assumption.
+    - intros k n u H H0.
+      simpl in *.
+      f_equal.
+      + apply IHt1 with (S k).
+        * auto with arith.
+        * apply H0. 
+      + apply IHt2 with k.
+        * assumption.
+        * apply H0.
+Qed. 
         
 Lemma open_rec_term: forall t n u,  term t -> {n ~> u} t = t.
 Proof.
@@ -934,39 +947,22 @@ Proof.
            destruct (k === n).
            *** contradiction.
            *** reflexivity.
-  - Admitted.
-    
-(*   intro t; induction t using pterm_size_induction. *)
-(*   generalize dependent H. *)
-(*   case t0. *)
-(*   - intros n IH u k x Hu. *)
-(*     clear IH. *)
-(*     destruct (k === n); subst. *)
-(*     + replace ({S n ~> u} pterm_bvar n) with (pterm_bvar n). *)
-(*       * replace (bswap_rec n (pterm_bvar n)) with (pterm_bvar (S n)). *)
-(*         ** destruct n. *)
-(*            *** reflexivity. *)
-(*            *** admit. *)
-(*         ** *)
-(*            destruct (k === k). *)
-(*            *** reflexivity. *)
-(*            *** contradiction. *)
-(*       * unfold open_rec. *)
-(*         destruct (S k === k). *)
-(*         ** assert (H: S k <> k). *)
-(*            { apply Nat.neq_succ_diag_l. } *)
-(*            contradiction. *)
-(*         ** reflexivity. *)
-(*     + intro H. *)
-(*       destruct (n === S k); subst. *)
-(*       * replace ({S k ~> u} pterm_bvar (S k)) with u. *)
-(*         ** replace (bswap_rec k (pterm_bvar (S k))) with (pterm_bvar k). *)
-(*            *** simpl. *)
-(*            *** *)
-(*         ** *)
-(*       * *)
-      
-(* Admitted. *)
+  - reflexivity.
+  - intros u k x Hterm.
+    simpl.
+    f_equal.
+    + apply IHt1; assumption.
+    + apply IHt2; assumption.
+  - intros u k x Hterm.
+    simpl.
+    f_equal.
+    apply IHt; assumption.
+  - intros u k x Hterm.
+    simpl.
+    f_equal.
+    + apply IHt1; assumption.
+    + apply IHt2; assumption.
+Qed.
 
 Corollary bswap_commute: forall t u x, term u -> ({0 ~> pterm_fvar x} ({1 ~> u} t)) = ({0 ~> u}({1 ~> pterm_fvar x} (& t))).
 Proof.
@@ -1365,6 +1361,7 @@ Qed.
 
 Instance rw_eqC_app : Proper (eqC ==> eqC ==> eqC) pterm_app.
 Proof.
+  intros x y H x0 y0 H0.
   Admitted.
 (*     intros_all. apply star_closure_composition with (u:=pterm_app y x0). *)
 (*     induction H. constructor. constructor 2.  *)
@@ -1383,12 +1380,14 @@ Proof.
 
 Instance rw_eqC_subst_right : forall t, Proper (eqC ++> eqC) (pterm_sub t).
 Proof.
-  Admitted.
-(*  intros_all. induction H. *)
-(*  constructor. *)
-(*  constructor 2. induction H. constructor 1; auto. constructor 6. auto. admit. *)
-(*  constructor 2 with (t [u]). constructor 6; auto. admit. auto. *)
-(* Qed. *)
+  intros t x y H.
+  induction H.
+  - reflexivity.
+  - apply rtrans with (t [b]).
+    + apply ES_sub_in.
+      assumption.
+    + assumption.
+Qed.
 
 (** Lex rules *)
 (* end hide *)
