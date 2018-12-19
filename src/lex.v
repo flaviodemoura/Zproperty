@@ -1362,21 +1362,37 @@ Qed.
 Instance rw_eqC_app : Proper (eqC ==> eqC ==> eqC) pterm_app.
 Proof.
   intros x y H x0 y0 H0.
-  Admitted.
-(*     intros_all. apply star_closure_composition with (u:=pterm_app y x0). *)
-(*     induction H. constructor. constructor 2.  *)
-
-(*     induction H. *)
-(*     constructor. *)
-(*     constructor 2. auto. admit. constructor 2 with (pterm_app u x0). *)
-(*     constructor 2. auto.  admit. auto. *)
-
-(*     induction H0. constructor. *)
-(*     constructor 2. *)
-(*     induction H0. *)
-(*     constructor. auto. constructor 3; auto. admit. constructor 2 with (pterm_app y u). *)
-(*     constructor 3. auto.  admit. auto. *)
-(* Qed. *)
+  induction H.
+  - induction H0.
+    + reflexivity.
+    + apply rtrans with (pterm_app a b).
+      * apply ES_app_right.
+        assumption.
+      * assumption.
+  - generalize dependent b.
+    induction H0.
+    + intros.
+      apply refltrans_composition with (pterm_app b a0).
+      * apply rtrans with (pterm_app b a0).
+        ** apply ES_app_left.
+           assumption.
+        ** reflexivity.
+      * assumption.
+    + intros.
+      apply refltrans_composition with (pterm_app b0 b).
+      * apply rtrans with (pterm_app b0 a0).
+         ** apply ES_app_left.
+             assumption.
+         ** apply rtrans with (pterm_app b0 b).
+             *** apply ES_app_right.
+                  assumption.
+             *** reflexivity.
+      * apply eqc_ctx_sym in H.
+        apply rtrans with (pterm_app b0 a0).
+        ** apply ES_app_right.
+           assumption.
+        ** assumption.
+Qed.
 
 Instance rw_eqC_subst_right : forall t, Proper (eqC ++> eqC) (pterm_sub t).
 Proof.
@@ -1449,6 +1465,31 @@ Inductive sys_x : Rel pterm :=
 (* begin hide *)
 Lemma term_regular_sys_x: term_regular sys_x.
 Proof.
+  intros t u Hsys Hterm.
+  induction Hsys.
+  - inversion Hterm; subst.
+    assumption.
+  - assumption.
+  - inversion Hterm; subst.
+    apply term_app.
+    + apply term_sub with L.
+      * intros x H.
+        apply H1 in H.
+        unfold open in *.
+        simpl in *.
+        inversion H; subst.
+        assumption.
+      * assumption.
+    + apply term_sub with L.
+      * intros x H.
+        apply H1 in H.
+        unfold open in *.
+        simpl in *.
+        inversion H; subst.
+        assumption.
+      * assumption.
+  - admit.
+  - 
   Admitted.
   
 Definition x_ctx t u := ES_contextual_closure sys_x t u. 
