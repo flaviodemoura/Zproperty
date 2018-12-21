@@ -1488,7 +1488,40 @@ Proof.
         inversion H; subst.
         assumption.
       * assumption.
-  - admit.
+  - inversion Hterm; subst.
+    pick_fresh y.
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hu].
+    apply notin_union in Fr.
+    destruct Fr as [Fr Ht].
+    apply H1 in Fr.
+    unfold open in Fr.
+    simpl in Fr.
+    inversion Fr; subst.
+
+    pick_fresh z.
+    apply notin_union in Fr0.
+    destruct Fr0 as [Fr0 Hu'].
+    apply notin_union in Fr0.
+    destruct Fr0 as [Fr0 Ht'].
+    apply notin_union in Fr0.
+    destruct Fr0 as [Fr0 Hy].
+    apply notin_union in Fr0.
+    destruct Fr0 as [Fr0 HL0].
+    assert (H' := H0 z).    
+    apply H' in HL0.
+    unfold open in HL0.
+    
+    apply term_abs with (L \u L0).
+    intros x Hx.
+    unfold open.
+    unfold bswap.
+    simpl.
+    apply term_sub with (L \u L0).
+    intros x' Hx0.
+    unfold open.
+
+    admit.
   - 
   Admitted.
   
