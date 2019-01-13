@@ -560,7 +560,23 @@ Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
 
 Lemma body_app: forall t1 t2, body (pterm_app t1 t2) -> body t1 /\ body t2.
 Proof.
-  Admitted.
+  intros.
+  split.
+  - inversion H; subst.
+    unfold body.
+    exists x.
+    intros x0 H1.
+    apply H0 in H1.
+    inversion H1; subst.
+    assumption.
+  - inversion H; subst.
+    unfold body.
+    exists x.
+    intros x0 H1.
+    apply H0 in H1.
+    inversion H1; subst.
+    assumption.
+Qed.
   
 Lemma term_regular_trans: forall R, term_regular R -> term_regular (trans R).
 Proof.
@@ -1993,6 +2009,13 @@ Qed.
 
 Lemma ex_trans_abs: forall t t' L, (forall x, x \notin L -> t^x ->_ex+ t'^x) -> (pterm_abs t) ->_ex+ (pterm_abs t'). 
 Proof.
+  intros.
+  pick_fresh x.
+  apply notin_union in Fr.
+  destruct Fr.
+  apply notin_union in H0.
+  destruct H0.
+  apply H in H0.
 Admitted.
 
 (* Lemma ex_trans_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_ex+ t'^x) -> (t[u]) ->_ex+ (t'[u]). 
@@ -2343,8 +2366,21 @@ Proof.
       * apply x_ctx_rule.
         assumption.
       * assumption.
-  - 
-Admitted.
+  - apply transit with b.
+    + unfold lex.
+      unfold red_ctx_mod_eqC in *.
+      inversion H; subst.
+      destruct H1.
+      exists x.
+      exists x0.
+      split.
+      * apply H1.
+      * split.
+        ** apply x_ctx_rule.
+           apply H1.
+        ** apply H1.
+    + assumption.
+Qed.
 
 Definition refltrans_lex t u := refltrans lex t u.
 Notation "t ->_lex* u" := (refltrans_lex t u) (at level 59, left associativity).
