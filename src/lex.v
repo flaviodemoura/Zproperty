@@ -978,7 +978,7 @@ Proof.
 Qed.
   
 (* end hide *)
-(** Contextual closure of terms. *)
+(** Contextual closure of terms.
 Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
   | ES_redex : forall t s, R t s -> ES_contextual_closure R t s
   | ES_app_left : forall t t' u, ES_contextual_closure R t t' -> term u ->
@@ -990,8 +990,8 @@ Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
   | ES_sub : forall t t' u L, (forall x, x \notin L -> ES_contextual_closure R (t^x) (t'^x)) ->
                          term u -> ES_contextual_closure R  (t [u]) (t' [u])
   | ES_sub_in : forall t u u', ES_contextual_closure R u u' -> body t ->
-	  	               ES_contextual_closure R  (t [u]) (t [u']).
-(* begin hide *)
+	  	               ES_contextual_closure R  (t [u]) (t [u']). 
+
 Lemma term_regular_ctx: forall R, term_regular R -> term_regular (ES_contextual_closure R).
 Proof.
   intros R Hred.
@@ -1030,12 +1030,23 @@ Proof.
       * intros x Hfv.
         apply body_to_term; assumption.
       * apply IHHcc.
-Qed.
-(* end hide *)
-Inductive eqc : Rel pterm :=
-| eqc_def: forall t u v, lc_at 2 t -> term u -> term v -> eqc (t[u][v]) ((& t)[v][u]).
+Qed. *)
+
+(** Context for the equation is different from the reduction
+context. The equation is not term regular. *)
+Inductive eqc_ctx : Rel pterm :=
+| eqc_def: forall t u v, lc_at 2 t -> term u -> term v -> eqc_ctx (t[u][v]) ((& t)[v][u])
+| eqc_app_left : forall t t' u, eqc_ctx t t' -> eqc_ctx (pterm_app t u) (pterm_app t' u)
+| eqc_app_right : forall t u u', eqc_ctx u u' -> eqc_ctx (pterm_app t u) (pterm_app t u')
+| eqc_abs_in : forall t t' L, (forall x, x \notin L -> eqc_ctx (t^x) (t'^x)) ->
+                        eqc_ctx (pterm_abs t) (pterm_abs t')
+| eqc_sub : forall t t' u L, (forall x, x \notin L -> eqc_ctx (t^x) (t'^x)) ->
+                       eqc_ctx (t [u]) (t' [u])
+| eqc_sub_in : forall t u u', eqc_ctx u u' -> eqc_ctx (t [u]) (t [u']).
+
 (* begin hide *)
 
+(*
 Lemma eqc_sym : forall t u, eqc t u -> eqc u t.
 Proof.
   intros t u H.
@@ -1099,25 +1110,97 @@ Proof.
    + assumption.
 Qed.
 
-(* end hide *)  
-Definition eqc_ctx (t u: pterm) := ES_contextual_closure eqc t u.
+
+Definition eqc_ctx (t u: pterm) := ES_contextual_closure eqc t u. *)
 Notation "t =c u" := (eqc_ctx t u) (at level 66).
-(* begin hide *)
-Corollary term_regular_eqc_ctx: term_regular eqc_ctx.
+
+Lemma eqc_ctx_term: forall t t', term t -> t =c t' -> term t'.
+Proof.
+  intros t t' Hterm Heqc.
+  generalize dependent Hterm.
+  induction Heqc.
+  - intro Hterm.
+    apply term_sub with (fv t0).
+    + intros x Hfv.
+      unfold open.
+      simpl.
+      apply term_sub with (fv t0).
+      * intros x' Hfv'.
+        unfold open.
+        apply term_equiv_lc_at.
+        apply lc_at_open.
+        ** apply term_var.
+        ** apply lc_at_open.
+           *** apply term_var.
+           *** apply lc_at_bswap.
+               **** auto.
+               **** assumption.
+      * rewrite open_rec_term; assumption.
+    + assumption.
+  - intro Happ.
+    inversion Happ; subst.
+    apply term_app.
+    + apply IHHeqc; assumption.    
+    + assumption.
+  - intro Happ.
+    inversion Happ; subst.
+    apply term_app.
+    + assumption.    
+    + apply IHHeqc; assumption.
+  -  intro Habs.
+     inversion Habs; subst.
+     apply term_abs with (L \u L0).
+     intros x Hnotin.
+     apply H0.
+     + apply notin_union in Hnotin.
+       destruct Hnotin as [HL HL0].
+       assumption.
+     + apply H2.
+       apply notin_union in Hnotin.
+       destruct Hnotin as [HL HL0].
+       assumption.
+  - intro Hterm.
+    inversion Hterm; subst.
+    clear Hterm.
+    apply term_sub with (L \u L0).
+    + intros x Hnotin.
+      apply notin_union in Hnotin.
+      destruct Hnotin as [HL HL0].
+      apply H0.
+      * assumption.
+      * apply H3; assumption.
+    + assumption.
+  - intro Hterm.
+    inversion Hterm; subst.
+    clear Hterm.
+    apply term_sub with L.
+    + intros x Hnotin.
+      apply H1; assumption.
+    + apply IHHeqc; assumption.
+Qed.
+
+(* Corollary term_regular_eqc_ctx: term_regular eqc_ctx.
 Proof.
   apply term_regular_ctx.
   apply term_regular_eqc.
-Qed.
+Qed. *)
 
 Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
 Proof.
   intros t u H. induction H.
-  - apply ES_redex. apply eqc_sym; assumption. 
-  - apply ES_app_left; assumption. 
-  - apply ES_app_right; assumption. 
-  - apply ES_abs_in with L; assumption. 
-  - apply ES_sub with L; assumption.
-  - apply ES_sub_in; assumption.
+  - replace t0 with (&(& t0)) at 2.
+    + apply eqc_def.
+      * apply lc_at_bswap.
+        ** auto.
+        ** assumption.
+      * assumption.
+      * assumption. 
+    + apply bswap_idemp.
+  - apply eqc_app_left; assumption. 
+  - apply eqc_app_right; assumption. 
+  - apply eqc_abs_in with L; assumption. 
+  - apply eqc_sub with L; assumption.
+  - apply eqc_sub_in; assumption.
 Qed.
 
 (*
@@ -1158,10 +1241,9 @@ Proof.
   generalize dependent Hterm.
   induction HeqC.
   - intro Hterm; assumption.
-  - intro Ha.
+  - intro Hterm.
     apply IHHeqC.
-    apply term_regular_eqc_ctx in H.
-    apply H.
+    apply eqc_ctx_term with a; assumption.
 Qed.
  
 (* Corollary red_regular_eqC: red_regular eqC. *)
@@ -1331,6 +1413,51 @@ Qed.
 (* (* Qed. *) *)
 
 Instance rw_eqC_app : Proper (eqC ==> eqC ==> eqC) pterm_app.
+  intros x y H x0 y0 H0.
+  induction H.
+  - induction H0.
+    + reflexivity.
+    + apply rtrans with (pterm_app a b).
+      * apply ES_app_right.
+        ** assumption.
+        **
+      * assumption.
+  - generalize dependent b.
+    induction H0.
+    + intros.
+      apply refltrans_composition with (pterm_app b a0).
+      * apply rtrans with (pterm_app b a0).
+        ** apply ES_app_left.
+           assumption.
+        ** reflexivity.
+      * assumption.
+    + intros.
+      apply refltrans_composition with (pterm_app b0 b).
+      * apply rtrans with (pterm_app b0 a0).
+         ** apply ES_app_left.
+             assumption.
+         ** apply rtrans with (pterm_app b0 b).
+             *** apply ES_app_right.
+                  assumption.
+             *** reflexivity.
+      * apply eqc_ctx_sym in H.
+        apply rtrans with (pterm_app b0 a0).
+        ** apply ES_app_right.
+           assumption.
+        ** assumption.
+Qed.
+
+Instance rw_eqC_subst_right : forall t, Proper (eqC ++> eqC) (pterm_sub t).
+Proof.
+  intros t x y H.
+  induction H.
+  - reflexivity.
+  - apply rtrans with (t [b]).
+    + apply ES_sub_in.
+      assumption.
+    + assumption.
+Qed.
+
 Proof.
   intros x y H x0 y0 H0.
   generalize dependent y0.
