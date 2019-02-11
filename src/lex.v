@@ -1466,6 +1466,11 @@ Inductive lx: Rel pterm :=
 | x_ctx_rule : forall t u, t ->_x u -> lx t u.
 Notation "t ->_Bx u" := (lx t u) (at level 59, left associativity).
 
+Instance rw_eqC_lx : Proper (eqC ==> eqC ==> iff) lx.
+Proof.
+  intros x x' H u u' H'.
+Admitted.
+
 (*
 Lemma Bx_app_left: forall t t' u, term u -> t ->_Bx t' -> pterm_app t u ->_Bx pterm_app t' u. 
 Proof.
@@ -2244,11 +2249,6 @@ Proof.
   (*     Admitted. *)
 (* end hide *)
 
-Instance rw_eqC_lx : Proper (eqC ==> eqC ==> iff) lx.
-Proof.
-  intros x x' H u u' H'.
-Admitted.
-
 Lemma ES_Bx_sub: forall t t' u x, term u -> t^x ->_Bx t'^x -> t[u] ->_Bx (t'[u]).
 Proof.
   intros t t' u x Hterm HBx.
@@ -2329,12 +2329,16 @@ Proof.
                **** rewrite <- sd_open.
                     apply to_sd.
                     apply body_to_term.
-                    ***** apply notin_union in Fr.
-                    destruct Fr as [Fr Hu0].
-                    apply notin_union in Fr.
-                    destruct Fr as [Fr Ht1].
-                    assumption.
-                      ***** assumption.
+                    {
+                      apply notin_union in Fr.
+                      destruct Fr as [Fr Hu0].
+                      apply notin_union in Fr.
+                      destruct Fr as [Fr Ht1].
+                      assumption.
+                    }
+                    {
+                      assumption.
+                    }
            *** apply ES_lex_sub_in.
                **** admit.
                **** apply to_sd; assumption.
