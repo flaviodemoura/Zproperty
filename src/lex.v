@@ -978,7 +978,7 @@ Proof.
 Qed.
   
 (* end hide *)
-(** Contextual closure of terms.
+(** Contextual closure of terms. *)
 Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
   | ES_redex : forall t s, R t s -> ES_contextual_closure R t s
   | ES_app_left : forall t t' u, ES_contextual_closure R t t' -> term u ->
@@ -1030,7 +1030,7 @@ Proof.
       * intros x Hfv.
         apply body_to_term; assumption.
       * apply IHHcc.
-Qed. *)
+Qed.
 
 (** Context for the equation is different from the reduction
 context. The equation is not term regular. *)
@@ -1418,33 +1418,11 @@ Instance rw_eqC_app : Proper (eqC ==> eqC ==> eqC) pterm_app.
   - induction H0.
     + reflexivity.
     + apply rtrans with (pterm_app a b).
-      * apply ES_app_right.
-        ** assumption.
-        **
+      * apply eqc_app_right; assumption.
       * assumption.
-  - generalize dependent b.
-    induction H0.
-    + intros.
-      apply refltrans_composition with (pterm_app b a0).
-      * apply rtrans with (pterm_app b a0).
-        ** apply ES_app_left.
-           assumption.
-        ** reflexivity.
+  - apply rtrans with (pterm_app b x0).
+      * apply eqc_app_left; assumption.
       * assumption.
-    + intros.
-      apply refltrans_composition with (pterm_app b0 b).
-      * apply rtrans with (pterm_app b0 a0).
-         ** apply ES_app_left.
-             assumption.
-         ** apply rtrans with (pterm_app b0 b).
-             *** apply ES_app_right.
-                  assumption.
-             *** reflexivity.
-      * apply eqc_ctx_sym in H.
-        apply rtrans with (pterm_app b0 a0).
-        ** apply ES_app_right.
-           assumption.
-        ** assumption.
 Qed.
 
 Instance rw_eqC_subst_right : forall t, Proper (eqC ++> eqC) (pterm_sub t).
@@ -1453,44 +1431,9 @@ Proof.
   induction H.
   - reflexivity.
   - apply rtrans with (t [b]).
-    + apply ES_sub_in.
-      assumption.
+    + apply eqc_sub_in; assumption.
     + assumption.
 Qed.
-
-Proof.
-  intros x y H x0 y0 H0.
-  generalize dependent y0.
-  generalize dependent x0.
-  induction H.
-  - intros b b' HeqC.
-    generalize dependent a.
-    induction HeqC.
-    Admitted.
-(*     + intros a' Hterm. *)
-(*       apply refl_term. *)
-(*       apply term_app; assumption. *)
-(*     + intros a' Hterm. *)
-(*       apply rtrans_term with (pterm_app a' b). *)
-(*       * apply ES_app_right; assumption. *)
-(*       * apply IHHeqC; assumption. *)
-(*   - intros x x' HeqC. *)
-(*     apply rtrans_term with (pterm_app b x). *)
-(*     + apply ES_app_left. *)
-(*       * assumption. *)
-(*       * apply eqC_term_regular in HeqC. *)
-(*         apply HeqC. *)
-(*     + apply IHrefltrans_term; assumption. *)
-(* Qed. *)
-
-Instance rw_eqC_subst_right : forall t, Proper (eqC ++> eqC) (pterm_sub t).
-Proof.
-  intros t x y H.
-  generalize dependent t.
-  induction H.
-  - intro t.
-    reflexivity.
-  - Admitted.
 
 (** Lex rules *)
 (* end hide *)
@@ -1547,6 +1490,39 @@ Proof.
   apply term_regular_ctx.
   apply term_regular_b.
 Qed.
+
+Lemma eqC_preserves_redex: forall t1 t2 u, pterm_app (pterm_abs t2) u =e t1 -> exists t v, t1 = pterm_app (pterm_abs t) v.
+Proof.
+Admitted.
+
+Lemma eqC_preserves_sub: forall t1 t2 u,  (t1 [t2]) =e u -> exists t v, u = (t [ v ]).
+Proof.
+Admitted.
+  
+Instance rw_eqC_B : Proper (eqC ==> eqC ==> iff) b_ctx.
+Proof.
+  intros x x' H u u' H'; split.
+  - intro HB.
+    generalize dependent x'.
+    generalize dependent u'.
+    induction HB.
+    + intros t1' Heq1 t1 Heq2.
+      inversion H; subst.
+      apply eqC_preserves_redex in Heq2.
+      destruct Heq2 as [t [v H']].
+      rewrite H'.
+      apply eqC_preserves_sub in Heq1.
+      destruct Heq1 as [t' [v' H'']].
+      rewrite H''.
+      apply ES_redex.
+      admit.
+    + admit.
+    + admit.
+    + admit.
+    + admit.
+    + admit.
+  - Admitted.
+   
 (* end hide *)  
 Inductive sys_x : Rel pterm :=
 | reg_rule_var : forall t, term t -> sys_x (pterm_bvar 0 [t]) t
@@ -1556,7 +1532,7 @@ Inductive sys_x : Rel pterm :=
 | reg_rule_abs : forall t u, body t -> term u ->
   sys_x ((pterm_abs t)[u]) (pterm_abs ((& t)[u]))
 | reg_rule_comp : forall t u v, lc_at 2 t -> has_free_index 0 u ->
-                           term v ->
+                           lc_at 1 u -> term v ->
   sys_x (t[u][v]) (((& t)[v])[ u[ v ] ]).
 (* begin hide *)
 Lemma term_regular_sys_x: term_regular sys_x.
@@ -1577,8 +1553,87 @@ Proof.
         rewrite open_rec_term; assumption.
       * assumption.
     + assumption.    
-  - Admitted.
-  
+  - unfold body in *.
+    destruct H.
+    destruct H0.
+    split.
+    + apply term_sub with (x \u x0).
+      * intros x' Hfv.
+        apply notin_union in Hfv.
+        destruct Hfv as [Hx Hx0].
+        unfold open; simpl.
+        apply term_app.
+        ** apply H in Hx; assumption.
+        ** apply H0 in Hx0; assumption.
+      * assumption.
+    + apply term_app.
+      * apply term_sub with x; assumption.
+      * apply term_sub with x0; assumption.
+  - unfold body in H.
+    destruct H.
+    split.
+    + apply term_sub with x.
+      * intros x' Hfv.
+        unfold open; simpl.
+        apply term_abs with x.
+        intros x'' Hfv'.
+        unfold open.
+        apply term_equiv_lc_at.
+        apply lc_at_open_rec.
+        ** apply term_var.
+        ** apply H in Hfv.
+           unfold open in Hfv.
+           apply term_equiv_lc_at in Hfv.
+           admit.
+      * assumption.
+    + admit.
+  - split.
+    + apply term_sub with (fv t0).
+      * intros x Hfv.
+        unfold open; simpl.
+        apply term_sub with (fv t0).
+        ** intros x' Hfv'.
+           unfold open.
+           apply term_equiv_lc_at.
+           apply lc_at_open_rec.
+           *** apply term_var.
+           *** apply lc_at_open_rec.
+               **** apply term_var.
+               **** assumption.
+        ** apply term_equiv_lc_at.
+           apply lc_at_open_rec.
+           *** apply term_var.
+           *** assumption.
+      * assumption.
+    + apply term_sub with (fv t0).
+      * intros x Hfv.
+        unfold open; simpl.
+        apply term_sub with (fv t0).
+        ** intros x' Hfv'.
+           unfold open.
+           apply term_equiv_lc_at.
+           apply lc_at_open_rec.
+           *** apply term_var.
+           *** apply lc_at_open_rec.
+               **** apply term_var.
+               **** apply lc_at_bswap.
+                    {
+                      auto.                      
+                    }
+                    {
+                      assumption.
+                    }
+        ** rewrite open_rec_term; assumption.
+      * apply term_sub with (fv u).
+        ** intros x Hfv.
+           unfold open.
+           apply term_equiv_lc_at.
+           apply lc_at_open_rec.
+           *** apply term_var.
+           *** assumption.
+        ** assumption.
+Admitted.
+    
 Definition x_ctx t u := ES_contextual_closure sys_x t u. 
 Notation "t ->_x u" := (x_ctx t u) (at level 59, left associativity).
 
@@ -1596,6 +1651,15 @@ Notation "t ->_Bx u" := (lx t u) (at level 59, left associativity).
 Instance rw_eqC_lx : Proper (eqC ==> eqC ==> iff) lx.
 Proof.
   intros x x' H u u' H'.
+  split.
+  - intro HBx.
+    generalize dependent x'.
+    generalize dependent u'.
+    induction HBx.
+    +
+    +
+  -
+    
 Admitted.
 
 (*
