@@ -1035,7 +1035,7 @@ Qed.
 (** Context for the equation is different from the reduction
 context. The equation is not term regular. *)
 Inductive eqc_ctx : Rel pterm :=
-| eqc_def: forall t u v, lc_at 2 t -> term u -> term v -> eqc_ctx (t[u][v]) ((& t)[v][u])
+| eqc_def: forall t u v, term u -> term v -> eqc_ctx (t[u][v]) ((& t)[v][u])
 | eqc_app_left : forall t t' u, eqc_ctx t t' -> eqc_ctx (pterm_app t u) (pterm_app t' u)
 | eqc_app_right : forall t u u', eqc_ctx u u' -> eqc_ctx (pterm_app t u) (pterm_app t u')
 | eqc_abs_in : forall t t' L, (forall x, x \notin L -> eqc_ctx (t^x) (t'^x)) ->
@@ -1127,6 +1127,9 @@ Proof.
       apply term_sub with (fv t0).
       * intros x' Hfv'.
         unfold open.
+        apply term_equiv_lc_at in Hterm.
+        inversion Hterm; clear Hterm.
+        inversion H1; clear H1.
         apply term_equiv_lc_at.
         apply lc_at_open.
         ** apply term_var.
@@ -1189,12 +1192,7 @@ Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
 Proof.
   intros t u H. induction H.
   - replace t0 with (&(& t0)) at 2.
-    + apply eqc_def.
-      * apply lc_at_bswap.
-        ** auto.
-        ** assumption.
-      * assumption.
-      * assumption. 
+    + apply eqc_def; assumption.
     + apply bswap_idemp.
   - apply eqc_app_left; assumption. 
   - apply eqc_app_right; assumption. 
@@ -1345,25 +1343,25 @@ Qed.
 
 Instance rw_eqC_red: forall R, Proper (eqC ==> eqC ==> iff) (red_ctx_mod_eqC R).
 Proof.
- intro R; split.
- - intro H1.
-   unfold red_ctx_mod_eqC in *.
-   destruct H1 as [x'[x'' [Heq1 [HR Heq2]]]].
-   exists x', x''; split.
-   + apply eqC_sym in H.
-     apply eqC_trans with x; assumption.
-   + split.
-     * assumption.
-     * apply eqC_trans with x0; assumption.
- - intro H1.
-   unfold red_ctx_mod_eqC in *.
-   destruct H1 as [y' [y'' [Heq1 [HR Heq2]]]].
-   exists y',y''; split.
-   + apply eqC_trans with y; assumption. 
-   + split.
-     * assumption.
-     * apply eqC_sym in H0.
-       apply eqC_trans with y0; assumption.
+  intro R; split.
+  - intro H1.
+    unfold red_ctx_mod_eqC in *.
+    destruct H1 as [x'[x'' [Heq1 [HR Heq2]]]].
+    exists x', x''; split.
+    + apply eqC_sym in H.
+      apply eqC_trans with x; assumption.
+    + split.
+      * assumption.
+      * apply eqC_trans with x0; assumption.
+  - intro H1.
+    unfold red_ctx_mod_eqC in *.
+    destruct H1 as [y' [y'' [Heq1 [HR Heq2]]]].
+    exists y',y''; split.
+    + apply eqC_trans with y; assumption. 
+    + split.
+      * assumption.
+      * apply eqC_sym in H0.
+        apply eqC_trans with y0; assumption.
 Qed.
 
 (* Instance rw_eqC_trs : forall R, Proper (eqC ==> eqC ==> iff) (trans (red_ctx_mod_eqC R)).
@@ -1425,7 +1423,7 @@ Instance rw_eqC_app : Proper (eqC ==> eqC ==> eqC) pterm_app.
       * assumption.
 Qed.
 
-Instance rw_eqC_subst_right : forall t, Proper (eqC ++> eqC) (pterm_sub t).
+Instance rw_eqC_sub_in : forall t, Proper (eqC ++> eqC) (pterm_sub t).
 Proof.
   intros t x y H.
   induction H.
@@ -1491,37 +1489,49 @@ Proof.
   apply term_regular_b.
 Qed.
 
-Lemma eqC_preserves_redex: forall t1 t2 u, pterm_app (pterm_abs t2) u =e t1 -> exists t v, t1 = pterm_app (pterm_abs t) v.
+(* Lemma eqC_preserves_redex: forall t1 t2 u, pterm_app (pterm_abs t2) u =e t1 -> exists t v, t1 = pterm_app (pterm_abs t) v.
 Proof.
 Admitted.
 
 Lemma eqC_preserves_sub: forall t1 t2 u,  (t1 [t2]) =e u -> exists t v, u = (t [ v ]).
 Proof.
-Admitted.
+Admitted. *)
   
-Instance rw_eqC_B : Proper (eqC ==> eqC ==> iff) b_ctx.
-Proof.
-  intros x x' H u u' H'; split.
-  - intro HB.
-    generalize dependent x'.
-    generalize dependent u'.
-    induction HB.
-    + intros t1' Heq1 t1 Heq2.
-      inversion H; subst.
-      apply eqC_preserves_redex in Heq2.
-      destruct Heq2 as [t [v H']].
-      rewrite H'.
-      apply eqC_preserves_sub in Heq1.
-      destruct Heq1 as [t' [v' H'']].
-      rewrite H''.
-      apply ES_redex.
-      admit.
-    + admit.
-    + admit.
-    + admit.
-    + admit.
-    + admit.
-  - Admitted.
+(* Instance rw_eqC_B : Proper (eqC ==> eqC ==> iff) b_ctx. *)
+(* Proof. *)
+(*   intros x x' H u u' H'; split. *)
+(*   - intro HB. *)
+(*     Admitted. *)
+  (*   inversion HB; subst. *)
+  (*   + inversion H0; subst. *)
+  (*     inversion H; subst. *)
+  (*     * inversion H'; subst. *)
+  (*       ** apply ES_redex. *)
+  (*          apply reg_rule_b; assumption. *)
+  (*       ** destruct H'. *)
+  (*          *** apply ES_redex. *)
+  (*              assumption. *)
+  (*          *** *)
+  (*     * *)
+  (*   generalize dependent x'. *)
+  (*   generalize dependent u'. *)
+  (*   induction HB. *)
+  (*   + intros t1' Heq1 t1 Heq2. *)
+  (*     inversion H; subst. *)
+  (*     apply eqC_preserves_redex in Heq2. *)
+  (*     destruct Heq2 as [t [v H']]. *)
+  (*     rewrite H'. *)
+  (*     apply eqC_preserves_sub in Heq1. *)
+  (*     destruct Heq1 as [t' [v' H'']]. *)
+  (*     rewrite H''. *)
+  (*     apply ES_redex. *)
+  (*     admit. *)
+  (*   + admit. *)
+  (*   + admit. *)
+  (*   + admit. *)
+  (*   + admit. *)
+  (*   + admit. *)
+  (* - Admitted. *)
    
 (* end hide *)  
 Inductive sys_x : Rel pterm :=
@@ -1574,65 +1584,69 @@ Proof.
     split.
     + apply term_sub with x.
       * intros x' Hfv.
-        unfold open; simpl.
-        apply term_abs with x.
-        intros x'' Hfv'.
-        unfold open.
-        apply term_equiv_lc_at.
-        apply lc_at_open_rec.
-        ** apply term_var.
-        ** apply H in Hfv.
-           unfold open in Hfv.
-           apply term_equiv_lc_at in Hfv.
-           admit.
-      * assumption.
-    + admit.
-  - split.
-    + apply term_sub with (fv t0).
-      * intros x Hfv.
-        unfold open; simpl.
-        apply term_sub with (fv t0).
-        ** intros x' Hfv'.
-           unfold open.
-           apply term_equiv_lc_at.
-           apply lc_at_open_rec.
-           *** apply term_var.
-           *** apply lc_at_open_rec.
-               **** apply term_var.
-               **** assumption.
-        ** apply term_equiv_lc_at.
-           apply lc_at_open_rec.
-           *** apply term_var.
-           *** assumption.
-      * assumption.
-    + apply term_sub with (fv t0).
-      * intros x Hfv.
-        unfold open; simpl.
-        apply term_sub with (fv t0).
-        ** intros x' Hfv'.
-           unfold open.
-           apply term_equiv_lc_at.
-           apply lc_at_open_rec.
-           *** apply term_var.
-           *** apply lc_at_open_rec.
-               **** apply term_var.
-               **** apply lc_at_bswap.
-                    {
-                      auto.                      
-                    }
-                    {
-                      assumption.
-                    }
-        ** rewrite open_rec_term; assumption.
-      * apply term_sub with (fv u).
-        ** intros x Hfv.
-           unfold open.
-           apply term_equiv_lc_at.
-           apply lc_at_open_rec.
-           *** apply term_var.
-           *** assumption.
-        ** assumption.
 Admitted.
+
+        
+(*         unfold open; simpl. *)
+(*         apply term_abs with x. *)
+(*         intros x'' Hfv'. *)
+(*         unfold open. *)
+(*         apply term_equiv_lc_at. *)
+(*         apply lc_at_open_rec. *)
+(*         ** apply term_var. *)
+(*         ** apply H in Hfv. *)
+(*            unfold open in Hfv. *)
+(*            apply term_equiv_lc_at in Hfv. *)
+(*            apply lc_at_weaken_ind with 0. *)
+(*            admit. *)
+(*       * assumption. *)
+(*     + admit. *)
+(*   - split. *)
+(*     + apply term_sub with (fv t0). *)
+(*       * intros x Hfv. *)
+(*         unfold open; simpl. *)
+(*         apply term_sub with (fv t0). *)
+(*         ** intros x' Hfv'. *)
+(*            unfold open. *)
+(*            apply term_equiv_lc_at. *)
+(*            apply lc_at_open_rec. *)
+(*            *** apply term_var. *)
+(*            *** apply lc_at_open_rec. *)
+(*                **** apply term_var. *)
+(*                **** assumption. *)
+(*         ** apply term_equiv_lc_at. *)
+(*            apply lc_at_open_rec. *)
+(*            *** apply term_var. *)
+(*            *** assumption. *)
+(*       * assumption. *)
+(*     + apply term_sub with (fv t0). *)
+(*       * intros x Hfv. *)
+(*         unfold open; simpl. *)
+(*         apply term_sub with (fv t0). *)
+(*         ** intros x' Hfv'. *)
+(*            unfold open. *)
+(*            apply term_equiv_lc_at. *)
+(*            apply lc_at_open_rec. *)
+(*            *** apply term_var. *)
+(*            *** apply lc_at_open_rec. *)
+(*                **** apply term_var. *)
+(*                **** apply lc_at_bswap. *)
+(*                     { *)
+(*                       auto.                       *)
+(*                     } *)
+(*                     { *)
+(*                       assumption. *)
+(*                     } *)
+(*         ** rewrite open_rec_term; assumption. *)
+(*       * apply term_sub with (fv u). *)
+(*         ** intros x Hfv. *)
+(*            unfold open. *)
+(*            apply term_equiv_lc_at. *)
+(*            apply lc_at_open_rec. *)
+(*            *** apply term_var. *)
+(*            *** assumption. *)
+(*         ** assumption. *)
+(* Admitted. *)
     
 Definition x_ctx t u := ES_contextual_closure sys_x t u. 
 Notation "t ->_x u" := (x_ctx t u) (at level 59, left associativity).
@@ -1656,11 +1670,9 @@ Proof.
     generalize dependent x'.
     generalize dependent u'.
     induction HBx.
-    +
-    +
-  -
-    
-Admitted.
+    + admit.
+    + admit.
+  - Admitted.
 
 (*
 Lemma Bx_app_left: forall t t' u, term u -> t ->_Bx t' -> pterm_app t u ->_Bx pterm_app t' u. 
