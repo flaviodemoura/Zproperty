@@ -128,7 +128,6 @@ Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> (
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
 Theorem Zprop_implies_Confl {A:Type}: forall R: Rel A, Zprop R -> Confl R.
-(* begin hide *)
 Proof.
   intros R HZprop.
   unfold Zprop in HZprop.
@@ -172,7 +171,53 @@ Proof.
         ** apply H.
            assumption.
 Qed.
-(* end hide *)
+  
+(** Some experiments: the next proof does not seem to have a constructive proof in the general setting of ARS. *)
+Lemma Zprop_fun {A}: forall (R: Rel A) (x : A -> A), ( forall(a b: A), R a b -> (refltrans R b (x a) /\ refltrans R (x a) (x b))) -> ( forall(a : A), refltrans R a (x a)).
+Proof.
+  intros R x HZprop a.
+Admitted.
+
+Lemma Zprop_mon {A}: forall (R: Rel A) (x : A -> A), ( forall(a b: A), R a b -> (refltrans R b (x a) /\ refltrans R (x a) (x b))) -> forall u v : A, refltrans R u v -> refltrans R (x u) (x v).
+Proof.
+Admitted.
+
+Theorem Zprop_implies_Confl' {A:Type}: forall R: Rel A, Zprop R -> Confl R.
+(* begin hide *)
+Proof.
+  intros R HZprop.
+  unfold Zprop in HZprop.
+  destruct HZprop.
+  unfold Confl.
+  intros a b c Hrefl1.
+  generalize dependent c.
+  induction Hrefl1.
+  - intros c Hrefl.
+    exists c; split.
+    + assumption.
+    + apply refl.      
+  - intros c' Hrefl2.
+    inversion Hrefl2; subst.
+    + exists c; split.
+      * apply refl.
+      * apply rtrans with b; assumption.
+    + assert (H3 := IHHrefl1 (x c')).
+      assert (H4 : refltrans R b (x c')).
+      {
+        apply refltrans_composition with (x b0).
+        - apply refltrans_composition with (x a).
+          + apply H; assumption.
+          + apply H; assumption.
+        - apply Zprop_mon; assumption.
+      }
+      apply H3 in H4.
+      destruct H4 as [d].
+      exists d; split.
+      * apply H4.
+      * apply refltrans_composition with (x c').
+        ** apply Zprop_fun; assumption.
+        ** apply H4.
+Qed.
 
 (** Proof using semi-confluence *)
 Definition SemiConfl {A:Type} (R: Rel A) := forall a b c, R a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
@@ -248,3 +293,51 @@ split.
       ** apply CompReflTrans with x; assumption.
     * assumption.
 Qed.
+
+Definition P_regular {A} (R: Rel A) :=
+  forall (P:A -> Prop) t t', R t t' -> P t /\ P t'.
+
+Definition P_wregular {A} (R: Rel A) :=
+  forall (P:A -> Prop) t t', P t -> R t t' -> P t'.
+
+Definition P_wregular' {A} (R: Rel A) :=
+  forall (P:A -> Prop) t t', (P t /\ R t t') -> P t'.
+
+Lemma P_wregular_equiv_P_wregular' {A}: forall (R: Rel A), P_wregular R <-> P_wregular' R.
+Proof.
+  intro R; split.
+  - unfold P_wregular.
+    unfold P_wregular'.
+    intros Hwreg P t t' Hand.
+    destruct Hand as [Ht Hred].
+    apply Hwreg with t; assumption.
+  - unfold P_wregular.
+    unfold P_wregular'.
+    intros Hwreg P t t' Ht Hred.
+    apply Hwreg with t.
+    split; assumption.
+Qed.
+
+Lemma P_wregular_imples_P_regular {A}: forall (R: Rel A), P_regular R -> P_wregular R.
+Proof.
+  intros R Hreg.
+  unfold P_regular in Hreg.
+  unfold P_wregular.
+  intros P t t' Ht Hred.
+  apply (Hreg P) in Hred.
+  apply Hred.
+Qed.
+
+Definition tri_prop_elem {A} (a : A) (R: Rel A) :=
+  exists a', forall b, R a b -> R b a'.
+
+Definition tri_prop {A} (R: Rel A) :=
+  forall a, tri_prop_elem a R.
+
+Lemma tri_imples_Z {A}: forall R: Rel A, tri_prop R -> Zprop R.
+Proof.
+  intros R Htri.
+  unfold tri_prop in Htri.
+  unfold tri_prop_elem in Htri.
+  unfold Zprop.
+  Admitted.
