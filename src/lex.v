@@ -614,6 +614,20 @@ Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
 Definition bswap t := bswap_rec 0 t.
 Notation "& t" := (bswap t) (at level 67).
 
+(** The substitution is compositional. *)
+Lemma open_comp: forall t u v, (t ^^ u ) ^^ v  = ((&t) ^^ v) ^^ (u ^^ v).
+Proof.
+  intro t; induction t.
+  - case n.
+    + intros u v; unfold open; simpl.
+      admit.
+    + Admitted.
+
+(** The above notion of substitution is not capture free because it is
+defines over pre-terms. Nevertheless it is a capture free substitution
+when [u] is a term: *)
+(* Lemma open_capture_free: forall t u, term u -> *)
+
 (** bswap replaces 0s by 1s and vice-versa. Any other index is preserved. *)
 Fixpoint has_free_index (k:nat) (t:pterm) : Prop :=
   match t with
@@ -1539,7 +1553,7 @@ Inductive sys_x : Rel pterm :=
 | reg_rule_gc : forall t u, term t -> term u -> sys_x (t[u]) t
 | reg_rule_app : forall t1 t2 u, body t1 -> body t2 -> term u ->
   sys_x ((pterm_app t1 t2)[u]) (pterm_app (t1[u]) (t2[u]))
-| reg_rule_abs : forall t u, body t -> term u ->
+| reg_rule_abs : forall t u, lc_at 2 t -> term u ->
   sys_x ((pterm_abs t)[u]) (pterm_abs ((& t)[u]))
 | reg_rule_comp : forall t u v, lc_at 2 t -> has_free_index 0 u ->
                            lc_at 1 u -> term v ->
@@ -1580,10 +1594,6 @@ Proof.
       * apply term_sub with x; assumption.
       * apply term_sub with x0; assumption.
   - unfold body in H.
-    destruct H.
-    split.
-    + apply term_sub with x.
-      * intros x' Hfv.
 Admitted.
 
         
@@ -2408,6 +2418,12 @@ Admitted. *)
 
 Lemma sd_app: forall t u, pterm_app (sd t) (sd u) ->_lex* sd(pterm_app t u). 
 Proof.
+  intro t; induction t.
+  - intro u; simpl.
+    apply refl.
+  - intro u; simpl.
+    apply refl.
+  - intro u.
 Admitted.
 
 (* Lemma lex_refltrans_app: forall t u t' u', t ->_lex* t' -> u ->_lex* u' -> pterm_app t u  ->_lex* pterm_app t' u'.
@@ -2433,7 +2449,10 @@ Lemma to_sd: forall t, term t -> t ->_lex* (sd t).
 Proof.
   induction 1.
   - apply refl.
-  - Admitted.
+  - apply refltrans_composition with (pterm_app (sd t1) (sd t2)).
+    + admit.
+    + apply sd_app.
+Admitted.
   (*   apply refltrans_composition with (pterm_app (sd t1) (sd t2)). *)
     
   (*   + apply lex_refltrans_app; assumption. *)
