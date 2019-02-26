@@ -9,3 +9,10 @@
 *.vo
 *.pdfsync
 *.xml
+/.DS_Store
+*.tex~
+latex/auto/*
+*.nav
+*.snm
+*.toc
+*.vrb
