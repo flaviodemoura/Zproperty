@@ -145,7 +145,7 @@ Notation "f1 # f2" := (comp f1 f2) (at level 40).
 
 Definition f_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R')  b (f a) /\ (refltrans R') (f a) (f b)). 
 
-Theorem comp_Z {A:Type}: forall (R R1 R2 :Rel A), R = (R1 !_!  R2) -> exists f1 f2: A -> A, f_is_Z R1 f1 -> (forall a b, R1 a b -> (refltrans R) (f2 a) (f2 b)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_weak_Z R2 R (f1 # f2)) -> f_is_Z R (f1 # f2).
+Theorem comp_Z {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_!  R2) -> f_is_Z R1 f1 -> (forall a b, R1 a b -> (refltrans R) (f2 a) (f2 b)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_weak_Z R2 R (f1 # f2)) -> f_is_Z R (f1 # f2).
 Proof.
 Admitted.  
   
