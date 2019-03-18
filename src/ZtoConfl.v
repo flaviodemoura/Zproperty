@@ -18,8 +18,6 @@ We present a formalisation ...
 (* begin hide *)
 Definition Rel (A:Type) := A -> A -> Prop.
 
-Definition NF {A:Type} (a:A) (R: Rel A) := ~(exists b, R a b).
-
 Inductive trans {A} (red: Rel A) : Rel A :=
 | singl: forall a b,  red a b -> trans red a b
 | transit: forall b a c,  red a b -> trans red b c -> trans red a c
@@ -125,6 +123,32 @@ Qed.
 
 Definition Zprop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
 
+Definition f_is_Z {A:Type} (R: Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R)  b (f a) /\ (refltrans R) (f a) (f b)). 
+
+Lemma f_is_Z_implies_Zprop {A:Type}: forall (R: Rel A) (f:A -> A), f_is_Z R f -> Zprop R.
+Proof.
+  intros R f H.
+  unfold Zprop.
+  exists f.
+  unfold f_is_Z in H.
+  assumption.
+Qed.
+
+Inductive union {A} (red1 red2: Rel A) : Rel A :=
+ | union_left: forall a b,  red1 a b -> union red1 red2 a b
+ | union_right: forall a b,  red2 a b -> union red1 red2 a b.
+
+Notation "R1 !_! R2" := (union R1 R2) (at level 40).
+
+Definition comp {A} (f1 f2: A -> A) := fun x:A => f1 (f2 x).
+Notation "f1 # f2" := (comp f1 f2) (at level 40).
+
+Definition f_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R')  b (f a) /\ (refltrans R') (f a) (f b)). 
+
+Theorem comp_Z {A:Type}: forall (R R1 R2 :Rel A), R = (R1 !_!  R2) -> exists f1 f2: A -> A, f_is_Z R1 f1 -> (forall a b, R1 a b -> (refltrans R) (f2 a) (f2 b)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_weak_Z R2 R (f1 # f2)) -> f_is_Z R (f1 # f2).
+Proof.
+Admitted.  
+  
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
 Theorem Zprop_implies_Confl {A:Type}: forall R: Rel A, Zprop R -> Confl R.
@@ -293,6 +317,12 @@ split.
       ** apply CompReflTrans with x; assumption.
     * assumption.
 Qed.
+
+
+Definition CompZ {A:Type} (R R1 R2: Rel A) := exists w1 w2:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
+
+
+(** Comparing regularity *)
 
 Definition P_regular {A} (R: Rel A) :=
   forall (P:A -> Prop) t t', R t t' -> P t /\ P t'.
