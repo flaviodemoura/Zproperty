@@ -145,10 +145,42 @@ Notation "f1 # f2" := (comp f1 f2) (at level 40).
 
 Definition f_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R')  b (f a) /\ (refltrans R') (f a) (f b)). 
 
-Theorem comp_Z {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_!  R2) -> f_is_Z R1 f1 -> (forall a b, R1 a b -> (refltrans R) (f2 a) (f2 b)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_weak_Z R2 R (f1 # f2)) -> f_is_Z R (f1 # f2).
+Theorem comp_Z {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_! R2) -> f_is_Z R1 f1 -> (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
 Proof.
-Admitted.  
-  
+  intros.
+  unfold f_is_Z in *.
+  unfold f_weak_Z in H3.
+  intros.
+  split.
+  - inversion H; subst.
+    clear H5.
+    destruct H4.
+    + apply refltrans_composition with (f1 a).
+      * apply H0 in H.
+        destruct H.
+        induction H.
+        **  apply refl.
+        **  apply rtrans with b.
+            *** apply union_left.
+                assumption.
+            *** apply IHrefltrans.
+                apply refltrans_composition with (f1 a0).
+                **** assumption.
+                **** apply H0.
+                      assumption.
+      * apply H2 with a. trivial.
+    + apply H3 in H.
+      apply H.
+  - inversion H; subst.
+    clear H5.
+    destruct H4.
+    + apply H1.
+      apply H0.
+      assumption.
+    + apply H3 in H.
+      apply H.
+Qed.  
+
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
 Theorem Zprop_implies_Confl {A:Type}: forall R: Rel A, Zprop R -> Confl R.
