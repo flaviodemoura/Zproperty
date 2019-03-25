@@ -145,7 +145,13 @@ Notation "f1 # f2" := (comp f1 f2) (at level 40).
 
 Definition f_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R')  b (f a) /\ (refltrans R') (f a) (f b)). 
 
-Theorem comp_Z {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_! R2) -> f_is_Z R1 f1 -> (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
+Definition Z_comp {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_weak_Z R2 R (f2 # f1)).
+
+Definition Z_comp' {A:Type} (R :Rel A) := exists (R1 R2: Rel A), R = (R1 !_! R2) -> forall (f1 f2: A -> A), f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_weak_Z R2 R (f2 # f1)).
+
+(* Definition Z_comp3 {A:Type} (R :Rel A) := exists (R1 R2 R3: Rel A), forall (f1 f2 ??: A -> A), R = ((R1 !_! R2) !_! R3) .... *)
+
+Theorem comp_Z_implies_Z {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_! R2) -> f_is_Z R1 f1 -> (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
 Proof.
   intros.
   unfold f_is_Z in *.
@@ -179,7 +185,16 @@ Proof.
       assumption.
     + apply H3 in H.
       apply H.
-Qed.  
+Qed.
+
+Lemma Z_comp_imples_Z {A:Type}: forall (R :Rel A), Z_comp R -> Zprop R.
+Proof.
+  intros R H.
+  unfold Z_comp in H.
+  inversion H as [ R1 [ R2 [f1 [f2 [H0 [H1 [H2 [H3 H4]]]]]]]].
+  apply f_is_Z_implies_Zprop with (f2 # f1).
+  apply comp_Z_implies_Z with R1 R2; assumption.
+Qed.    
 
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
@@ -227,7 +242,14 @@ Proof.
         ** apply H.
            assumption.
 Qed.
-  
+
+Corollary Z_comp_is_Confl {A}: forall (R: Rel A), Z_comp R -> Confl R.
+Proof.
+  intros R H.
+  apply Z_comp_imples_Z in H.
+  apply Zprop_implies_Confl; assumption.  
+Qed.
+
 (** Some experiments: the next proof does not seem to have a constructive proof in the general setting of ARS. *)
 Lemma Zprop_fun {A}: forall (R: Rel A) (x : A -> A), ( forall(a b: A), R a b -> (refltrans R b (x a) /\ refltrans R (x a) (x b))) -> ( forall(a : A), refltrans R a (x a)).
 Proof.
