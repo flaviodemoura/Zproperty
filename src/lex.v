@@ -2309,8 +2309,6 @@ Qed. *)
 
 Fixpoint sd (t : pterm) : pterm :=
   match t with
-  | pterm_bvar i    => t
-  | pterm_fvar x    => t
   | pterm_abs t1    => pterm_abs (sd t1)
   | pterm_app t1 t2 => let t0 := (sd t1) in
                       match t0 with
@@ -2318,6 +2316,7 @@ Fixpoint sd (t : pterm) : pterm :=
                       | _ => pterm_app (sd t1) (sd t2)
                       end 
   | pterm_sub t1 t2 => (sd t1) ^^ (sd t2)
+  | _ => t
   end.
 (* begin hide *)
 (* Lemma sd_open_rec_preserves_structure: forall t t' k, sd t = t' -> forall x, sd (open_rec k (pterm_fvar x) t) = open_rec k (pterm_fvar x) t'. 

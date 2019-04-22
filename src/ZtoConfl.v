@@ -140,6 +140,11 @@ Inductive union {A} (red1 red2: Rel A) : Rel A :=
 
 Notation "R1 !_! R2" := (union R1 R2) (at level 40).
 
+Lemma union_idemp {A}: forall (R : Rel A), union R R = R.
+Proof.
+  intros R.
+Admitted.  
+  
 Definition comp {A} (f1 f2: A -> A) := fun x:A => f1 (f2 x).
 Notation "f1 # f2" := (comp f1 f2) (at level 40).
 
@@ -187,16 +192,50 @@ Proof.
       apply H.
 Qed.
 
-Lemma Z_comp_imples_Z {A:Type}: forall (R :Rel A), Z_comp R -> Zprop R.
+Lemma Z_comp_implies_Z {A:Type}: forall (R :Rel A), Z_comp R -> Zprop R.
 Proof.
   intros R H.
   unfold Z_comp in H.
   inversion H as [ R1 [ R2 [f1 [f2 [H0 [H1 [H2 [H3 H4]]]]]]]].
   apply f_is_Z_implies_Zprop with (f2 # f1).
   apply comp_Z_implies_Z with R1 R2; assumption.
-Qed.    
+Qed.
+  
+Lemma Z_implies_Z_comp {A:Type}: forall (R : Rel A), Zprop R -> Z_comp R.
+Proof.
+  intros R HZprop.
+  unfold Zprop in HZprop.
+  destruct HZprop.
+  unfold Z_comp.
+  exists R. exists R. exists x. exists (@id A). split.
+  - symmetry.
+    apply union_idemp.
+  - split.
+    + admit.
+    + split.
+      * intros a b Hab.
+        assumption.
+      * split.
+        ** intros a b Heq.
+           apply refl.
+        ** Admitted.
+
+Theorem Z_comp_equiv_Z {A:Type}: forall (R : Rel A), Zprop R <-> Z_comp R.
+Proof.
+  split.
+  - apply Z_implies_Z_comp.
+  - apply Z_comp_implies_Z.
+Qed.
+
+Require Import Morphisms.
+
+Definition Zprop_mod {A:Type} (R eqA:Rel A) := Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
+
+
+
 
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
+
 
 Theorem Zprop_implies_Confl {A:Type}: forall R: Rel A, Zprop R -> Confl R.
 Proof.
