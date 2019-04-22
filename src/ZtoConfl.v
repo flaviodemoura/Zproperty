@@ -200,7 +200,8 @@ Proof.
   apply f_is_Z_implies_Zprop with (f2 # f1).
   apply comp_Z_implies_Z with R1 R2; assumption.
 Qed.
-  
+
+(** Finish this proof. *)
 Lemma Z_implies_Z_comp {A:Type}: forall (R : Rel A), Zprop R -> Z_comp R.
 Proof.
   intros R HZprop.
@@ -227,11 +228,15 @@ Proof.
   - apply Z_comp_implies_Z.
 Qed.
 
+(** Add equiv between Z and Z_leandro. *)
+
+
 Require Import Morphisms.
 
 Definition Zprop_mod {A:Type} (R eqA:Rel A) := Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
 
-
+(** Establish equivalence(?) between Z_comp and Zprop_mod *)
+Theorem  Z_comp <-> Zprop_mod
 
 
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
