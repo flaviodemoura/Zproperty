@@ -287,8 +287,9 @@ Proof.
   - apply Z_comp_implies_Z.
 Qed.
 
-Lemma Z_comp_eq {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_! R2) -> (forall a b, R1 a b -> (f1 a) = (f1 b)) -> (forall a, (refltrans R1) a (f1 a)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
+Lemma Z_comp_eq {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_! R2) -> (forall a b, R1 a b -> (f1 a) = (f1 b)) -> (forall a, (refltrans R1) a (f1 a)) -> (forall b a, a = f1 b -> (refltrans R) a (f2 a)) -> (f_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
 Proof.
+  intros R R1 R2 f1 f2 Hunion HR1eqf1 Haf1a HRf2 Hweak.  
   Admitted.
 
 Theorem Z_comp_equiv_Z_comp_weak {A:Type}: forall (R : Rel A), Z_comp R <-> Z_comp_weak R.
@@ -320,8 +321,20 @@ Require Import Morphisms.
 
 Definition Zprop_mod {A:Type} (R eqA:Rel A) := Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
 
+
 Corollary Z_comp_implies_Zprop_mod {A:Type}: forall (R eqA: Rel A), Z_comp R -> Zprop_mod R eqA.
-Admitted.
+Proof.
+  intros R eqA Hcomp.
+  unfold Z_comp in Hcomp.
+  unfold Zprop_mod.
+  intros Heq.
+  destruct Hcomp as [R1 [R2 [f1 [f2 [Hunion [Hf1_is_Z [H1 H2]]]]]]].
+  exists f2.
+  intros a b Hred. split.
+  - split.
+    + admit.
+    + admit.
+  - Admitted.
 
 (** Establish equivalence(?) between Z_comp and Zprop_mod *)
 Theorem Z_comp_equiv_Z_mod {A: Type}: forall (R eqA: Rel A), Z_comp R <-> Zprop_mod R eqA.
