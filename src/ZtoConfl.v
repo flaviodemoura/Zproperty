@@ -290,7 +290,39 @@ Qed.
 Lemma Z_comp_eq {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_! R2) -> (forall a b, R1 a b -> (f1 a) = (f1 b)) -> (forall a, (refltrans R1) a (f1 a)) -> (forall b a, a = f1 b -> (refltrans R) a (f2 a)) -> (f_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
 Proof.
   intros R R1 R2 f1 f2 Hunion HR1eqf1 Haf1a HRf2 Hweak.  
-  Admitted.
+  unfold f_is_Z.
+  unfold f_weak_Z in Hweak.
+  inversion Hunion; subst.
+  clear H.
+  intros a b Hab.
+  split.
+  - induction Hab.
+    + apply HR1eqf1 in H.
+      specialize (HRf2 a).
+      specialize (HRf2 (f1 b)).
+      apply refltrans_composition with (f1 b).
+      * specialize (Haf1a b).
+        induction Haf1a.
+        ** apply refl.
+        ** apply rtrans with b.
+            *** apply union_left.
+                assumption.
+            *** apply IHHaf1a; assumption.
+      * rewrite <- H in *.
+        apply HRf2. reflexivity.
+    + apply Hweak in H.
+      apply H.
+  - induction Hab.
+    + apply HR1eqf1 in H.
+      specialize (HRf2 a).
+      specialize (HRf2 (f1 b)).
+      apply refltrans_composition with (f1 b).
+      * admit.
+      * rewrite H in *.
+        apply HRf2. reflexivity.
+    + apply Hweak in H.
+      apply H.
+Admitted.
 
 Theorem Z_comp_equiv_Z_comp_weak {A:Type}: forall (R : Rel A), Z_comp R <-> Z_comp_weak R.
 Proof.
