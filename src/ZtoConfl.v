@@ -152,12 +152,15 @@ Definition f_is_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((r
 
 Definition Z_comp {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
 
+(* 
 Definition Z_comp' {A:Type} (R :Rel A) := exists (R1 R2: Rel A), R = (R1 !_! R2) -> forall (f1 f2: A -> A), f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
 
 Definition Z_comp'' {A:Type} (R R1 R2: Rel A) := R = (R1 !_! R2) -> forall (f1 f2: A -> A), f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
+ *)
 
 Definition Z_comp_weak {A:Type} (R :Rel A) := exists (R1 R2: Rel A), R = (R1 !_! R2) -> forall (f1: A -> A), f_is_Z R1 f1 -> (forall a b, (refltrans R1) a b -> (refltrans R) (f1 a) (f1 b)) -> (f_is_weak_Z R2 R f1).
 
+(*
 Definition Z_comp2 {A:Type} (R :Rel A) := forall (R1 R2: Rel A), R = (R1 !_! R2) -> exists (f : A -> A), f_is_Z R1 f /\ f_is_Z R2 f.
 
 Lemma Z_comp2_implies_Zprop {A:Type}: forall (R :Rel A), Z_comp2 R -> Zprop R.
@@ -214,6 +217,7 @@ Admitted.
     
   
 Definition Z_comp3 {A:Type} (R :Rel A) := exists (R1 R2 R3: Rel A), R = ((R1 !_! R2) !_! R3) -> forall (f1 : A -> A), f_is_Z R1 f1 /\ f_is_Z R2 f1 /\ f_is_Z R3 f1.
+ *)
 
 Theorem comp_Z_implies_Z {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_! R2) -> f_is_Z R1 f1 -> (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_is_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
 Proof.
@@ -305,6 +309,7 @@ Proof.
   - assumption.
 Admitted.
 
+(*
 Theorem Z_comp_equiv_Z_comp_weak {A:Type}: forall (R : Rel A), Z_comp R <-> Z_comp_weak R.
 Proof.
   unfold Z_comp.
@@ -329,11 +334,11 @@ Proof.
     exists x.
     exists x0.
 Admitted.
+ *)
 
 Require Import Morphisms.
 
 Definition Zprop_mod {A:Type} (R eqA : Rel A) := Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
-
 
 Corollary Z_comp_implies_Zprop_mod {A:Type}: forall (R eqA: Rel A), Z_comp R -> Zprop_mod R eqA.
 Proof.
@@ -342,40 +347,25 @@ Proof.
   unfold Zprop_mod.
   intros Heq.
   destruct Hcomp as [R1 [R2 [f1 [f2 [Hunion [Hf1_is_Z [H1 H2]]]]]]].
-  exists f2.
-  intros a b Hred. split.
-  - split.
-    + admit.
-    + admit.
-  - Admitted.
-
-(** Establish equivalence(?) between Z_comp and Zprop_mod *)
-Theorem Z_comp_equiv_Z_mod {A: Type}: forall (R eqA: Rel A), Z_comp R <-> Zprop_mod R eqA.
-Proof.
-  unfold Z_comp.
-  unfold Zprop_mod.
-  split.
-  - intros.
-    destruct H.
-    destruct H.
-    destruct H.
-    destruct H.
-    destruct H.
-    destruct H1.
-    destruct H2.
-    destruct H3.
-    exists x2.
-    intros.
-    split.
-    + inversion H; subst.
-      unfold f_weak_Z in H4.
-      admit.
-    + intros.
-      apply f_equal.
-      admit.
-  - intros.
 Admitted.
 
+(* Não faz sentido
+Lemma Zprop_mod_implies_Z_comp {A:Type}: forall (R eqA: Rel A), Zprop_mod R eqA -> Z_comp R.
+Proof.
+  intros R eq Hzmod.
+  unfold Zprop_mod in Hzmod.
+  unfold Z_comp.
+  exists eq. exists R. 
+Admitted.
+
+(** Equivalence between Z_comp and Zprop_mod *)
+Theorem Z_comp_equiv_Zprop_mod {A: Type}: forall (R eqA: Rel A), Z_comp R <-> Zprop_mod R eqA.
+Proof.
+  intros E eq; split.
+  - apply Z_comp_implies_Zprop_mod.
+  - apply Zprop_mod_implies_Z_comp.
+Qed.    
+*)
 
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
