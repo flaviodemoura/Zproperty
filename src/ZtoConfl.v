@@ -287,10 +287,23 @@ Proof.
   - apply Z_comp_implies_Z.
 Qed.
 
-Lemma Z_comp_eq {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_! R2) -> (forall a b, R1 a b -> (f1 a) = (f1 b)) -> (forall a, (refltrans R1) a (f1 a)) -> (forall b a, a = f1 b -> (refltrans R) a (f2 a)) -> (f_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
+Lemma Z_comp_eq {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_! R2) -> (forall a b, R1 a b -> (f1 a) = (f1 b)) -> (forall a, (refltrans R1) a (f1 a)) -> (forall b a, a = f1 b -> (refltrans R) a (f2 a)) -> (f_is_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
 Proof.
   intros R R1 R2 f1 f2 Hunion HR1eqf1 Haf1a HRf2 Hweak.  
-  Admitted.
+  apply comp_Z_implies_Z with R1 R2.
+  - assumption.
+  - unfold f_is_Z.
+    intros a b Hab; split.
+    + apply HR1eqf1 in Hab.
+      rewrite Hab.
+      apply Haf1a.
+    + apply HR1eqf1 in Hab.
+      rewrite Hab.
+      apply refl.
+  - admit.
+  - assumption.
+  - assumption.
+Admitted.
 
 Theorem Z_comp_equiv_Z_comp_weak {A:Type}: forall (R : Rel A), Z_comp R <-> Z_comp_weak R.
 Proof.
