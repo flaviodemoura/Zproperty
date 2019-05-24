@@ -95,9 +95,7 @@ Proof.
     + assumption.
     + apply refl.
   - apply IHrefltrans in H2.
-    apply rtrans with b.
-    + assumption.
-    + assumption.
+    apply rtrans with b; assumption.
 Qed.
 
 Lemma trans_to_refltrans {A:Type} (R: Rel A): forall a b, trans R a b -> refltrans R a b.
@@ -110,8 +108,7 @@ Proof.
   - apply rtrans with b; assumption.
 Qed.    
 
-Lemma CompReflTrans {A} (R: Rel A): forall a b c, refltrans R a b -> refltrans R b c -> refltrans R a c
-.
+Lemma CompReflTrans {A} (R: Rel A): forall a b c, refltrans R a b -> refltrans R b c -> refltrans R a c.
 Proof.
 intros a b c H H0.
 induction H.
@@ -298,23 +295,19 @@ Proof.
   split.
   - induction Hab.
     + apply HR1eqf1 in H.
-      specialize (HRf2 a).
-      specialize (HRf2 (f1 b)).
       apply refltrans_composition with (f1 b).
       * specialize (Haf1a b).
         induction Haf1a.
-        ** apply refl.
-        ** apply rtrans with b.
+        **  apply refl.
+        **  apply rtrans with b.
             *** apply union_left.
                 assumption.
             *** apply IHHaf1a; assumption.
       * rewrite <- H in *.
-        apply HRf2. reflexivity.
-    + apply Hweak in H.
-      apply H.
+        apply HRf2 with b; assumption.
+    + apply Hweak; assumption.
   - inversion Hab; subst.
-    + assert (H1 := H).
-      apply HR1eqf1 in H.
+    + apply HR1eqf1 in H.
       assert (H2: ((f2 # f1) a) = ((f2 # f1) b)).
       {
         unfold comp.
@@ -322,8 +315,7 @@ Proof.
       }
       rewrite H2.
       apply refl.
-    + apply Hweak in H.
-      apply H.
+    + apply Hweak; assumption.
 Qed.
 
 Theorem Z_comp_equiv_Z_comp_weak {A:Type}: forall (R : Rel A), Z_comp R <-> Z_comp_weak R.
@@ -592,7 +584,7 @@ split.
 Qed.
 
 
-Definition CompZ {A:Type} (R R1 R2: Rel A) := exists w1 w2:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
+(* Definition CompZ {A:Type} (R R1 R2: Rel A) := exists w1 w2:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)). *)
 
 
 (** Comparing regularity *)
