@@ -345,31 +345,22 @@ Admitted.
 
 Require Import Morphisms.
 
-Definition Zprop_mod {A:Type} (R eqA : Rel A) := Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
-
-Corollary Z_comp_implies_Zprop_mod {A:Type}: forall (R eqA: Rel A), Z_comp R -> Zprop_mod R eqA.
+Definition Zprop_mod {A:Type} (R : Rel A) := exists eqA, Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
+  
+Corollary Z_comp_implies_Zprop_mod {A:Type}: forall (R : Rel A), Z_comp R -> Zprop_mod R.
 Proof.
-  intros R eqA Hcomp.
+  intros R Hcomp.
   unfold Z_comp in Hcomp.
   unfold Zprop_mod.
-  intros Heq.
   destruct Hcomp as [R1 [R2 [f1 [f2 [Hunion [Hf1_is_Z [H1 H2]]]]]]].
-  unfold f_is_Z in Hf1_is_Z.
-  exists f2. intros a b Hred; subst.
+  exists R1.
+  intros Heq.
+  exists f1. intros a b Hred; subst.
   inversion Hred; subst. 
   - split.
     + split.
-      * admit.
-      * apply H1.
-        apply rtrans with b.
-        ** assumption.
-        ** apply refl.
-    + admit.
-  - split.
-    + split.
-      * admit.
-      * admit.
-    + Admitted.
+      * unfold f_is_Z in Hf1_is_Z.
+ Admitted.
 
 (** Establish equivalence(?) between Z_comp and Zprop_mod 
 Theorem Z_comp_equiv_Z_mod {A: Type}: forall (R eqA: Rel A), Z_comp R <-> Zprop_mod R eqA.
