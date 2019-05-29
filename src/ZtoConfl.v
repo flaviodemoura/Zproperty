@@ -356,10 +356,32 @@ Proof.
   exists R1.
   intros Heq.
   exists f1. intros a b Hred; subst.
-  inversion Hred; subst. 
+  inversion Hred; subst.
+  - split.
+    + clear Hred.
+      split.
+      * apply Hf1_is_Z in H.
+        destruct H.
+        clear H0.
+        induction H.
+        **  apply refl.
+        **  apply rtrans with b.
+            *** apply union_left; assumption.
+            *** apply IHrefltrans.
+      * apply Hf1_is_Z in H.
+        destruct H.
+        clear H.
+        induction H0.
+        **  apply refl.
+        **  apply rtrans with b0.
+            *** apply union_left; assumption.
+            *** apply IHrefltrans.
+    + admit.
   - split.
     + split.
-      * unfold f_is_Z in Hf1_is_Z.
+      * admit.
+      * admit.
+    + admit.
  Admitted.
 
 (** Establish equivalence(?) between Z_comp and Zprop_mod 
