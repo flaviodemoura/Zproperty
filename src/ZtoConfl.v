@@ -269,11 +269,8 @@ Proof.
   unfold Z_comp_new in H.
   apply H in Hunion.
   clear H.
+  destruct Hunion as [f1 [f2 [H1 [H2 [H3 H4]]]]].
   apply f_is_Z_implies_Zprop with (f2 # f1).
-
-
-
-  
 Admitted.
   
 Lemma Z_implies_Z_comp {A:Type}: forall (R : Rel A), Zprop R -> Z_comp R.
@@ -409,6 +406,15 @@ Proof.
   unfold Z_comp.
  *)
 
+Corollary Z_comp_new_implies_Zprop_mod {A:Type}: forall (R R1 R2 : Rel A), R = R1 !_! R2 -> Z_comp_new R -> Zprop_mod R.
+Proof.
+  intros R R1 R2 Hunion Hnew.
+  unfold Z_comp_new in Hnew.
+  apply Hnew in Hunion.
+  clear Hnew.
+  destruct Hunion as [f1 [f2 [H1 [H2 [H3 H4]]]]].
+Admitted.  
+  
 Corollary Z_comp_implies_Zprop_mod {A:Type}: forall (R : Rel A), Z_comp R -> Zprop_mod R.
 Proof.
   intros R Hcomp.
