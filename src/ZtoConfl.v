@@ -20,27 +20,24 @@ Definition Rel (A:Type) := A -> A -> Prop.
 
 Inductive trans {A} (red: Rel A) : Rel A :=
 | singl: forall a b,  red a b -> trans red a b
-| transit: forall b a c,  red a b -> trans red b c -> trans red a c
-.
+| transit: forall b a c,  red a b -> trans red b c -> trans red a c.
 
 Arguments transit {A} {red} _ _ _ _ _ .
 
-Lemma trans_composition {A}:
-  forall (R: Rel A) t u v, trans R t u -> trans R u v -> trans R t v
-.
+Lemma trans_composition {A} (R: Rel A):
+  forall t u v, trans R t u -> trans R u v -> trans R t v.
 Proof.
-  intros R t u v H1 H2. induction H1.
+  intros t u v H1 H2. induction H1.
   - apply transit with b; assumption.
   - apply transit with b.
     + assumption.
     + apply IHtrans; assumption.
 Qed.
 
-Lemma transit' {A:Type}:
-  forall (R: Rel A) t u v, trans R t u -> R u v -> trans R t v
-.
+Lemma transit' {A:Type} (R: Rel A):
+  forall t u v, trans R t u -> R u v -> trans R t v.
 Proof.
-  intros R t u v H1 H2. induction H1.
+  intros t u v H1 H2. induction H1.
   - apply transit with b. 
     + assumption.
     + apply singl.
@@ -49,10 +46,10 @@ Proof.
     apply transit with b; assumption.
 Qed.
 
-Lemma trans_composition' {A}:
-  forall (R: Rel A) t v, trans R t v -> (R t v \/ exists u, trans R t u /\ R u v).
+Lemma trans_composition' {A} (R: Rel A):
+  forall t v, trans R t v -> (R t v \/ exists u, trans R t u /\ R u v).
 Proof.
- intros R t v H.
+ intros t v H.
  induction H.
  - left; assumption.
  - right.
@@ -73,24 +70,22 @@ Qed.
 
 Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
 | refl: forall a, (refltrans R) a a
-| rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c
-.
+| rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c.
 
-Lemma refltrans_composition {A}:
-  forall (R: Rel A) t u v, refltrans R t u -> refltrans R u v -> refltrans R t v
-.
+Lemma refltrans_composition {A} (R: Rel A):
+  forall t u v, refltrans R t u -> refltrans R u v -> refltrans R t v.
 Proof.
-  intros R t u v H1 H2. induction H1.
+  intros t u v H1 H2. induction H1.
   - assumption.
   - apply rtrans with b.
     + assumption.
     + apply IHrefltrans; assumption.
 Qed.
 
-Lemma refltrans_composition' {A}:
-    forall (R: Rel A) t u v, refltrans R t u -> R u v -> refltrans R t v.
+Lemma refltrans_composition' {A} (R: Rel A):
+    forall t u v, refltrans R t u -> R u v -> refltrans R t v.
 Proof.
-  intros R t u v H1 H2. induction H1.
+  intros t u v H1 H2. induction H1.
   - apply rtrans with v.
     + assumption.
     + apply refl.
@@ -147,13 +142,17 @@ Notation "f1 # f2" := (comp f1 f2) (at level 40).
 
 Definition f_is_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R')  b (f a) /\ (refltrans R') (f a) (f b)). 
 
-Definition Z_comp {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
+Definition Z_comp {A:Type} (R :Rel A) := forall (R1 R2: Rel A), R = (R1 !_! R2) -> exists (f1 f2: A -> A), f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
 
-Definition Z_comp' {A:Type} (R :Rel A) := exists (R1 R2: Rel A), R = (R1 !_! R2) -> forall (f1 f2: A -> A), f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
+(*
+Definition Z_comp' {A:Type} (R :Rel A) := forall (R1 R2: Rel A), R = (R1 !_! R2) -> forall (f1 f2: A -> A), f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
+ *)
 
-Definition Z_comp'' {A:Type} (R R1 R2: Rel A) := R = (R1 !_! R2) -> forall (f1 f2: A -> A), f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
+Definition Z_comp' {A:Type} (R R1 R2: Rel A) := R = (R1 !_! R2) -> exists (f1 f2: A -> A), f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
 
+(*
 Definition Z_comp_weak {A:Type} (R :Rel A) := exists (R1 R2: Rel A), R = (R1 !_! R2) -> forall (f1: A -> A), f_is_Z R1 f1 -> (forall a b, (refltrans R1) a b -> (refltrans R) (f1 a) (f1 b)) -> (f_is_weak_Z R2 R f1).
+ *)
 
 Definition Z_comp2 {A:Type} (R :Rel A) := forall (R1 R2: Rel A), R = (R1 !_! R2) -> exists (f : A -> A), f_is_Z R1 f /\ f_is_Z R2 f.
 
@@ -180,13 +179,13 @@ Lemma Zprop_implies_Z_comp2 {A:Type}: forall (R :Rel A), Zprop R -> Z_comp2 R.
 Proof.
   intros R HZprop.
   unfold Zprop in HZprop.
-  inversion HZprop.
+  destruct HZprop.
   unfold Z_comp2.
   intros R1 R2 Hunion.
   rewrite Hunion in H.
 Admitted.  
 
-  
+(*
 Definition Z_comp2' {A:Type} (R R1 R2: Rel A) := forall (f : A -> A), R = (R1 !_! R2) -> f_is_Z R1 f /\ f_is_Z R2 f.
 
 Lemma Z_comp2'_implies_Z_comp'' {A:Type}: forall (R R1 R2 :Rel A), Z_comp2' R R1 R2 -> Z_comp'' R R1 R2.
@@ -211,6 +210,7 @@ Admitted.
     
   
 Definition Z_comp3 {A:Type} (R :Rel A) := exists (R1 R2 R3: Rel A), R = ((R1 !_! R2) !_! R3) -> forall (f1 : A -> A), f_is_Z R1 f1 /\ f_is_Z R2 f1 /\ f_is_Z R3 f1.
+ *)
 
 Theorem comp_Z_implies_Z {A:Type}: forall (R R1 R2 :Rel A) (f1 f2: A -> A), R = (R1 !_! R2) -> f_is_Z R1 f1 -> (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_is_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
 Proof.
@@ -252,6 +252,8 @@ Lemma Z_comp_implies_Z {A:Type}: forall (R :Rel A), Z_comp R -> Zprop R.
 Proof.
   intros R H.
   unfold Z_comp in H.
+  unfold Zprop.
+  assert (H' := H R R).
   destruct H as [ R1 [ R2 [f1 [f2 [H0 [H1 [H2 [H3 H4]]]]]]]].
   apply f_is_Z_implies_Zprop with (f2 # f1).
   apply comp_Z_implies_Z with R1 R2; assumption.
@@ -345,7 +347,47 @@ Admitted.
 
 Require Import Morphisms.
 
-Definition Zprop_mod {A:Type} (R : Rel A) := exists eqA, Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
+Definition Zprop_mod {A:Type} (R : Rel A) := forall eqA, Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
+
+Definition Zprop_mod2 {A:Type} (R eqA : Rel A) := Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
+
+Definition Zprop_mod3 {A:Type} (R : Rel A) := exists eqA, Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
+
+Lemma Zprop_mod_implies_Zprop_mod2 {A:Type}: forall (R eqA : Rel A), Zprop_mod R -> Zprop_mod2 R eqA. 
+Proof.
+  intros R eqA Hmod.
+  unfold Zprop_mod in Hmod.
+  unfold Zprop_mod2.
+  intros HeqA.
+  apply Hmod in HeqA.
+  assumption.
+Qed.
+
+Lemma Zprop_mod2_implies_Zprop_mod3 {A:Type}: forall (R eqA : Rel A), Zprop_mod2 R eqA -> Zprop_mod3 R. 
+Proof.
+  intros R eqA Hmod2.
+  unfold Zprop_mod2 in Hmod2.
+  unfold Zprop_mod3.
+  exists eqA.
+  intros HeqA.
+  apply Hmod2 in HeqA.
+  assumption.
+Qed.
+
+Lemma Zprop_mod3_implies_Zprop_mod {A:Type}: forall (R eqA : Rel A), Zprop_mod3 R -> Zprop_mod R. 
+Proof.
+  intros R eqA Hmod3.
+  unfold Zprop_mod3 in Hmod3.
+  unfold Zprop_mod.
+  intros eqA' HeqA'.
+Admitted.
+
+Corollary Zprop_mod_implies_Z_comp {A:Type}: forall (R eqA: Rel A), Zprop_mod2 R eqA -> Z_comp R.
+Proof.
+  intros R eqA H.
+  unfold Zprop_mod2 in H.
+  unfold Z_comp.
+
   
 Corollary Z_comp_implies_Zprop_mod {A:Type}: forall (R : Rel A), Z_comp R -> Zprop_mod R.
 Proof.
@@ -376,7 +418,9 @@ Proof.
         **  apply rtrans with b0.
             *** apply union_left; assumption.
             *** apply IHrefltrans.
-    + admit.
+    + intros c d HR1.
+      inversion Heq.
+      admit.
   - split.
     + split.
       * admit.

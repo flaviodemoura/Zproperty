@@ -1824,6 +1824,7 @@ Qed. *)
 Lemma ex_sub: forall t t' u L, (forall x, x \notin L -> t^x ->_ex t'^x) -> (t[u]) ->_ex (t'[u]). 
 Proof.
 Admitted.
+*)
 
 Lemma ex_sub_in: forall u u' t, u ->_ex u' -> (t[u]) ->_ex (t[u']). 
 Proof.
@@ -2023,6 +2024,81 @@ Proof.
   (*     apply ex_trans_abs. *)
   (*     apply IH'. *)
   (*     admit. *)
+(*
+          apply reg_rule_var.
+        ** reflexivity.
+    + intros Hbody IH.
+      unfold open.
+      simpl.
+      apply singl.
+      unfold ex.
+      unfold red_ctx_mod_eqC.
+      exists (pterm_bvar (S n) [u]).
+      exists (pterm_bvar (S n)).
+      split.
+      * reflexivity.
+      * split.
+        ** unfold x_ctx.
+           apply ES_redex.
+           apply reg_rule_gc.
+           intro H.
+           inversion H.
+        ** reflexivity.
+  - intros v IH Hbody u Hterm.
+    unfold open; simpl.
+    apply singl.
+    unfold ex.
+    unfold red_ctx_mod_eqC.
+    exists (pterm_fvar v [u]).
+    exists (pterm_fvar v).
+    split.
+    + reflexivity.
+    + split.
+      * unfold x_ctx.
+        apply ES_redex.
+        apply reg_rule_gc.
+        intro H.
+        inversion H.
+      * reflexivity.
+  - intros t1 t2 IH Hbody u Hterm.
+    apply transit with (pterm_app (t1[u]) (t2[u])).
+    + unfold ex.
+      unfold red_ctx_mod_eqC.
+      exists (pterm_app t1 t2 [u]).
+      exists (pterm_app (t1 [u]) (t2 [u])).
+      split.
+      * reflexivity.
+      * split.
+        ** unfold x_ctx.
+           apply ES_redex.
+           apply reg_rule_app.
+        ** reflexivity.
+    + unfold open. simpl.
+      apply body_app in Hbody.
+      destruct Hbody as [Hbody1 Hbody2].
+      apply ex_trans_app.
+      * apply IH.
+        ** simpl.
+           rewrite <- Nat.add_succ_r.
+           apply Nat.lt_add_pos_r.
+           apply Nat.lt_0_succ.
+        ** assumption.
+        ** assumption.
+      * apply IH.
+        ** simpl.
+           rewrite <- Nat.add_succ_l.
+           rewrite plus_comm.
+           apply Nat.lt_add_pos_r.
+           apply Nat.lt_0_succ.
+        ** assumption.
+        ** assumption.
+  - intros t1 IH Hbody u Hterm.
+    apply transit with (pterm_abs ((&t1)[u])).
+    + admit.
+    + apply ex_trans_abs with (fv t1).
+      
+        admit. *)
+
     (* case n. *)
     (* + intros Hbody u. *)
     (*   unfold open; simpl. *)
