@@ -259,11 +259,21 @@ Proof.
   apply comp_Z_implies_Z with R1 R2; assumption.
 Qed.
 
-Lemma Z_comp_new_implies_Z {A:Type}: forall (R :Rel A), Z_comp_new R -> Zprop R.
+Theorem comp_Z_new_implies_Z {A:Type}: forall (R R1 R2 :Rel A), R = (R1 !_! R2) -> exists (f1 f2: A -> A), f_is_Z R1 f1 -> (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) -> (forall a b, b = f1 a -> (refltrans R) b (f2 b)) -> (f_is_weak_Z R2 R (f2 # f1)) -> f_is_Z R (f2 # f1).
 Proof.
-  intros R H.
+  Admitted.
+  
+Lemma Z_comp_new_implies_Z {A:Type}: forall (R R1 R2 :Rel A), R = R1 !_! R2 -> Z_comp_new R -> Zprop R.
+Proof.
+  intros R R1 R2 Hunion H.
   unfold Z_comp_new in H.
-  unfold Zprop.
+  apply H in Hunion.
+  clear H.
+  apply f_is_Z_implies_Zprop with (f2 # f1).
+
+
+
+  
 Admitted.
   
 Lemma Z_implies_Z_comp {A:Type}: forall (R : Rel A), Zprop R -> Z_comp R.
