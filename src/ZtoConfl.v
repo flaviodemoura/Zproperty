@@ -382,6 +382,8 @@ Require Import Setoid.
 
 Definition Zprop_mod {A:Type} (R : Rel A) := exists eqA, Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
 
+Definition Zprop_mod' {A:Type} (R : Rel A) := exists eqA, Equivalence eqA /\  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
+
 Definition Zprop_mod2 {A:Type} (R : Rel A) := forall eqA, Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
 
 Definition Zprop_mod3 {A:Type} (R eqA : Rel A) := Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
@@ -432,11 +434,18 @@ Proof.
   destruct Hunion as [f1 [f2 [H1 [H2 [H3 H4]]]]].
 Admitted.
 
-Lemma Zprop_mod_impliesZ_comp_eq {A:Type}: forall (R: Rel A), Zprop_mod R -> Z_comp_eq_def R.
+Lemma Zprop_mod_implies_Z_comp_eq {A:Type}: forall (R: Rel A), Zprop_mod R -> Z_comp_eq_def R.
 Proof.
   Admitted.
 
-Lemma Zprop_mod_implies_Z_comp_new_eq {A:Type}: forall (R: Rel A), Zprop_mod R -> Z_comp_new_eq_def R.
+Lemma Zprop_mod_implies_Z_comp_new_eq {A:Type}: forall (R: Rel A), Zprop_mod' R -> Z_comp_new_eq_def R.
+Proof.
+  intros R H.
+  unfold Zprop_mod' in H.
+  destruct H as [eq [Heq [wb H]]].
+  unfold Z_comp_new_eq_def.
+  intros R1 R2 Hcomp.
+  exists wb. 
 Admitted.
 
 (*
