@@ -345,6 +345,10 @@ Proof.
     + apply Hweak; assumption.
 Qed.
 
+Definition Z_comp_eq_def {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ (forall a b, R1 a b -> (f1 a) = (f1 b)) /\ (forall a, (refltrans R1) a (f1 a)) /\ (forall b a, a = f1 b -> (refltrans R) a (f2 a)) /\ (f_is_weak_Z R2 R (f2 # f1)).
+
+Definition Z_comp_new_eq_def {A:Type} (R :Rel A) := forall (R1 R2: Rel A), R = (R1 !_! R2) -> exists (f1 f2: A -> A), (forall a b, R1 a b -> (f1 a) = (f1 b)) /\ (forall a, (refltrans R1) a (f1 a)) /\ (forall b a, a = f1 b -> (refltrans R) a (f2 a)) /\ (f_is_weak_Z R2 R (f2 # f1)).
+
 (*
 Theorem Z_comp_equiv_Z_comp_weak {A:Type}: forall (R : Rel A), Z_comp R <-> Z_comp_weak R.
 Proof.
@@ -426,8 +430,24 @@ Proof.
   apply Hnew in Hunion.
   clear Hnew.
   destruct Hunion as [f1 [f2 [H1 [H2 [H3 H4]]]]].
-Admitted.  
-  
+Admitted.
+
+Lemma Zprop_mod_impliesZ_comp_eq {A:Type}: forall (R: Rel A), Zprop_mod R -> Z_comp_eq_def R.
+Proof.
+  Admitted.
+
+Lemma Zprop_mod_implies_Z_comp_new_eq {A:Type}: forall (R: Rel A), Zprop_mod R -> Z_comp_new_eq_def R.
+Admitted.
+
+(*
+Lemma Z_comp_eq_implies_Zprop_mod {A:Type}: forall (R: Rel A), Z_comp_eq_def R -> Zprop_mod R.
+Proof.
+  Admitted.
+
+Lemma Z_comp_new_eq_implies_Zprop_mod {A:Type}: forall (R: Rel A), Z_comp_new_eq_def R -> Zprop_mod R.
+Admitted.
+ *)
+
 Corollary Z_comp_implies_Zprop_mod {A:Type}: forall (R : Rel A), Z_comp R -> Zprop_mod R.
 Proof.
   intros R Hcomp.
