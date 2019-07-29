@@ -1836,10 +1836,12 @@ Proof.
   - rewrite Heq.
     apply refl.
   - split.
-    + apply ES_sub_in; assumption.
+    + apply ES_sub_in.
+      * assumption.
+      * admit.
     + rewrite Heq'.
       apply refl.
-Qed. *)
+Admitted.
   
 Corollary term_regular_ex: term_regular ex.
 Proof.
@@ -2604,7 +2606,7 @@ Proof.
     + apply IHHlex; assumption.
 Qed.
 
-Lemma BxZlex: forall a b, a ->_lex b -> b ->_lex* (sd a) /\ (sd a) ->_lex* (sd b).
+Lemma Bx_Z_lex: forall a b, a ->_lex b -> b ->_lex* (sd a) /\ (sd a) ->_lex* (sd b).
 (* begin hide *)
 Proof.
   intros a b Hlex.
@@ -2617,8 +2619,8 @@ Proof.
     + split.
       * inversion H0; subst.
         simpl sd.
-        apply CompReflTrans with (sd t1 [sd u0]).
-        ** apply CompReflTrans with (sd t1 [u0]).
+        apply refltrans_composition with (sd t1 [sd u0]).
+        ** apply refltrans_composition with (sd t1 [u0]).
            *** pick_fresh y.
                apply ES_lex_sub with y.
                **** assumption.
@@ -2642,15 +2644,15 @@ Proof.
       * Admitted.
 (* end hide *)
 
-Theorem Zlex: Zprop lex.
+Theorem Z_lex: Z_prop lex.
 Proof.
-  unfold Zprop.
+  unfold Z_prop.
   exists sd.
-  apply BxZlex.
+  apply Bx_Z_lex.
 Qed.
 
 Corollary lex_is_confluent: Confl lex.
 Proof.
-  apply Zprop_implies_Confl.
-  apply Zlex.
+  apply Z_prop_implies_Confl.
+  apply Z_lex.
 Qed.
