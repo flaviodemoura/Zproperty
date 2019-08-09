@@ -1,0 +1,182 @@
+#+options: toc:nil tags:nil <:nil ^:nil tex:t num:t
+#+options: author:t email:t
+#+creator: Emacs 26.1 (Org mode 9.2.2)
+#+TITLE: A Formal Characterization of Confluence
+#+AUTHOR: Leandro O. Rezende, Flávio L. C. de Moura
+#+email: flaviomoura@unb.br
+#+date: \today
+#+select_tags: export
+#+exclude_tags: noexport
+#+latex_class: article
+
+#+latex_header: \usepackage[all]{xy}
+#+latex_header: \usepackage{proof,amsthm}
+
+#+latex_header: \newtheorem{theorem}{Theorem}[section]
+#+latex_header: \newtheorem{definition}{Definition}[section]
+#+latex_header: \newtheorem{lemma}{Lemma}[section]
+
+#+latex_header: \newcommand{\tto}{\twoheadrightarrow}
+
+* Organização                                                      :noexport:
+
+** Como gerar pdf com lncs
+
+Da forma como está, o presente arquivo gera um pdf na classe
+article. Para gerar o documento na classe lncs, precisamos exportar o
+corpo (C-b) como tex, e compilar separadamente o arquivo
+2019Mai_ZpropertyLOPSTR.tex
+
+** Como gerar pdf com entcs
+
+Da forma como está, o presente arquivo gera um pdf na classe
+article. Para gerar o documento na classe entcs, precisamos exportar o
+corpo (C-b) como tex, e compilar separadamente o arquivo
+2019Abr_lsfaZprop.tex
+
+** Referências complementares
+
+cite:book143657
+cite:AM14
+cite:BN98
+cite:CWC07
+cite:zproperty,
+cite:2016arXiv160903139N
+
+** We have a different proof (from Delia and V. Oostrom).
+
+** pages limit: 13 pages including references
+
+* Introduction
+
+An Abstract Reduction System (ARS) is a pair \((A,R)\) formed by a set
+\(A\) and a binary relation \(R\) over this set. When \((a,b) \in R\),
+we write \(a R b\) or \(a \to_R b\) and we say that \(a\) /reduces/ to
+\(b\) in one step. A finite reduction chain \(a \to_R a_1 \to_R \ldots
+\to_R a_n\) means that \(a\) reduces to \(a_n\) in \(n\) steps, and we
+write \(a \to_R^n a_n\). It is usual to write \(\to\) instead of
+\(\to_R\), when \(R\) is clear. In this way, \(\to^+\)
+(resp. \(\tto\)) denotes the transitive closure (resp. reflexive
+transitive closure) of \(\to\). Several problems can be expressed in
+terms of ARS (cf. cite:BN98,DershowitzJ90,terese03), and in this work
+we study characterization of the confluence property, which concerns
+the determinism of the reduction relation. More precisely, given an
+ARS \((A,\to)\), an element \(a\in A\) usually can be reduced in
+different ways according to \(\to\). Informally, the confluence
+property states that, no matter how the reduction is done, there is
+always a way to join reduction paths. The following diagram is used to
+express this idea:
+
+\[
+  \xymatrix{
+    & a \ar@{->>}[dl] \ar@{->>}[dr] & \\
+    b \ar@{.>>}[dr] &  & c \ar@{.>>}[dl] \\
+    & d & 
+  }
+\]
+
+The diagram states that if \(a\) can be reduced in two different ways
+to \(b\) and \(c\), then there exists an element \(d\) in \(A\) such
+that both \(b\) and \(c\) can be reduced to \(d\). 
+
+The paper is organized as follows: In Section [[The formalization]], we present 
+
+* Yet another proof that Z property implies confluence
+
+In this section, we prove that Z property implies confluence for
+ARSs. The novelty of this proof is that it is direct (for instance,
+cite:2016arXiv160903139N establishes confluence from Z property via
+semi-confluence), and does not rely on the law of excluded middle, or
+other classical axioms
+(cf. cite:kesner09:_theor_explic_subst_with_safe_full_compos). In
+addition, it is formalized in the Coq proof assistant. The theorem is as follows:
+
+#+begin_theorem
+  If the ARS \((A,\to)\) has the Z property then it is confluent.
+#+end_theorem
+
+The proof is as follows: Let \(a\in A\). Suppose that
+
+\[
+  \xymatrix{
+    & a \ar@{->>}[dl] \ar@{->>}[dr] & \\
+    b  &  & c 
+  }
+\]
+
+\noindent for some \(b,c\in A\). We proceed by induction on \(a \tto
+b\). If \(a=b\) the result is trivial, so suppose that \(a \to a' \tto
+b\) for some \(a'\in A\). 
+
+\[
+  \xymatrix{
+    & & a \ar@{->}[dl] \ar@{->>}[ddrr] & & \\
+    & b' \ar@{->>}[dl] \ar@[blue]@{->>}[dr] & & & \\
+    b \ar@[red]@{->>}[ddrr] & & x \ar@[red]@{->>}[dd] & &  c \ar@{.>>}[ddll] \\
+    & & & & & \\
+    & & d & &
+   }
+  \]
+
+\[
+  \xymatrix{
+    & & a \ar@{->>}[dd] \ar@{->>}[ddrr] & & \\
+    & b' \ar@{->>}[dl] \ar@{->>}[dr] & & & \\
+    b \ar@{.>>}[ddrr] & & f(a) & &  c \ar@{.>>}[ddll] \\
+    & & & & & \\
+    & & d & &
+   }
+  \]
+
+  \[
+      \xymatrix{
+        & & a \ar@{->>}[dd] \ar@{->>}[ddrr] & & \\
+        & b' \ar@{->>}[dl] \ar@{->>}[dr] & & & \\
+        b \ar@{->>}[ddrr] & & f(a) \ar@{->>}[dd] & &  a \ar@{->>}[ll] \\
+        & & & & & \\
+        & & d & &
+      }
+    \]
+
+  \[
+       \xymatrix{
+        & & a \ar@{->>}[dd] \ar@{->}[dr] & & \\
+        & b' \ar@{->>}[dl] \ar@{->>}[dr] \ar@[blue]@{->>}[ddr] & & c' \ar@{->>}[dr] \ar@[blue]@{->>}[ddl] & \\
+        b \ar@[red]@{->>}[ddrr] & & f(a) & &  c  \ar@[red]@{->>}[ddll] \\
+        & & f(c') & & & \\
+        & & d  & & 
+      }
+     \]
+
+ \[
+       \xymatrix{
+        & & a \ar@{->>}[dd] \ar@{->}[dr] & & \\
+        & b' \ar@{->>}[dl] \ar@{->>}[dr] & & c' \ar@{->>}[dr] \ar@{->>}[dl] & \\
+        b \ar@{->>}[ddrr] \ar@{->>}[ddrr] & & f(a) \ar@{->>}[d] & &  c  \ar@{->>}[ddll] \\
+        & & f(c') & & & \\
+        & & d  & & 
+      }
+     \]
+* The formalization
+
+In cite:ZPropertyDraft, a sufficient condition for confluence is given
+by the so called Z property:
+
+#+begin_definition
+ Let \((A,\to)\) be an ARS. The system \((A,\to)\) has the Z property,
+ if there exists a map \(f:A \to A\) such that \(a \to b\) implies
+ that \(b \tto f(a)\) and \(f(a) \tto f(b)\):
+    
+ \[
+  \xymatrix{
+   a \ar[r] &  b \ar@{.>>}[dl]\\
+   f(a) \ar@{.>>}[r] & f(b) \\ 
+  }
+ \]
+#+end_definition
+
+
+* Conclusions and Future Work
+
+bibliographystyle:alpha
+bibliography:~/Dropbox/bibliography/references.bib 
