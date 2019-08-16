@@ -271,9 +271,15 @@ Qed.
 
 Definition Z_comp_eq {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ (forall a b, R1 a b -> (f1 a) = (f1 b)) /\ (forall a, (refltrans R1) a (f1 a)) /\ (forall b a, a = f1 b -> (refltrans R) a (f2 a)) /\ (f_is_weak_Z R2 R (f2 # f1)).
 
+Definition Z_comp_eq' {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f : A -> A), R = (R1 !_! R2) /\ (forall a b, R1 a b -> (f a) = (f b)) /\ (forall a, (refltrans R2) a (f a)) /\ (f_is_weak_Z R2 R f).
+
 (*
 Definition Z_comp_new_eq {A:Type} (R :Rel A) := forall (R1 R2: Rel A), R = (R1 !_! R2) -> exists (f1 f2: A -> A), (forall a b, R1 a b -> (f1 a) = (f1 b)) /\ (forall a, (refltrans R1) a (f1 a)) /\ (forall b a, a = f1 b -> (refltrans R) a (f2 a)) /\ (f_is_weak_Z R2 R (f2 # f1)).
  *)
+
+Lemma Z_comp_eq_implies_Z_prop' {A:Type}: forall (R : Rel A), Z_comp_eq' R -> Z_prop R.
+Proof.
+Admitted.
 
 Lemma Z_comp_eq_implies_Z_prop {A:Type}: forall (R : Rel A), Z_comp_eq R -> Z_prop R.
 Proof.
@@ -310,6 +316,60 @@ Proof.
       apply refl.
     + apply Hweak; assumption.
 Qed.
+
+(*
+Lemma Z_comp_eq_implies_Z_prop {A:Type}: forall (R : Rel A), Z_comp_eq R -> Z_prop R.
+Proof.
+  unfold Z_comp_eq.
+  unfold Z_prop.
+  intros.
+  destruct H as [R1 [R2 [f1 [f2 [Hunion [HR1eqf1 [Haf1a [HRf2 Hweak]]]]]]]].
+  exists (f2 # f1).
+  inversion Hunion; subst.
+  clear H.
+  intros a b Hab.
+  assert (H':  forall a : A, refltrans R2 a (f1 a)).
+  {
+    admit.
+  }
+  split.
+  - induction Hab.
+    + apply HR1eqf1 in H.
+      apply refltrans_composition with (f1 b).
+      * specialize (H' b).
+        induction H'.
+        **  apply refl.
+        **  apply rtrans with b.
+            *** apply union_right.
+                assumption.
+            *** apply IHH'; assumption.
+
+
+
+
+
+
+        induction Haf1a.
+        **  apply refl.
+        **  apply rtrans with b.
+            *** apply union_left.
+                assumption.
+            *** apply IHHaf1a; assumption.
+      * rewrite <- H in *.
+        apply HRf2 with b; assumption.
+    + apply Hweak; assumption.
+  - inversion Hab; subst.
+    + apply HR1eqf1 in H.
+      assert (H2: ((f2 # f1) a) = ((f2 # f1) b)).
+      {
+        unfold comp.
+        apply f_equal; assumption.
+      }
+      rewrite H2.
+      apply refl.
+    + apply Hweak; assumption.
+Qed.
+*)
 
 Require Import Morphisms.
 

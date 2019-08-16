@@ -1,7 +1,7 @@
 #+options: toc:nil tags:nil <:nil ^:nil tex:t num:t
 #+options: author:t email:t
 #+creator: Emacs 26.1 (Org mode 9.2.2)
-#+TITLE: A Formal Characterization of Confluence
+#+TITLE: A Formal Characterization of Confluence via Z Property
 #+AUTHOR: Leandro O. Rezende, Flávio L. C. de Moura
 #+email: flaviomoura@unb.br
 #+date: \today
@@ -49,8 +49,29 @@ cite:2016arXiv160903139N
 
 * Introduction
 
-An Abstract Reduction System (ARS) is a pair \((A,R)\) formed by a set
-\(A\) and a binary relation \(R\) over this set. When \((a,b) \in R\),
+This work is about confluence, an essential property related to the
+determinism of the computation in the sense that different reduction
+paths all lead to the same result. In general, it is an undecidable
+property that is difficult to be achieved.
+
+A technique proposed by Dehornoy and van Oostrom, called the /Z
+property/, establishes a sufficient condition for the confluence of an
+Abstract Rewriting System (ARS). This technique has been used for
+proving confluence of several rewriting systems in a more direct way
+including \(\lambda\)-calculi with and without explicit substitutions
+cite:kes09,2016arXiv160903139N.
+
+An ARS is a pair \((A,R)\) formed by a set \(A\) and a binary relation
+\(R\) over this set. The decomposition of the binary relation \(R\)
+into sub-relations allows ... For instance, in the
+\(\lambda\)-calculus, the reduction \(\to_{\beta\eta}\) means
+\(\to_{\beta} \cup \to_{\eta}\).
+
+In this work, we
+
+* Abstract Rewriting Systems
+
+ When \((a,b) \in R\),
 we write \(a R b\) or \(a \to_R b\) and we say that \(a\) /reduces/ to
 \(b\) in one step. A finite reduction chain \(a \to_R a_1 \to_R \ldots
 \to_R a_n\) means that \(a\) reduces to \(a_n\) in \(n\) steps, and we
@@ -59,10 +80,9 @@ write \(a \to_R^n a_n\). It is usual to write \(\to\) instead of
 (resp. \(\tto\)) denotes the transitive closure (resp. reflexive
 transitive closure) of \(\to\). Several problems can be expressed in
 terms of ARS (cf. cite:BN98,DershowitzJ90,terese03), and in this work
-we study characterization of the confluence property, which concerns
-the determinism of the reduction relation. More precisely, given an
-ARS \((A,\to)\), an element \(a\in A\) usually can be reduced in
-different ways according to \(\to\). Informally, the confluence
+we study characterization of the confluence property. More precisely,
+given an ARS \((A,\to)\), an element \(a\in A\) usually can be reduced
+in different ways according to \(\to\). Informally, the confluence
 property states that, no matter how the reduction is done, there is
 always a way to join reduction paths. The following diagram is used to
 express this idea:
