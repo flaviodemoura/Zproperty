@@ -277,15 +277,40 @@ Definition Z_comp_eq' {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f : A -> A),
 Definition Z_comp_new_eq {A:Type} (R :Rel A) := forall (R1 R2: Rel A), R = (R1 !_! R2) -> exists (f1 f2: A -> A), (forall a b, R1 a b -> (f1 a) = (f1 b)) /\ (forall a, (refltrans R1) a (f1 a)) /\ (forall b a, a = f1 b -> (refltrans R) a (f2 a)) /\ (f_is_weak_Z R2 R (f2 # f1)).
  *)
 
-Lemma Z_comp_eq_implies_Z_prop' {A:Type}: forall (R : Rel A), Z_comp_eq' R -> Z_prop R.
+Lemma Z_comp_eq'_implies_Z_prop {A:Type}: forall (R : Rel A), Z_comp_eq' R -> Z_prop R.
 Proof.
-Admitted.
+  unfold Z_comp_eq'.
+  unfold Z_prop.
+  intros R H.
+  destruct H as [R1 [R2 [f [Hunion [HR1eqf [HR2f Hweak]]]]]].
+  exists f.
+  intros a b Hab.
+  inversion Hunion; subst.
+  clear H.
+  split.
+  - induction Hab.
+    + apply HR1eqf in H.
+      apply refltrans_composition with (f b).
+      * specialize (HR2f b).
+        induction HR2f.
+        ** apply refl.
+        **  apply rtrans with b.
+            *** apply union_right; assumption.
+            *** apply IHHR2f; assumption.
+      * rewrite H; apply refl.
+    + apply Hweak; assumption.
+  - induction Hab.
+    + apply HR1eqf in H.
+      rewrite <- H.
+      apply refl.
+    + apply Hweak; assumption.
+Qed.
 
 Lemma Z_comp_eq_implies_Z_prop {A:Type}: forall (R : Rel A), Z_comp_eq R -> Z_prop R.
 Proof.
   unfold Z_comp_eq.
   unfold Z_prop.
-  intros.
+  intros R H.
   destruct H as [R1 [R2 [f1 [f2 [Hunion [HR1eqf1 [Haf1a [HRf2 Hweak]]]]]]]].
   exists (f2 # f1).
   inversion Hunion; subst.
@@ -343,8 +368,6 @@ Proof.
             *** apply union_right.
                 assumption.
             *** apply IHH'; assumption.
-
-
 
 
 
@@ -413,94 +436,6 @@ Proof.
   unfold Z_prop_mod2 in H.
   unfold Z_comp.
 *)
-
-Lemma Z_comp_eq_implies_Z_prop_mod3 {A:Type}: forall (R eqA: Rel A), Z_comp_eq R -> Z_prop_mod3 R eqA.
-Proof.
-  intros R eqA H.
-  unfold Z_comp_eq in H.
-  destruct H as [R1 [R2 [f1 [f2 [Hunion [Heq [H1 [H2 H3]]]]]]]].
-  unfold Z_prop_mod3. split.
-  Admitted.
-  
-Lemma Z_prop_mod3_implies_Z_comp_eq {A:Type}: forall (R eqA: Rel A), Z_prop_mod3 R eqA -> Z_comp_eq (eqA !_! R).
-Proof.
-  intros R eqA H.
-  unfold Z_prop_mod3 in H.
-  destruct H as [Heq H].  
-  destruct H.
-  unfold Z_comp_eq.
-  exists eqA. exists R. exists x. exists x. split.
-  - reflexivity.
-  - split.
-    + intros a b.
-      assert (H' := H a b); clear H.
-    +
-      
-  
-  
-Corollary Z_comp_new_implies_Z_prop_mod {A:Type}: forall (R R1 R2 : Rel A), R = R1 !_! R2 -> Z_comp_new R -> Z_prop_mod R.
-Proof.
-  intros R R1 R2 Hunion Hnew.
-  unfold Z_comp_new in Hnew.
-  apply Hnew in Hunion.
-  clear Hnew.
-  destruct Hunion as [f1 [f2 [H1 [H2 [H3 H4]]]]].
-Admitted.
-
-Lemma Z_prop_mod_implies_Z_comp_eq {A:Type}: forall (R: Rel A), Z_prop_mod R -> Z_comp_eq R.
-Proof.
-Admitted.
-
-Lemma Z_prop_mod'_implies_Z_comp_new_eq {A:Type}: forall (R: Rel A), Z_prop_mod' R -> Z_comp_new_eq R.
-Proof.
-  intros R H.
-  unfold Z_prop_mod' in H.
-  destruct H as [eq [Heq [wb H]]].
-  unfold Z_comp_new_eq.
-  intros R1 R2 Hcomp.
-  exists wb. 
-Admitted.
-
-Corollary Z_comp_implies_Z_prop_mod {A:Type}: forall (R : Rel A), Z_comp R -> Z_prop_mod R.
-Proof.
-  intros R Hcomp.
-  unfold Z_comp in Hcomp.
-  unfold Z_prop_mod.
-  destruct Hcomp as [R1 [R2 [f1 [f2 [Hunion [Hf1_is_Z [H1 H2]]]]]]].
-  exists R1.
-  intros Heq.
-  exists (f2 # f1). intros a b Hred; subst.
-  inversion Hred; subst.
-  - split.
-    + clear Hred.
-      split.
-      * apply refltrans_composition with (f1 a).
-        **  apply Hf1_is_Z in H.
-            destruct H.
-            induction H.
-            *** apply refl.
-            *** apply rtrans with b.
-                ****  apply union_left.
-                      assumption.
-                ****  apply IHrefltrans.
-                      apply refltrans_composition with (f1 a0).
-                      ***** assumption.
-                      ***** apply Hf1_is_Z.
-                            assumption.
-        ** apply H2 with a. trivial.
-      * apply Hf1_is_Z in H.
-        destruct H.
-        apply H1 in H0; assumption.
-    + intros c d HR1.
-      apply f_equal.
-      admit.
-  - split.
-    + apply H2 in H.
-        apply H.
-    + intros c d HR1.
-      apply f_equal.
-    admit.
-Admitted.
 
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
