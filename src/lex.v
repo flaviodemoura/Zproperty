@@ -1670,6 +1670,7 @@ Inductive lx: Rel pterm :=
 | b_ctx_rule : forall t u, t ->_B u -> lx t u
 | x_ctx_rule : forall t u, t ->_x u -> lx t u.
 Notation "t ->_Bx u" := (lx t u) (at level 59, left associativity).
+Notation "t ->_lx* u" := ((refltrans lx) t u) (at level 59, left associativity).
 
 Instance rw_eqC_lx : Proper (eqC ==> eqC ==> iff) lx.
 Proof.

@@ -1,4 +1,5 @@
 Require Import lex.
+Require Import ZtoConfl.
 
 (** Superdevelopment function *)
 
@@ -76,7 +77,7 @@ Lemma sd_open_rec:  forall t x i, sd ({i ~> x} t) = {i ~> x} (sd t).
 Proof.
 Admitted. *)
   
-Lemma sd_open:  forall (x:elt) t, sd (t ^ x) = sd t ^ x.
+Lemma sd_open:  forall x t, sd (t ^ x) = sd t ^ x.
 Proof.
   intros x t.
   generalize dependent x.
@@ -109,6 +110,7 @@ Corollary sd_body: forall t, body t -> body (sd t).
 Proof.
 Admitted. *)
 
+
 Lemma sd_app: forall t u, pterm_app (sd t) (sd u) ->_lex* sd(pterm_app t u). 
 Proof.
   intro t; induction t.
@@ -118,6 +120,7 @@ Proof.
     apply refl.
   - intro u.
 Admitted.
+ 
 
 (* Lemma lex_refltrans_app: forall t u t' u', t ->_lex* t' -> u ->_lex* u' -> pterm_app t u  ->_lex* pterm_app t' u'.
 Proof.
@@ -137,7 +140,19 @@ Lemma lex_refltrans_sd_sub: forall t L u t' u', (forall x, x \notin L -> t ^ x -
 Proof.
   Admitted.
 
-Lemma to_sd: forall t, term t -> t ->_lex* (sd t).
+Lemma to_sd: forall t, term t -> t ->_lx* (sd t).
+Proof.
+  induction t.
+  - intro H.
+    inversion H.
+  - intro H.
+    simpl. apply refl.
+  -intro H.
+   inversion H; subst.
+   
+    
+  
+(*Lemma to_sd: forall t, term t -> t ->_lex* (sd t).
 (* begin hide *)
 Proof.
   induction 1.
@@ -161,7 +176,7 @@ Admitted.
   (*   + apply trans_to_refltrans. *)
   (*     apply trans_ex_to_lex. *)
   (*     apply full_comp. *)
-  (*     Admitted. *)
+       Admitted. *)
 (* end hide *)
 
 Lemma ES_Bx_sub: forall t t' u x, term u -> t^x ->_Bx t'^x -> t[u] ->_Bx (t'[u]).
@@ -223,7 +238,9 @@ Proof.
     + apply IHHlex; assumption.
 Qed.
 
-Lemma Bx_Z_lex: forall a b, a ->_lex b -> b ->_lex* (sd a) /\ (sd a) ->_lex* (sd b).
+Lemma eqC_equal: forall a b,  a =C b -> (sd a) = (sd b).
+
+Lemma Bx_Z_lex: forall a b, a ->_lx b -> b ->_lex* (sd a) /\ (sd a) ->_lex* (sd b).
 (* begin hide *)
 Proof.
   intros a b Hlex.

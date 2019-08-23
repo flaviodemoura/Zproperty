@@ -1,0 +1,192 @@
+% Created 2019-08-09 Fri 15:56
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage[all]{xy}
+\usepackage{proof,amsthm}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newcommand{\tto}{\twoheadrightarrow}
+\author{Leandro O. Rezende, Flávio L. C. de Moura\thanks{flaviomoura@unb.br}}
+\date{\today}
+\title{A Formal Characterization of Confluence via Z Property}
+\hypersetup{
+ pdfauthor={Leandro O. Rezende, Flávio L. C. de Moura},
+ pdftitle={A Formal Characterization of Confluence via Z Property},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 26.1 (Org mode 9.2.2)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:orgf0f9137}
+
+This work is about confluence, an essential property related to the
+determinism of the computation in the sense that different reduction
+paths all lead to the same result. In general, it is an undecidable
+property that is difficult to be achieved.
+
+A technique proposed by Dehornoy and van Oostrom, called the \emph{Z
+property}, establishes a sufficient condition for the confluence of an
+Abstract Rewriting System (ARS). This technique has been used for
+proving confluence of several rewriting systems in a more direct way
+including \(\lambda\)-calculi with and without explicit substitutions
+\cite{kes09,2016arXiv160903139N}.
+
+An ARS is a pair \((A,R)\) formed by a set \(A\) and a binary relation
+\(R\) over this set. The decomposition of the binary relation \(R\) into sub-relations allows \ldots{} For instance, in the \(\lambda\)-calculus, the reduction \(\to_{\beta\eta}\) means \(\to_{\beta} \cup \to_{\eta}\).
+
+In this work, we
+
+\section{Abstract Rewriting Systems}
+\label{sec:org9f76804}
+
+ When \((a,b) \in R\),
+we write \(a R b\) or \(a \to_R b\) and we say that \(a\) \emph{reduces} to
+\(b\) in one step. A finite reduction chain \(a \to_R a_1 \to_R \ldots
+\to_R a_n\) means that \(a\) reduces to \(a_n\) in \(n\) steps, and we
+write \(a \to_R^n a_n\). It is usual to write \(\to\) instead of
+\(\to_R\), when \(R\) is clear. In this way, \(\to^+\)
+(resp. \(\tto\)) denotes the transitive closure (resp. reflexive
+transitive closure) of \(\to\). Several problems can be expressed in
+terms of ARS (cf. \cite{BN98,DershowitzJ90,terese03}), and in this work
+we study characterization of the confluence property. More precisely,
+given an ARS \((A,\to)\), an element \(a\in A\) usually can be reduced
+in different ways according to \(\to\). Informally, the confluence
+property states that, no matter how the reduction is done, there is
+always a way to join reduction paths. The following diagram is used to
+express this idea:
+
+\[
+  \xymatrix{
+    & a \ar@{->>}[dl] \ar@{->>}[dr] & \\
+    b \ar@{.>>}[dr] &  & c \ar@{.>>}[dl] \\
+    & d & 
+  }
+\]
+
+The diagram states that if \(a\) can be reduced in two different ways
+to \(b\) and \(c\), then there exists an element \(d\) in \(A\) such
+that both \(b\) and \(c\) can be reduced to \(d\). 
+
+The paper is organized as follows: In Section \ref{sec:org9727d04}, we present 
+
+\section{Yet another proof that Z property implies confluence}
+\label{sec:org7fb54b5}
+
+In this section, we prove that Z property implies confluence for
+ARSs. The novelty of this proof is that it is direct (for instance,
+\cite{2016arXiv160903139N} establishes confluence from Z property via
+semi-confluence), and does not rely on the law of excluded middle, or
+other classical axioms
+(cf. \cite{kesner09:_theor_explic_subst_with_safe_full_compos}). In
+addition, it is formalized in the Coq proof assistant. The theorem is as follows:
+
+\begin{theorem}
+If the ARS \((A,\to)\) has the Z property then it is confluent.
+\end{theorem}
+
+The proof is as follows: Let \(a\in A\). Suppose that
+
+\[
+  \xymatrix{
+    & a \ar@{->>}[dl] \ar@{->>}[dr] & \\
+    b  &  & c 
+  }
+\]
+
+\noindent for some \(b,c\in A\). We proceed by induction on \(a \tto
+b\). If \(a=b\) the result is trivial, so suppose that \(a \to a' \tto
+b\) for some \(a'\in A\). 
+
+\[
+  \xymatrix{
+    & & a \ar@{->}[dl] \ar@{->>}[ddrr] & & \\
+    & b' \ar@{->>}[dl] \ar@[blue]@{->>}[dr] & & & \\
+    b \ar@[red]@{->>}[ddrr] & & x \ar@[red]@{->>}[dd] & &  c \ar@{.>>}[ddll] \\
+    & & & & & \\
+    & & d & &
+   }
+  \]
+
+\[
+  \xymatrix{
+    & & a \ar@{->>}[dd] \ar@{->>}[ddrr] & & \\
+    & b' \ar@{->>}[dl] \ar@{->>}[dr] & & & \\
+    b \ar@{.>>}[ddrr] & & f(a) & &  c \ar@{.>>}[ddll] \\
+    & & & & & \\
+    & & d & &
+   }
+  \]
+
+\[
+      \xymatrix{
+        & & a \ar@{->>}[dd] \ar@{->>}[ddrr] & & \\
+        & b' \ar@{->>}[dl] \ar@{->>}[dr] & & & \\
+        b \ar@{->>}[ddrr] & & f(a) \ar@{->>}[dd] & &  a \ar@{->>}[ll] \\
+        & & & & & \\
+        & & d & &
+      }
+    \]
+
+\[
+       \xymatrix{
+        & & a \ar@{->>}[dd] \ar@{->}[dr] & & \\
+        & b' \ar@{->>}[dl] \ar@{->>}[dr] \ar@[blue]@{->>}[ddr] & & c' \ar@{->>}[dr] \ar@[blue]@{->>}[ddl] & \\
+        b \ar@[red]@{->>}[ddrr] & & f(a) & &  c  \ar@[red]@{->>}[ddll] \\
+        & & f(c') & & & \\
+        & & d  & & 
+      }
+     \]
+
+\[
+       \xymatrix{
+        & & a \ar@{->>}[dd] \ar@{->}[dr] & & \\
+        & b' \ar@{->>}[dl] \ar@{->>}[dr] & & c' \ar@{->>}[dr] \ar@{->>}[dl] & \\
+        b \ar@{->>}[ddrr] \ar@{->>}[ddrr] & & f(a) \ar@{->>}[d] & &  c  \ar@{->>}[ddll] \\
+        & & f(c') & & & \\
+        & & d  & & 
+      }
+     \]
+\section{The formalization}
+\label{sec:org9727d04}
+
+In \cite{ZPropertyDraft}, a sufficient condition for confluence is given
+by the so called Z property:
+
+\begin{definition}
+Let \((A,\to)\) be an ARS. The system \((A,\to)\) has the Z property,
+if there exists a map \(f:A \to A\) such that \(a \to b\) implies
+that \(b \tto f(a)\) and \(f(a) \tto f(b)\):
+
+\[
+  \xymatrix{
+   a \ar[r] &  b \ar@{.>>}[dl]\\
+   f(a) \ar@{.>>}[r] & f(b) \\ 
+  }
+ \]
+\end{definition}
+
+
+\section{Conclusions and Future Work}
+\label{sec:org0712535}
+
+\bibliographystyle{alpha}
+\bibliography{../../../Dropbox/bibliography/references} 
+\end{document}
