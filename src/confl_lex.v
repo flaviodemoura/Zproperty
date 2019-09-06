@@ -86,7 +86,24 @@ Proof.
     unfold open.
     case n; reflexivity.
   - reflexivity.
-  - intros x. admit.
+  - intros x.
+    unfold open in *.
+    change ({0 ~> pterm_fvar x} pterm_app t1 t2) with (pterm_app ({0 ~> pterm_fvar x} t1) ({0 ~> pterm_fvar x} t2)).
+    generalize dependent t1.
+    intro t1. case t1.
+    + intro n; case n. 
+      * intro IH.
+        simpl.
+        rewrite IHt2; reflexivity.        
+      * intros n' IH.
+        simpl.
+        rewrite IHt2; reflexivity.        
+    + intros v IH.
+      simpl.
+        rewrite IHt2; reflexivity.        
+    + intros p1 p2 IH. admit.
+    + admit.
+    + admit.
   - intros x. simpl.
     admit. 
 Admitted.
@@ -142,6 +159,48 @@ Proof.
 
 Lemma to_sd: forall t, term t -> t ->_lx* (sd t).
 Proof.
+  intros t Hterm.
+  induction Hterm.
+  - admit.
+  - generalize dependent t1.
+    intro t1. case t1.
+    + intros n Hterm IH.
+      inversion Hterm.
+    + intros v Hterm IH.
+      simpl.
+      apply lx_star_app_right; assumption.
+    + admit.
+    + admit.
+    + admit.
+  - simpl.
+    pick_fresh y.
+    assert (H' := H0 y).
+    apply notin_union in Fr.
+    destruct Fr as [Hfv Fr].
+    apply H' in Hfv.
+    
+    assert (H2: sd (t1 ^ y) = (sd t1) ^ y).
+    {
+      admit.
+    }
+ (*)   rewrite H2 in Hfv. *)
+    remember (t1 ^ y) as a. 
+    induction Hfv. subst.
+    + assert (H3: t1 = sd t1).
+      {
+        admit.
+      }
+      rewrite <- H3.
+      apply refl.
+    + subst.
+      clear IHHfv.
+      apply rtrans with (pterm_abs (close y b)).
+    + admit.
+    + admit.
+      
+    
+
+  
   induction t.
   - intro H.
     inversion H.
