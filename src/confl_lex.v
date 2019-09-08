@@ -161,29 +161,32 @@ Lemma to_sd: forall t, term t -> t ->_lx* (sd t).
 Proof.
   intros t Hterm.
   induction Hterm.
-  - admit.
+  - apply refl.
   - generalize dependent t1.
     intro t1. case t1.
     + intros n Hterm IH.
       inversion Hterm.
     + intros v Hterm IH.
-      simpl.
       apply lx_star_app_right; assumption.
-    + admit.
-    + admit.
-    + admit.
+    + intros p p0 Hterm IH.
+      apply refltrans_composition with (pterm_app (sd (pterm_app p p0)) t2).
+      * apply lx_star_app_left; assumption.
+      * admit.
+    + intros p Hterm IH.
+      apply refltrans_composition with (pterm_app (sd (pterm_abs p)) t2).
+      * apply lx_star_app_left; assumption.
+      * admit.
+    + intros p p0 Hterm IH.
+      apply refltrans_composition with (pterm_app (sd (p [p0])) t2).
+      * apply lx_star_app_left; assumption.
+      * admit.
   - simpl.
     pick_fresh y.
     assert (H' := H0 y).
     apply notin_union in Fr.
     destruct Fr as [Hfv Fr].
     apply H' in Hfv.
-    
-    assert (H2: sd (t1 ^ y) = (sd t1) ^ y).
-    {
-      admit.
-    }
- (*)   rewrite H2 in Hfv. *)
+    rewrite sd_open in Hfv.
     remember (t1 ^ y) as a. 
     induction Hfv. subst.
     + assert (H3: t1 = sd t1).
@@ -194,22 +197,9 @@ Proof.
       apply refl.
     + subst.
       clear IHHfv.
-      apply rtrans with (pterm_abs (close y b)).
-    + admit.
-    + admit.
-      
-    
-
-  
-  induction t.
-  - intro H.
-    inversion H.
-  - intro H.
-    simpl. apply refl.
-  -intro H.
-   inversion H; subst.
-   
-    
+      admit.
+    - admit.
+Admitted.
   
 (*Lemma to_sd: forall t, term t -> t ->_lex* (sd t).
 (* begin hide *)
@@ -297,7 +287,9 @@ Proof.
     + apply IHHlex; assumption.
 Qed.
 
-Lemma eqC_equal: forall a b,  a =C b -> (sd a) = (sd b).
+Lemma eqC_equal: forall a b,  a =c b -> (sd a) = (sd b).
+Proof.
+Admitted.
 
 Lemma Bx_Z_lex: forall a b, a ->_lx b -> b ->_lex* (sd a) /\ (sd a) ->_lex* (sd b).
 (* begin hide *)

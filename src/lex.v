@@ -1694,35 +1694,79 @@ Qed.
 
 Lemma Bx_abs: forall t1 t2, t1 ->_Bx t2 -> pterm_abs t1 ->_Bx pterm_abs t2.
 Proof.
-  Admitted.
-
-Lemma Bx_sub: forall t1 t2 t3, term t1 -> t2 ->_Bx t3 -> pterm_sub t1 t2 ->_Bx pterm_sub t1 t3.
-Proof.
+  intros t1 t2 HBx.
+  inversion HBx; subst.
+  - admit.
+  - admit.
 Admitted.
 
-Lemma Bx_sub_in: forall t1 t2 t3, term t3 -> t1 ->_Bx t2 -> pterm_sub t1 t3 ->_Bx pterm_sub t2 t3.
+Lemma Bx_sub: forall t1 t2 t3, term t3 -> t1 ->_Bx t2 -> pterm_sub t1 t3 ->_Bx pterm_sub t2 t3.
 Proof.
+  intros t1 t2 t3 Hterm HBx.
+  inversion HBx; subst.
+  - admit.
+  - admit.
 Admitted.
+
+Lemma Bx_sub_in: forall t1 t2 t3, body t1 -> t2 ->_Bx t3 -> pterm_sub t1 t2 ->_Bx pterm_sub t1 t3.
+Proof.
+  intros t1 t2 t3 Hbody HBx.
+  inversion HBx; subst.
+  - apply b_ctx_rule.
+    apply ES_sub_in; assumption.
+  - apply x_ctx_rule.
+    apply ES_sub_in; assumption.
+Qed.
 
 Lemma lx_star_app_left: forall t1 t2 t3, term t3 -> t1 ->_lx* t2 -> pterm_app t1 t3 ->_lx* pterm_app t2 t3.
 Proof.
-Admitted.
+  intros t1 t2 t3 Hterm Hlx.
+  induction Hlx.
+  - apply refl.
+  - apply rtrans with (pterm_app b t3).
+    + apply Bx_app_left; assumption.
+    + assumption.
+Qed.
 
 Lemma lx_star_app_right: forall t1 t2 t3, term t1 -> t2 ->_lx* t3 -> pterm_app t1 t2 ->_lx* pterm_app t1 t3.
 Proof.
-Admitted.
+  intros t1 t2 t3 Hterm Hlx.
+  induction Hlx.
+  - apply refl.
+  - apply rtrans with (pterm_app t1 b).
+    + apply Bx_app_right; assumption.
+    + assumption.
+Qed.
 
 Lemma lx_star_abs: forall t1 t2, t1 ->_lx* t2 -> pterm_abs t1 ->_lx* pterm_abs t2.
 Proof.
-  Admitted.
+  intros t1 t2 Hlx.
+  induction Hlx.
+  - apply refl.
+  - apply rtrans with (pterm_abs b).
+    + apply Bx_abs; assumption.
+    + assumption.
+Qed.
 
-Lemma lx_star_sub: forall t1 t2 t3, term t1 -> t2 ->_lx* t3 -> pterm_sub t1 t2 ->_lx* pterm_sub t1 t3.
+Lemma lx_star_sub: forall t1 t2 t3, term t3 -> t1 ->_lx* t2 -> pterm_sub t1 t3 ->_lx* pterm_sub t2 t3.
 Proof.
-Admitted.
+  intros t1 t2 t3 Hterm Hlx.
+  induction Hlx.
+  - apply refl.
+  - apply rtrans with (b [t3]).
+    + apply Bx_sub; assumption.
+    + assumption.
+Qed.
 
-Lemma lx_star_sub_in: forall t1 t2 t3, term t3 -> t1 ->_lx* t2 -> pterm_sub t1 t3 ->_lx* pterm_sub t2 t3.
+Lemma lx_star_sub_in: forall t1 t2 t3, term t1 -> t2 ->_lx* t3 -> pterm_sub t1 t2 ->_lx* pterm_sub t1 t3.
 Proof.
-Admitted.
+  intros t1 t2 t3 Hterm Hlx.
+  induction Hlx.
+  - apply refl.
+  - apply rtrans with (t1 [b]).
+    + apply Bx_sub_in; assumption.
+    + assumption.
+Qed.
 
 Instance rw_eqC_lx : Proper (eqC ==> eqC ==> iff) lx.
 Proof.
