@@ -1692,20 +1692,12 @@ Proof.
     apply ES_app_right; assumption.
 Qed.
 
-Lemma Bx_abs: forall t1 t2, t1 ->_Bx t2 -> pterm_abs t1 ->_Bx pterm_abs t2.
+Lemma Bx_abs: forall t1 t2 x, t1^x ->_Bx t2^x -> pterm_abs t1 ->_Bx pterm_abs t2.
 Proof.
-  intros t1 t2 HBx.
-  inversion HBx; subst.
-  - admit.
-  - admit.
 Admitted.
 
-Lemma Bx_sub: forall t1 t2 t3, term t3 -> t1 ->_Bx t2 -> pterm_sub t1 t3 ->_Bx pterm_sub t2 t3.
+Lemma Bx_sub: forall t1 t2 t3 x, term t3 -> t1^x ->_Bx t2^x -> pterm_sub t1 t3 ->_Bx pterm_sub t2 t3.
 Proof.
-  intros t1 t2 t3 Hterm HBx.
-  inversion HBx; subst.
-  - admit.
-  - admit.
 Admitted.
 
 Lemma Bx_sub_in: forall t1 t2 t3, body t1 -> t2 ->_Bx t3 -> pterm_sub t1 t2 ->_Bx pterm_sub t1 t3.
@@ -1738,29 +1730,30 @@ Proof.
     + assumption.
 Qed.
 
-Lemma lx_star_abs: forall t1 t2, t1 ->_lx* t2 -> pterm_abs t1 ->_lx* pterm_abs t2.
+Lemma lx_star_abs: forall t1 t2 x L, x \notin L -> t1^x ->_lx* t2^x -> pterm_abs t1 ->_lx* pterm_abs t2.
 Proof.
-  intros t1 t2 Hlx.
-  induction Hlx.
-  - apply refl.
-  - apply rtrans with (pterm_abs b).
-    + apply Bx_abs; assumption.
-    + assumption.
-Qed.
+  (* intros t1 t2 Hlx. *)
+  (* induction Hlx. *)
+  (* - apply refl. *)
+  (* - apply rtrans with (pterm_abs b). *)
+  (*   + apply Bx_abs; assumption. *)
+  (*   + assumption. *)
+Admitted.
 
-Lemma lx_star_sub: forall t1 t2 t3, term t3 -> t1 ->_lx* t2 -> pterm_sub t1 t3 ->_lx* pterm_sub t2 t3.
+Lemma lx_star_sub: forall t1 t2 t3 x, term t3 -> t1^x ->_lx* t2^x -> pterm_sub t1 t3 ->_lx* pterm_sub t2 t3.
 Proof.
-  intros t1 t2 t3 Hterm Hlx.
-  induction Hlx.
-  - apply refl.
-  - apply rtrans with (b [t3]).
-    + apply Bx_sub; assumption.
-    + assumption.
-Qed.
-
-Lemma lx_star_sub_in: forall t1 t2 t3, term t1 -> t2 ->_lx* t3 -> pterm_sub t1 t2 ->_lx* pterm_sub t1 t3.
+(*   intros t1 t2 t3 Hterm Hlx. *)
+(*   induction Hlx. *)
+(*   - apply refl. *)
+(*   - apply rtrans with (b [t3]). *)
+(*     + apply Bx_sub; assumption. *)
+(*     + assumption. *)
+(* Qed. *)
+Admitted.
+  
+Lemma lx_star_sub_in: forall t1 t2 t3, body t1 -> t2 ->_lx* t3 -> pterm_sub t1 t2 ->_lx* pterm_sub t1 t3.
 Proof.
-  intros t1 t2 t3 Hterm Hlx.
+  intros t1 t2 t3 Hbody Hlx.
   induction Hlx.
   - apply refl.
   - apply rtrans with (t1 [b]).

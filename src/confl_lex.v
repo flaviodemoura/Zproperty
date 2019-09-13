@@ -108,27 +108,31 @@ Proof.
     admit. 
 Admitted.
     
-(* Lemma sd_term: forall t, term t -> term (sd t).
+Lemma sd_term: forall t, term t -> term (sd t).
 Proof.
-  intros t Hterm.
-  induction Hterm.  
-  - admit.
-  - admit.
-  - simpl sd.
-    apply term_abs with L.
-    intro x.
-    (* Lemma sd_open:  forall x : elt, x \notin L ->  term (sd (t1 ^ x)) -> term (sd t1 ^ x) *)
-    replace (sd t1 ^ x) with (sd (t1 ^ x)).
-    apply H0.
-    apply sd_open.
-  - Admitted. 
+  Admitted.
+  (* intros t Hterm. *)
+  (* induction Hterm.   *)
+  (* - admit. *)
+  (* - admit. *)
+  (* - simpl sd. *)
+  (*   apply term_abs with L. *)
+  (*   intro x. *)
+  (*   (* Lemma sd_open:  forall x : elt, x \notin L ->  term (sd (t1 ^ x)) -> term (sd t1 ^ x) *) *)
+  (*   replace (sd t1 ^ x) with (sd (t1 ^ x)). *)
+  (*   apply H0. *)
+  (*   apply sd_open. *)
+  (* - Admitted.  *)
 
 Corollary sd_body: forall t, body t -> body (sd t).
 Proof.
-Admitted. *)
+Admitted. 
 
+Lemma sd_app_lx: forall t u, pterm_app (sd t) (sd u) ->_lx* sd(pterm_app t u). 
+Proof.
+Admitted.
 
-Lemma sd_app: forall t u, pterm_app (sd t) (sd u) ->_lex* sd(pterm_app t u). 
+Lemma sd_app_lex: forall t u, pterm_app (sd t) (sd u) ->_lex* sd(pterm_app t u). 
 Proof.
   intro t; induction t.
   - intro u; simpl.
@@ -169,17 +173,29 @@ Proof.
     + intros v Hterm IH.
       apply lx_star_app_right; assumption.
     + intros p p0 Hterm IH.
-      apply refltrans_composition with (pterm_app (sd (pterm_app p p0)) t2).
-      * apply lx_star_app_left; assumption.
-      * admit.
+      apply refltrans_composition with (pterm_app (sd (pterm_app p p0)) (sd t2)).
+      * apply refltrans_composition with (pterm_app (sd (pterm_app p p0)) t2).
+        ** apply lx_star_app_left; assumption.
+        ** apply lx_star_app_right.
+           *** apply sd_term; assumption.
+           *** assumption.
+      * apply sd_app_lx.
     + intros p Hterm IH.
-      apply refltrans_composition with (pterm_app (sd (pterm_abs p)) t2).
-      * apply lx_star_app_left; assumption.
-      * admit.
+      apply refltrans_composition with (pterm_app (sd (pterm_abs p)) (sd t2)).
+      * apply refltrans_composition with (pterm_app (sd (pterm_abs p)) t2).
+        ** apply lx_star_app_left; assumption.
+        ** apply lx_star_app_right.
+           *** apply sd_term; assumption.
+           *** assumption.
+      * apply sd_app_lx.
     + intros p p0 Hterm IH.
-      apply refltrans_composition with (pterm_app (sd (p [p0])) t2).
-      * apply lx_star_app_left; assumption.
-      * admit.
+      apply refltrans_composition with (pterm_app (sd (p [p0])) (sd t2)).
+      * apply refltrans_composition with (pterm_app (sd (p [p0])) t2).
+        ** apply lx_star_app_left; assumption.
+        ** apply lx_star_app_right.
+           *** apply sd_term; assumption.
+           *** assumption.
+      * apply sd_app_lx.
   - simpl.
     pick_fresh y.
     assert (H' := H0 y).
@@ -187,8 +203,7 @@ Proof.
     destruct Fr as [Hfv Fr].
     apply H' in Hfv.
     rewrite sd_open in Hfv.
-    remember (t1 ^ y) as a. 
-    induction Hfv. subst.
+    apply lx_star_abs with y (fv t1); assumption.
     + assert (H3: t1 = sd t1).
       {
         admit.
