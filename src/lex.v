@@ -1692,12 +1692,44 @@ Proof.
     apply ES_app_right; assumption.
 Qed.
 
-Lemma Bx_abs: forall t1 t2 x, t1^x ->_Bx t2^x -> pterm_abs t1 ->_Bx pterm_abs t2.
+Lemma Bx_abs: forall t1 t2 L, (forall x, x \notin L -> t1^x ->_Bx t2^x) -> pterm_abs t1 ->_Bx pterm_abs t2.
 Proof.
+  intros t1 t2 L HBx.
+  pick_fresh x.
+  apply notin_union in Fr.
+  destruct Fr as [Fr Fvt2].
+  apply notin_union in Fr.
+  destruct Fr as [Fr Fvt1].
+  clear Fvt1 Fvt2.
+  apply HBx in Fr.
+  inversion Fr; subst.
+  - apply b_ctx_rule.
+    apply ES_abs_in with L.
+    admit.
+  - admit.
 Admitted.
 
-Lemma Bx_sub: forall t1 t2 t3 x, term t3 -> t1^x ->_Bx t2^x -> pterm_sub t1 t3 ->_Bx pterm_sub t2 t3.
+Lemma Bx_sub: forall t1 t2 t3 L, (forall x, x \notin L -> t1^x ->_Bx t2^x) -> term t3 -> pterm_sub t1 t3 ->_Bx pterm_sub t2 t3.
 Proof.
+  intros t1 t2 t3 L HBx Hterm.
+  pick_fresh x.
+  apply notin_union in Fr.
+  destruct Fr as [Fr Fvt3].
+  apply notin_union in Fr.
+  destruct Fr as [Fr Fvt2].
+  apply notin_union in Fr.
+  destruct Fr as [Fr Fvt1].
+  apply HBx in Fr.
+  clear Fvt1 Fvt2 Fvt3.
+  inversion Fr; subst.
+  - apply b_ctx_rule.
+    apply ES_sub with L.
+    + admit.
+    + assumption.
+  - apply x_ctx_rule.
+    apply ES_sub with L.
+    + admit.
+    + assumption.
 Admitted.
 
 Lemma Bx_sub_in: forall t1 t2 t3, body t1 -> t2 ->_Bx t3 -> pterm_sub t1 t2 ->_Bx pterm_sub t1 t3.
@@ -1730,27 +1762,38 @@ Proof.
     + assumption.
 Qed.
 
-Lemma lx_star_abs: forall t1 t2 x L, x \notin L -> t1^x ->_lx* t2^x -> pterm_abs t1 ->_lx* pterm_abs t2.
+Lemma lx_star_abs: forall t1 t2 L, (forall x, x \notin L -> t1^x ->_lx* t2^x) -> pterm_abs t1 ->_lx* pterm_abs t2.
 Proof.
-  (* intros t1 t2 Hlx. *)
-  (* induction Hlx. *)
-  (* - apply refl. *)
-  (* - apply rtrans with (pterm_abs b). *)
-  (*   + apply Bx_abs; assumption. *)
-  (*   + assumption. *)
+  intros t1 t2 L Hlx.
+  pick_fresh x.
+  apply notin_union in Fr.
+  destruct Fr as [Fr Fvt2].
+  apply notin_union in Fr.
+  destruct Fr as [Fr Fvt1].
+  apply Hlx in Fr.
+  clear Hlx Fvt1 Fvt2.
+  induction Fr.
+  - admit.
+  - assumption.
 Admitted.
 
-Lemma lx_star_sub: forall t1 t2 t3 x, term t3 -> t1^x ->_lx* t2^x -> pterm_sub t1 t3 ->_lx* pterm_sub t2 t3.
+Lemma lx_star_sub: forall t1 t2 t3 L, (forall x, x \notin L -> t1^x ->_lx* t2^x) -> term t3 -> pterm_sub t1 t3 ->_lx* pterm_sub t2 t3.
 Proof.
-(*   intros t1 t2 t3 Hterm Hlx. *)
-(*   induction Hlx. *)
-(*   - apply refl. *)
-(*   - apply rtrans with (b [t3]). *)
-(*     + apply Bx_sub; assumption. *)
-(*     + assumption. *)
-(* Qed. *)
+  intros t1 t2 t3 L Hlx Hterm.
+  pick_fresh x.
+  apply notin_union in Fr.
+  destruct Fr as [Fr Fvt3].
+  apply notin_union in Fr.
+  destruct Fr as [Fr Fvt2].
+  apply notin_union in Fr.
+  destruct Fr as [Fr Fvt1].
+  apply Hlx in Fr.
+  clear Fvt1 Fvt2 Fvt3.
+  induction Fr.
+  - admit.
+  - assumption.
 Admitted.
-  
+
 Lemma lx_star_sub_in: forall t1 t2 t3, body t1 -> t2 ->_lx* t3 -> pterm_sub t1 t2 ->_lx* pterm_sub t1 t3.
 Proof.
   intros t1 t2 t3 Hbody Hlx.
@@ -1760,6 +1803,27 @@ Proof.
     + apply Bx_sub_in; assumption.
     + assumption.
 Qed.
+
+(* Lemmas provados baseados em versões antigas de lemmas anteriores
+Lemma lx_star_abs: forall t1 t2, t1 ->_lx* t2 -> pterm_abs t1 ->_lx* pterm_abs t2.
+Proof.
+  intros t1 t2 Hlx.
+  induction Hlx.
+  - apply refl.
+  - apply rtrans with (pterm_abs b).
+    + apply Bx_abs; assumption.
+    + assumption.
+Qed.
+
+Lemma lx_star_sub: forall t1 t2 t3, term t3 -> t1 ->_lx* t2 -> pterm_sub t1 t3 ->_lx* pterm_sub t2 t3.
+Proof.
+  intros t1 t2 t3 Hterm Hlx.
+  induction Hlx.
+  - apply refl.
+  - apply rtrans with (b [t3]).
+    + apply Bx_sub; assumption.
+    + assumption.
+Qed.*)
 
 Instance rw_eqC_lx : Proper (eqC ==> eqC ==> iff) lx.
 Proof.
