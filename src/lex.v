@@ -299,12 +299,12 @@ Definition term_regular (R : Rel pterm) :=
   forall t t', R t t' -> term t /\ term t'.
 
 (* begin hide *)
-(* Definition red_rename (R : Rel pterm) :=
+Definition red_rename (R : Rel pterm) :=
   forall x t t' y,
     x \notin (fv t) ->
     x \notin (fv t') ->
   R (t ^ x) (t' ^ x) -> 
-  R (t ^ y) (t' ^ y). *)
+  R (t ^ y) (t' ^ y).
 
 Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
 
@@ -1470,28 +1470,48 @@ Proof.
    apply term_sub with x; assumption.
 Qed.
 
-(*
+Lemma rule_b_compat_open: forall t t' n x, rule_b t t' <-> rule_b ({n ~> pterm_fvar x}t) ({n ~> pterm_fvar x}t').
+Proof.
+  intros t1 t2 n x; split.
+  - intro Hrule_b.
+    inversion Hrule_b; subst.
+    simpl.
+    apply reg_rule_b.
+    + admit.
+    + admit.
+  - intro Hrule_b.
+    generalize dependent x.
+    generalize dependent n.
+    generalize dependent t2.
+    induction t1.
+    + intros t2 n' x H.
+      simpl in H.
+      destruct (n' === n); inversion H.      
+    + intros t2 n' x H.
+      simpl in H; inversion H.
+    + intros t2 n' x H.
+      simpl in H.
+      inversion H; subst.
+      rewrite <- H0 in H.
+      rewrite <- H2 in H.
+      (* here we probably need the close_rec operation *)
+      admit.
+    + intros t2 n' x H.
+      simpl in H; inversion H.
+    + intros t2 n' x H.
+      simpl in H; inversion H.
+Admitted.
+  
 Lemma red_rename_b: red_rename rule_b.
 Proof.
   unfold red_rename.
   intros x t t' y Hfv Hfv' Hb.
   unfold open in *.
-  inversion Hb; subst.
-  assert (Hc: t = (close (pterm_app (pterm_abs t0) u) x)).
-  {
-    admit.
-  }
-  assert (Hc': t' = (close (t0 [u]) x)).
-  {
-    admit.
-  }
-  rewrite Hc.
-  rewrite Hc'.
-  unfold open in *.
-  simpl.
-  
-  inversion H0.
-Admitted. *)
+  apply rule_b_compat_open in Hb.
+  apply rule_b_compat_open.
+  assumption.
+Qed.
+
 (* end hide *)
 Definition b_ctx t u := ES_contextual_closure rule_b t u. 
 Notation "t ->_B u" := (b_ctx t u) (at level 66).
@@ -1502,6 +1522,9 @@ Proof.
   apply term_regular_b.
 Qed.
 
+Lemma red_rename_b_ctx: red_rename b_ctx.
+Proof.
+Admitted.
 (* Lemma eqC_preserves_redex: forall t1 t2 u, pterm_app (pterm_abs t2) u =e t1 -> exists t v, t1 = pterm_app (pterm_abs t) v.
 Proof.
 Admitted.
@@ -1700,12 +1723,14 @@ Proof.
   destruct Fr as [Fr Fvt2].
   apply notin_union in Fr.
   destruct Fr as [Fr Fvt1].
-  clear Fvt1 Fvt2.
   apply HBx in Fr.
   inversion Fr; subst.
-  - apply b_ctx_rule.
-    apply ES_abs_in with L.
-    admit.
+  - clear Fr.
+    apply b_ctx_rule.
+    apply ES_abs_in with (fv t1 \u fv t2).
+    intros x' HL.
+    generalize H.
+    apply red_rename_b_ctx; assumption.
   - admit.
 Admitted.
 
