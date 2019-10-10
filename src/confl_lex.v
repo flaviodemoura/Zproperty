@@ -203,7 +203,8 @@ Proof.
     destruct Fr as [Hfv Fr].
     apply H' in Hfv.
     rewrite sd_open in Hfv.
-    apply lx_star_abs with y (fv t1); assumption.
+    apply lx_star_abs with (fv t1).
+    intros x Hfv'.
     + assert (H3: t1 = sd t1).
       {
         admit.

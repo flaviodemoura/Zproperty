@@ -469,6 +469,43 @@ Proof.
   - apply lc_rec_open_var_rec.
 Qed.
 
+Lemma lc_at_open_rec_leq : forall n k t u, n <= k -> lc_at n t -> lc_at n (open_rec k u t).
+Proof.
+  intros n k t0.
+  generalize dependent k.
+  generalize dependent n.
+  induction t0.
+  - intros n' k u Hleq Hlc_at. 
+    simpl.
+    destruct (k === n).
+    + subst.
+      inversion Hlc_at.
+      * subst.
+        admit.
+      * subst.
+      admit.
+    + assumption.
+  - intros n' k u Hleq Hlc_at.
+    assumption.
+  - intros n' k u Hleq Hlc_at.
+    destruct Hlc_at.
+    simpl; split.
+    + apply IHt0_1; assumption.
+    + apply IHt0_2; assumption.
+  - intros n' k u Hleq Hlc_at.
+    simpl in *.
+    apply IHt0.
+    + admit.
+    + assumption.
+  - intros n' k u Hleq Hlc_at.
+    destruct Hlc_at.
+    simpl in *; split.
+    + apply IHt0_1.
+      * admit.
+      * assumption.
+    + apply IHt0_2; assumption.
+Admitted.
+  
 Lemma lc_at_open_rec_rename: forall t x y m n, lc_at m (open_rec n (pterm_fvar x) t) -> lc_at m (open_rec n (pterm_fvar y) t).
 Proof.
   intro t; induction t.
@@ -579,10 +616,8 @@ Proof.
   intros t x y H.
   apply term_to_lc_at in H.
   apply term_equiv_lc_at.
-  simpl in *.
   unfold open in H.
-  apply lc_at_open_rec_rename with x.
-  assumption.
+  apply lc_at_open_rec_rename with x; assumption.
 Qed.
 
 Lemma body_to_term: forall t x, x \notin fv t -> body t -> term (t^x).
@@ -596,9 +631,12 @@ Proof.
   apply notin_union in Fr.
   destruct Fr as [Fr Hfvx].
   apply H in Fr.
-  apply term_open_rename with y.
-  assumption.
+  apply term_open_rename with y; assumption.
 Qed.
+
+Theorem body_lc_at: forall t, body t <-> lc_at 1 t.
+Proof.
+Admitted.
 
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   match t with
@@ -1453,6 +1491,7 @@ Inductive rule_b : Rel pterm  :=
     body t -> term u ->
     rule_b (pterm_app(pterm_abs t) u) (t[u]).
 (* begin hide *)
+
 Lemma term_regular_b: term_regular rule_b.
 Proof.
  unfold term_regular.
@@ -1477,8 +1516,21 @@ Proof.
     inversion Hrule_b; subst.
     simpl.
     apply reg_rule_b.
-    + admit.
-    + admit.
+    + unfold body in *.
+      destruct  H.
+      exists x0. intros x1 Hnotin.
+      unfold open.
+      apply term_equiv_lc_at.
+      apply lc_at_open_rec.
+      * auto.
+      * apply lc_at_open_rec_leq.
+        ** admit.
+        ** apply  body_lc_at.
+           unfold body.
+           exists x0; assumption.
+    + assert (H' : {n ~> pterm_fvar x} u = u).
+      * apply open_rec_term; assumption.
+      * rewrite H'; assumption.
   - intro Hrule_b.
     generalize dependent x.
     generalize dependent n.
@@ -1508,8 +1560,7 @@ Proof.
   intros x t t' y Hfv Hfv' Hb.
   unfold open in *.
   apply rule_b_compat_open in Hb.
-  apply rule_b_compat_open.
-  assumption.
+  apply rule_b_compat_open; assumption.
 Qed.
 
 (* end hide *)
