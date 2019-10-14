@@ -310,7 +310,21 @@ Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
 
 Lemma body_app: forall t1 t2, body (pterm_app t1 t2) -> body t1 /\ body t2.
 Proof.
-  Admitted.
+  intros t1 t2 Hbody.
+  inversion Hbody; subst.
+  unfold body.
+  split.
+  - exists x.
+    intros x0 Hnot.
+    apply H in Hnot.
+    inversion Hnot; subst.
+    assumption.
+  - exists x.
+    intros x0 Hnot.
+    apply H in Hnot.
+    inversion Hnot; subst.
+    assumption.
+Qed.
   
 Lemma term_regular_trans: forall R, term_regular R -> term_regular (trans R).
 Proof.
@@ -481,9 +495,11 @@ Proof.
     + subst.
       inversion Hlc_at.
       * subst.
-        admit.
+        apply Nat.nle_succ_diag_l in Hleq; contradiction.
       * subst.
-      admit.
+        apply le_S_gt in H.
+        apply le_S_gt in Hleq.
+        apply gt_asym in H; contradiction.
     + assumption.
   - intros n' k u Hleq Hlc_at.
     assumption.
@@ -495,16 +511,16 @@ Proof.
   - intros n' k u Hleq Hlc_at.
     simpl in *.
     apply IHt0.
-    + admit.
+    + apply le_n_S; assumption.
     + assumption.
   - intros n' k u Hleq Hlc_at.
     destruct Hlc_at.
     simpl in *; split.
     + apply IHt0_1.
-      * admit.
+      * apply le_n_S; assumption.
       * assumption.
     + apply IHt0_2; assumption.
-Admitted.
+Qed.
   
 Lemma lc_at_open_rec_rename: forall t x y m n, lc_at m (open_rec n (pterm_fvar x) t) -> lc_at m (open_rec n (pterm_fvar y) t).
 Proof.
@@ -636,6 +652,42 @@ Qed.
 
 Theorem body_lc_at: forall t, body t <-> lc_at 1 t.
 Proof.
+  intro t.
+  split.
+  - intro Hbody.
+    unfold body in Hbody.
+    destruct Hbody.
+    admit.
+  - induction t using pterm_size_induction.
+    induction t0.
+    + intro Hlc.
+      simpl in Hlc.
+      apply Nat.lt_1_r in Hlc.
+      rewrite Hlc.
+      unfold body.
+      exists {{n}}.
+      intros x Hnot.
+      apply term_var.
+    + intro Hlc.
+      unfold body.
+      exists {{0}}.
+      intros x Hnot.
+      apply term_var.
+    + simpl.
+      intro Hlc.
+      destruct Hlc as [Hlc1 Hlc2].
+      unfold body.
+      exists {{0}}.
+      intros x Hnot.
+      apply term_app.
+      * fold open_rec.
+        apply term_equiv_lc_at.
+        admit.
+      * fold open_rec.
+        apply term_equiv_lc_at.
+        admit.
+    + admit.
+    + admit.
 Admitted.
 
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
@@ -1524,7 +1576,8 @@ Proof.
       apply lc_at_open_rec.
       * auto.
       * apply lc_at_open_rec_leq.
-        ** admit.
+        ** apply Peano.le_n_S.
+           apply Peano.le_0_n.
         ** apply  body_lc_at.
            unfold body.
            exists x0; assumption.
