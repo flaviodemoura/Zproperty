@@ -182,7 +182,6 @@ Notation "{ k ~> u } t" := (open_rec k u t) (at level 67).
 Notation "t ^^ u" := (open t u) (at level 67). 
 Notation "t ^ x" := (open t (pterm_fvar x)).   
 
-(** Check how close operation is being used in the formalization. 
 Fixpoint close_rec  (k : nat) (x : var) (t : pterm) : pterm :=
   match t with
   | pterm_bvar i    => pterm_bvar i
@@ -192,7 +191,7 @@ Fixpoint close_rec  (k : nat) (x : var) (t : pterm) : pterm :=
   | pterm_sub t1 t2 => pterm_sub (close_rec (S k) x t1) (close_rec k x t2)
   end.
 
-Definition close t x := close_rec 0 x t. *)
+Definition close t x := close_rec 0 x t. 
 (* end hide *)
 (** ES terms are expressions without dangling deBruijn indexes. *)
 
@@ -657,38 +656,31 @@ Proof.
   - intro Hbody.
     unfold body in Hbody.
     destruct Hbody.
-    admit.
-  - induction t using pterm_size_induction.
-    induction t0.
-    + intro Hlc.
-      simpl in Hlc.
-      apply Nat.lt_1_r in Hlc.
-      rewrite Hlc.
-      unfold body.
-      exists {{n}}.
-      intros x Hnot.
-      apply term_var.
-    + intro Hlc.
-      unfold body.
-      exists {{0}}.
-      intros x Hnot.
-      apply term_var.
-    + simpl.
-      intro Hlc.
-      destruct Hlc as [Hlc1 Hlc2].
-      unfold body.
-      exists {{0}}.
-      intros x Hnot.
-      apply term_app.
-      * fold open_rec.
-        apply term_equiv_lc_at.
-        admit.
-      * fold open_rec.
-        apply term_equiv_lc_at.
-        admit.
-    + admit.
-    + admit.
-Admitted.
+    assert (Hlc_at :  forall x0 : elt, x0 \notin x -> lc_at 0 (t ^ x0)).
+    {
+      intros x' Hnot.
+      apply term_equiv_lc_at.
+      apply H; assumption.
+    }
+    clear H.
+    unfold open in Hlc_at.
+    pick_fresh y.
+    apply notin_union in Fr.
+    destruct Fr.
+    apply Hlc_at in H.
+    generalize dependent H.
+    apply lc_at_open.
+    apply term_var.
+  - intro Hlc_at.
+    unfold body.
+    exists (fv t).
+    intros x Hnot.
+    apply term_equiv_lc_at.
+    unfold open.
+    apply lc_at_open.
+    + apply term_var.
+    + assumption.
+Qed.
 
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   match t with
@@ -703,7 +695,7 @@ Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
 Definition bswap t := bswap_rec 0 t.
 Notation "& t" := (bswap t) (at level 67).
 
-(** The substitution is compositional. *)
+(** The substitution is compositional.
 Lemma open_comp: forall t u v, (t ^^ u ) ^^ v  = ((&t) ^^ v) ^^ (u ^^ v).
 Proof.
   intro t; induction t.
@@ -711,6 +703,7 @@ Proof.
     + intros u v; unfold open; simpl.
       admit.
     + Admitted.
+*)
 
 (** The above notion of substitution is not capture free because it is
 defines over pre-terms. Nevertheless it is a capture free substitution
@@ -1561,6 +1554,23 @@ Proof.
    apply term_sub with x; assumption.
 Qed.
 
+Lemma open_rec_abs: forall t t1 n x, {n ~> pterm_fvar x} t = pterm_abs t1 -> exists u,  t = pterm_abs u.
+Proof.
+  Admitted.
+  
+Lemma open_rec_app: forall t t1 t2 n x, {n ~> pterm_fvar x} t = pterm_app t1 t2 -> exists u v,  t = pterm_app u v.
+Proof.
+  Admitted.
+  
+Corollary open_rec_app_abs: forall t t1 t2 n x, {n ~> pterm_fvar x} t = pterm_app (pterm_abs t1) t2 -> exists u v,  t = pterm_app (pterm_abs u) v.
+Proof.
+  intros t0 t1 t2 n x Heq.
+  exists (close_rec n x t1).
+  exists (close_rec n x t2).
+  (* incluir lema sobre composição entre open_rec e close_rec *)
+Admitted.
+  
+  
 Lemma rule_b_compat_open: forall t t' n x, rule_b t t' <-> rule_b ({n ~> pterm_fvar x}t) ({n ~> pterm_fvar x}t').
 Proof.
   intros t1 t2 n x; split.
@@ -1585,13 +1595,16 @@ Proof.
       * apply open_rec_term; assumption.
       * rewrite H'; assumption.
   - intro Hrule_b.
+    remember ({n ~> pterm_fvar x} t1) as t.
+    remember (({n ~> pterm_fvar x} t2)) as t'. 
+    induction Hrule_b.
     generalize dependent x.
     generalize dependent n.
     generalize dependent t2.
     induction t1.
     + intros t2 n' x H.
       simpl in H.
-      destruct (n' === n); inversion H.      
+      destruct (n' === n); inversion H.
     + intros t2 n' x H.
       simpl in H; inversion H.
     + intros t2 n' x H.
@@ -1612,9 +1625,10 @@ Proof.
   unfold red_rename.
   intros x t t' y Hfv Hfv' Hb.
   unfold open in *.
-  apply rule_b_compat_open in Hb.
-  apply rule_b_compat_open; assumption.
-Qed.
+  Admitted.
+(*   apply rule_b_compat_open in Hb. *)
+(*   apply rule_b_compat_open; assumption. *)
+(* Qed. *)
 
 (* end hide *)
 Definition b_ctx t u := ES_contextual_closure rule_b t u. 
