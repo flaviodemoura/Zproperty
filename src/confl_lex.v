@@ -71,11 +71,26 @@ Proof.
      apply IHt2.
      reflexivity.
     }
-Admitted. 
+Admitted. *)
   
 Lemma sd_open_rec:  forall t x i, sd ({i ~> x} t) = {i ~> x} (sd t).
 Proof.
-Admitted. *)
+  intro t; induction t.
+  - admit.
+  - admit.
+  - generalize dependent t1.
+    intro t1; induction (sd t1).
+    + intro IH.
+      intros x i.
+      admit.
+    + admit.
+    + change (sd (pterm_app (pterm_app t1_1 t1_2) t2)) with 
+      admit.
+    +
+    +
+  -
+  -
+Admitted. 
   
 Lemma sd_open:  forall x t, sd (t ^ x) = sd t ^ x.
 Proof.
@@ -89,6 +104,31 @@ Proof.
   - intros x.
     unfold open in *.
     change ({0 ~> pterm_fvar x} pterm_app t1 t2) with (pterm_app ({0 ~> pterm_fvar x} t1) ({0 ~> pterm_fvar x} t2)).
+     destruct t1.
+    + destruct n.
+      * simpl.
+        rewrite IHt2; reflexivity. 
+      * simpl.
+        rewrite IHt2; reflexivity. 
+    + simpl.
+      rewrite IHt2; reflexivity. 
+    + destruct (pterm_app t1_1 t1_2).
+      * destruct n.
+        ** simpl.
+           rewrite IHt2; reflexivity. 
+        ** simpl.
+           rewrite IHt2; reflexivity. 
+      * simpl.
+        rewrite IHt2; reflexivity. 
+      *
+      *
+      *
+      fold sd.
+      simpl.
+      reflexivity.
+    +
+    +
+      
     generalize dependent t1.
     intro t1. case t1.
     + intro n; case n. 
@@ -100,8 +140,23 @@ Proof.
         rewrite IHt2; reflexivity.        
     + intros v IH.
       simpl.
-        rewrite IHt2; reflexivity.        
-    + intros p1 p2 IH. admit.
+      rewrite IHt2; reflexivity.        
+    + intros p1 p2 IH.
+      change ({0 ~> pterm_fvar x} pterm_app p1 p2) with (pterm_app ({0 ~> pterm_fvar x}p1) ({0 ~> pterm_fvar x}p2)).
+      replace (sd (pterm_app (pterm_app p1 p2) t2)) with (pterm_app (sd (pterm_app p1 p2)) (sd t2)).
+      * change ( {0 ~> pterm_fvar x} pterm_app (sd (pterm_app p1 p2)) (sd t2)) with ( pterm_app ({0 ~> pterm_fvar x}(sd (pterm_app p1 p2))) ({0 ~> pterm_fvar x}(sd t2))).
+        replace (sd (pterm_app (pterm_app ({0 ~> pterm_fvar x} p1) ({0 ~> pterm_fvar x} p2)) ({0 ~> pterm_fvar x} t2))) with
+            (pterm_app (sd (pterm_app ({0 ~> pterm_fvar x} p1) ({0 ~> pterm_fvar x} p2))) (sd ({0 ~> pterm_fvar x} t2))).
+        ** rewrite IHt2.
+           rewrite <- IH.
+           reflexivity.
+        ** replace (sd (pterm_app (pterm_app ({0 ~> pterm_fvar x} p1) ({0 ~> pterm_fvar x} p2)) ({0 ~> pterm_fvar x} t2))) with (pterm_app (sd (pterm_app ({0 ~> pterm_fvar x} p1) ({0 ~> pterm_fvar x} p2))) (sd ({0 ~> pterm_fvar x} t2))).
+           *** reflexivity.
+           *** simpl. reflexivity.
+             
+      *
+      simpl.
+      admit.
     + admit.
     + admit.
   - intros x. simpl.
