@@ -191,7 +191,8 @@ Fixpoint close_rec  (k : nat) (x : var) (t : pterm) : pterm :=
   | pterm_sub t1 t2 => pterm_sub (close_rec (S k) x t1) (close_rec k x t2)
   end.
 
-Definition close t x := close_rec 0 x t. 
+Definition close t x := close_rec 0 x t.
+
 (* end hide *)
 (** ES terms are expressions without dangling deBruijn indexes. *)
 
@@ -211,6 +212,42 @@ Inductive term : pterm -> Prop :=
       term (pterm_sub t1 t2).
 (* begin hide *)
 Hint Constructors term.
+
+Lemma pterm_abs_open: forall t1 t2 x, t1^x = t2^x -> pterm_abs t1 = pterm_abs t2. 
+Proof.
+Admitted.
+
+Lemma open_k_Sk: forall t x y k k', k <> k' -> {k ~> pterm_fvar y} ({k' ~> pterm_fvar x} close_rec k' x t) = {k' ~> pterm_fvar x} close_rec k' x ({k ~> pterm_fvar y} t).
+Proof.
+Admitted.
+  
+Lemma open_rec_close_rec_term: forall t x k, term t -> open_rec k (pterm_fvar x) (close_rec k x t) = t.
+Proof.
+  intros t x k Hterm.
+  generalize dependent k.
+  induction Hterm.
+  - admit.
+  - admit.
+  - pick_fresh y.
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hfv1].
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hx].
+    intro k; simpl.
+    clear Hx Hfv1.
+    apply pterm_abs_open with y.
+    unfold open in *.
+    rewrite <- (H0 y) with (S k).
+    + apply open_k_Sk.
+      admit.
+    + assumption.
+  - Admitted.
+  
+Corollary open_close_term: forall t x, term t -> (close t x)^x = t.
+Proof.
+  intros t x.
+  apply open_rec_close_rec_term.
+Qed.
 
 Fixpoint pterm_size (t : pterm) {struct t} : nat :=
  match t with
@@ -1554,6 +1591,7 @@ Proof.
    apply term_sub with x; assumption.
 Qed.
 
+(* talvez a forma de evitar os lemas seguintes seja a inclusão de close_rec 
 Lemma open_rec_abs: forall t t1 n x, {n ~> pterm_fvar x} t = pterm_abs t1 -> exists u,  t = pterm_abs u.
 Proof.
   Admitted.
@@ -1565,15 +1603,17 @@ Proof.
 Corollary open_rec_app_abs: forall t t1 t2 n x, {n ~> pterm_fvar x} t = pterm_app (pterm_abs t1) t2 -> exists u v,  t = pterm_app (pterm_abs u) v.
 Proof.
   intros t0 t1 t2 n x Heq.
-  exists (close_rec n x t1).
+  apply open_rec_app in Heq.
+  destruct Heq as [u [v]]; subst.
+  exists 
   exists (close_rec n x t2).
   (* incluir lema sobre composição entre open_rec e close_rec *)
 Admitted.
-  
-  
-Lemma rule_b_compat_open: forall t t' n x, rule_b t t' <-> rule_b ({n ~> pterm_fvar x}t) ({n ~> pterm_fvar x}t').
+  *)
+
+Lemma rule_b_compat_open: forall t t' n x, rule_b t t' -> rule_b ({n ~> pterm_fvar x}t) ({n ~> pterm_fvar x}t').
 Proof.
-  intros t1 t2 n x; split.
+  intros t1 t2 n x.
   - intro Hrule_b.
     inversion Hrule_b; subst.
     simpl.
@@ -1594,6 +1634,8 @@ Proof.
     + assert (H' : {n ~> pterm_fvar x} u = u).
       * apply open_rec_term; assumption.
       * rewrite H'; assumption.
+Qed.
+(* não funciona em termos  
   - intro Hrule_b.
     remember ({n ~> pterm_fvar x} t1) as t.
     remember (({n ~> pterm_fvar x} t2)) as t'. 
@@ -1618,14 +1660,46 @@ Proof.
       simpl in H; inversion H.
     + intros t2 n' x H.
       simpl in H; inversion H.
-Admitted.
+Admitted. *)
+
+Lemma open_close_redex: forall t t0 u x y, t^x = pterm_app (pterm_abs t0) u -> t^y = pterm_app ((close (pterm_abs t0) x)^y) (close u x)^y.
+Proof.
+  Admitted.
   
 Lemma red_rename_b: red_rename rule_b.
 Proof.
   unfold red_rename.
   intros x t t' y Hfv Hfv' Hb.
-  unfold open in *.
+  inversion Hb; subst.
+  symmetry in H.
+  assert (Hy : t^y = pterm_app ((close (pterm_abs t0) x)^y) (close u x)^y).
+  {
+    apply open_close_redex; assumption.
+  }
+  rewrite Hy.
   Admitted.
+(*   rewrite open_close_term. *)
+(*   (* escrever o lema open_close_redex *) *)
+
+(*   generalize dependent x. *)
+(*   generalize dependent y. *)
+(*   generalize dependent t'. *)
+(*   induction t. *)
+(*   - case n. *)
+(*     + intros t y x Hfv1 Hfv2 Hb. *)
+(*       simpl in Hb. *)
+(*       inversion Hb. *)
+(*     + intros n' t y x Hfv1 Hfv2 Hb. *)
+(*       simpl in Hb. *)
+(*       inversion Hb. *)
+(*   - intros t y x Hfv1 Hfv2 Hb. *)
+(*     simpl in Hb. *)
+(*     inversion Hb. *)
+(*   - intros t y x Hfv1 Hfv2 Hb. *)
+(*     simpl in *. *)
+(*   - *)
+(*   - *)
+
 (*   apply rule_b_compat_open in Hb. *)
 (*   apply rule_b_compat_open; assumption. *)
 (* Qed. *)
