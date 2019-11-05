@@ -213,196 +213,8 @@ Inductive term : pterm -> Prop :=
 (* begin hide *)
 Hint Constructors term.
 
-Lemma pterm_abs_open: forall t1 t2 x, t1^x = t2^x -> pterm_abs t1 = pterm_abs t2. 
-Proof.
-Admitted.
-
-Lemma open_k_Sk: forall t x y k k', k <> k' -> {k ~> pterm_fvar y} ({k' ~> pterm_fvar x} close_rec k' x t) = {k' ~> pterm_fvar x} close_rec k' x ({k ~> pterm_fvar y} t).
-Proof.
-Admitted.
-  
-Lemma open_rec_close_rec_term: forall t x k, term t -> open_rec k (pterm_fvar x) (close_rec k x t) = t.
-Proof.
-  intros t x k Hterm.
-  generalize dependent k.
-  induction Hterm.
-  - intro k.
-    simpl.
-    case (x0 == x).
-    + intro Heq.
-      rewrite Heq.
-      simpl.
-      case (k === k).
-     *  reflexivity.
-     *  contradiction.
-    + reflexivity.
-  - intro k.
-    simpl.
-    rewrite IHHterm1.
-    rewrite IHHterm2.
-    reflexivity.
-  - pick_fresh y.
-    apply notin_union in Fr.
-    destruct Fr as [Fr Hfv1].
-    apply notin_union in Fr.
-    destruct Fr as [Fr Hx].
-    intro k; simpl.
-    clear Hx Hfv1.
-    apply pterm_abs_open with y.
-    unfold open in *.
-    rewrite <- (H0 y) with (S k).
-    + apply open_k_Sk.
-      apply lt_0_neq.
-      apply gt_Sn_O.
-    + assumption.
-  - pick_fresh y.
-    apply notin_union in Fr.
-    destruct Fr as [Fr Hfv2].
-    apply notin_union in Fr.
-    destruct Fr as [Fr Hfv1].
-    apply notin_union in Fr.
-    destruct Fr as [Fr Hx].
-    intro k; simpl.
-    rewrite IHHterm.
-    assert (H1: {S k ~> pterm_fvar x} close_rec (S k) x (t1 ^ y) = t1 ^ y).
-    {
-      apply H0; assumption.
-    }
-    clear Hx Hfv1 Hfv2 Fr H0 Hterm.
-Admitted.
-  
-Corollary open_close_term: forall t x, term t -> (close t x)^x = t.
-Proof.
-  intros t x.
-  apply open_rec_close_rec_term.
-Qed.
-
-Fixpoint pterm_size (t : pterm) {struct t} : nat :=
- match t with
- | pterm_bvar i    => 1
- | pterm_fvar x    => 1
- | pterm_abs t1    => 1 + (pterm_size t1)
- | pterm_app t1 t2 => 1 + (pterm_size t1) + (pterm_size t2)
- | pterm_sub t1 t2 => 1 + (pterm_size t1) + (pterm_size t2)
- end.
-
-Lemma pterm_size_positive: forall t, 0 < pterm_size t.
-Proof.
-  induction t0; simpl; auto with arith.
-Qed.
-    
-Lemma pterm_size_open: forall t x, pterm_size (t^x) = pterm_size t.
-Proof.
-  unfold open.
-  intros t x.
-  generalize dependent 0.
-  generalize dependent x.
-  induction t.
-  - unfold open_rec.
-    intros x n'.
-    destruct (n' === n); reflexivity.
-  - reflexivity.
-  - simpl.
-    intros x n.
-    destruct (IHt1 x n).
-    destruct (IHt2 x n).
-    reflexivity.
-  - simpl.
-    intros x n.
-    destruct (IHt x (S n)); reflexivity.
-  - simpl.
-    intros x n.
-    destruct (IHt1 x (S n)).
-    destruct (IHt2 x n).
-    reflexivity.
-Qed.
-
-Lemma strong_induction :  forall Q: nat -> Prop,
-    (forall n, (forall m, m < n -> Q m) -> Q n) ->
-    forall n, Q n.
-Proof.
-  intros Q IH n.
-  assert (H := nat_ind (fun n => (forall m : nat, m < n -> Q m))).
-  apply IH.
-  apply H.
-  - intros m Hlt; inversion Hlt.
-  - intros n' H' m Hlt.
-    apply IH.
-    intros m0 Hlt'.
-    apply H'.
-    apply lt_n_Sm_le in Hlt.
-    apply lt_le_trans with m; assumption.
-Qed.
-
-(* end hide *)  
-Lemma pterm_size_induction :
- forall P : pterm -> Prop,
- (forall t,
-    (forall t', pterm_size t' < pterm_size t ->
-    P t') -> P t) ->
- (forall t, P t).
-(* begin hide *)
-Proof.
-  intros P IH t.
-  remember (pterm_size t) as n eqn:H.
-  assert (HsiInst := strong_induction (fun n => forall t, n = pterm_size t -> P t)).
-  generalize dependent t.
-  generalize dependent n.
-  apply HsiInst.
-  intros n' Hind t Hsz.
-  apply IH.
-  intros t' Hlt.
-  apply Hind with (pterm_size t').
-  - rewrite Hsz; assumption.  
-  - reflexivity.
-Qed.
-(* end hide *)  
-
-(** The locally nameless framework manipulates expressions that are a representation of the lambda-terms, and not all pre-terms. In this sense, if t reduces to t' then both t and t' are terms: *)
-Definition term_regular (R : Rel pterm) :=
-  forall t t', R t t' -> term t /\ term t'.
-
-(* begin hide *)
-Definition red_rename (R : Rel pterm) :=
-  forall x t t' y,
-    x \notin (fv t) ->
-    x \notin (fv t') ->
-  R (t ^ x) (t' ^ x) -> 
-  R (t ^ y) (t' ^ y).
-
 Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
 
-Lemma body_app: forall t1 t2, body (pterm_app t1 t2) -> body t1 /\ body t2.
-Proof.
-  intros t1 t2 Hbody.
-  inversion Hbody; subst.
-  unfold body.
-  split.
-  - exists x.
-    intros x0 Hnot.
-    apply H in Hnot.
-    inversion Hnot; subst.
-    assumption.
-  - exists x.
-    intros x0 Hnot.
-    apply H in Hnot.
-    inversion Hnot; subst.
-    assumption.
-Qed.
-  
-Lemma term_regular_trans: forall R, term_regular R -> term_regular (trans R).
-Proof.
-unfold term_regular.
-intros R H t t' Htrans.
-induction Htrans.
-- apply H; assumption.
-- destruct IHHtrans as [Hb Hc].
-  apply H in H0.
-  destruct H0 as [Ha Hb'].
-  auto.
-Qed.
-    
-(* end hide *)
 Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   match t with
   | pterm_bvar i    => i < k
@@ -411,7 +223,17 @@ Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   | pterm_abs t1    => lc_at (S k) t1
   | pterm_sub t1 t2 => (lc_at (S k) t1) /\ lc_at k t2
   end.
-(* begin hide *)    
+
+Inductive lc: pterm -> Prop :=
+  | lc_var: forall x, lc (pterm_fvar x)
+  | lc_app: forall t1 t2, lc t1 -> lc t2 -> lc (pterm_app t1 t2)
+  | lc_abs: forall t1 L,  (forall x, x \notin L -> lc (t1^x)) -> lc (pterm_abs t1)
+  | lc_sub: forall t1 t2 L,  (forall x, x \notin L -> lc (t1^x)) -> lc t2 -> lc (pterm_sub t1 t2).
+
+Lemma lc_equic_lc_at: forall t, lc t <-> lc_at 0 t.
+Proof.
+  Admitted.
+  
 Lemma lc_at_weaken_ind : forall k1 k2 t,
   lc_at k1 t -> k1 <= k2 -> lc_at k2 t.
 Proof.
@@ -612,9 +434,88 @@ Proof.
     + apply IHt1 with x; assumption.      
     + apply IHt2 with x; assumption.
 Qed.
-(* end hide *)
-Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
+
+Fixpoint pterm_size (t : pterm) {struct t} : nat :=
+ match t with
+ | pterm_bvar i    => 1
+ | pterm_fvar x    => 1
+ | pterm_abs t1    => 1 + (pterm_size t1)
+ | pterm_app t1 t2 => 1 + (pterm_size t1) + (pterm_size t2)
+ | pterm_sub t1 t2 => 1 + (pterm_size t1) + (pterm_size t2)
+ end.
+
+Lemma pterm_size_positive: forall t, 0 < pterm_size t.
+Proof.
+  induction t0; simpl; auto with arith.
+Qed.
+    
+Lemma pterm_size_open: forall t x, pterm_size (t^x) = pterm_size t.
+Proof.
+  unfold open.
+  intros t x.
+  generalize dependent 0.
+  generalize dependent x.
+  induction t.
+  - unfold open_rec.
+    intros x n'.
+    destruct (n' === n); reflexivity.
+  - reflexivity.
+  - simpl.
+    intros x n.
+    destruct (IHt1 x n).
+    destruct (IHt2 x n).
+    reflexivity.
+  - simpl.
+    intros x n.
+    destruct (IHt x (S n)); reflexivity.
+  - simpl.
+    intros x n.
+    destruct (IHt1 x (S n)).
+    destruct (IHt2 x n).
+    reflexivity.
+Qed.
+
+Lemma strong_induction :  forall Q: nat -> Prop,
+    (forall n, (forall m, m < n -> Q m) -> Q n) ->
+    forall n, Q n.
+Proof.
+  intros Q IH n.
+  assert (H := nat_ind (fun n => (forall m : nat, m < n -> Q m))).
+  apply IH.
+  apply H.
+  - intros m Hlt; inversion Hlt.
+  - intros n' H' m Hlt.
+    apply IH.
+    intros m0 Hlt'.
+    apply H'.
+    apply lt_n_Sm_le in Hlt.
+    apply lt_le_trans with m; assumption.
+Qed.
+
+(* end hide *)  
+Lemma pterm_size_induction :
+ forall P : pterm -> Prop,
+ (forall t,
+    (forall t', pterm_size t' < pterm_size t ->
+    P t') -> P t) ->
+ (forall t, P t).
 (* begin hide *)
+Proof.
+  intros P IH t.
+  remember (pterm_size t) as n eqn:H.
+  assert (HsiInst := strong_induction (fun n => forall t, n = pterm_size t -> P t)).
+  generalize dependent t.
+  generalize dependent n.
+  apply HsiInst.
+  intros n' Hind t Hsz.
+  apply IH.
+  intros t' Hlt.
+  apply Hind with (pterm_size t').
+  - rewrite Hsz; assumption.  
+  - reflexivity.
+Qed.
+
+Theorem term_equiv_lc_at: forall t, term t <-> lc_at 0 t.
 Proof.
   intro t; split.
   - apply term_to_lc_at.
@@ -691,29 +592,6 @@ Proof.
            apply Hlc.
 Qed.
 
-Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
-Proof.
-  intros t x y H.
-  apply term_to_lc_at in H.
-  apply term_equiv_lc_at.
-  unfold open in H.
-  apply lc_at_open_rec_rename with x; assumption.
-Qed.
-
-Lemma body_to_term: forall t x, x \notin fv t -> body t -> term (t^x).
-Proof.
-  intros t x Hfc Hbody.
-  unfold body in Hbody.
-  destruct Hbody as [L H].
-  pick_fresh y.
-  apply notin_union in Fr.
-  destruct Fr as [Fr Hfvt].
-  apply notin_union in Fr.
-  destruct Fr as [Fr Hfvx].
-  apply H in Fr.
-  apply term_open_rename with y; assumption.
-Qed.
-
 Theorem body_lc_at: forall t, body t <-> lc_at 1 t.
 Proof.
   intro t.
@@ -746,6 +624,150 @@ Proof.
     + apply term_var.
     + assumption.
 Qed.
+
+(* Falso: tome t1 = 0 e t2 = x
+Lemma pterm_abs_open: forall t1 t2 x, term (t1^x) -> term (t2^x) -> t1^x = t2^x -> pterm_abs t1 = pterm_abs t2. 
+Proof.
+  intros t1 t2 x Hbody.
+  generalize dependent x.
+  generalize dependent t2.
+Admitted.
+
+
+Lemma pterm_sub_open: forall t1 t2 t3 x, t1^x = t2^x -> pterm_sub t1 t3 = pterm_sub t2 t3. 
+Proof.
+Admitted.
+*)
+
+Lemma open_k_Sk: forall t x y k k', k <> k' -> {k ~> pterm_fvar y} ({k' ~> pterm_fvar x} close_rec k' x t) = {k' ~> pterm_fvar x} close_rec k' x ({k ~> pterm_fvar y} t).
+Proof.
+Admitted.
+
+(* The next lemma fails if t is not a term: take t = k = 0 *)
+Lemma open_rec_close_rec_term: forall t x k, term t ->  open_rec k (pterm_fvar x) (close_rec k x t) = t.
+Proof.
+  intros t x k Hterm.
+  generalize dependent k.
+  induction Hterm.
+  - intro k.
+    simpl.
+    case (x0 == x).
+    + intro Heq.
+      rewrite Heq.
+      simpl.
+      case (k === k).
+     *  reflexivity.
+     *  contradiction.
+    + reflexivity.
+  - intro k.
+    simpl.
+    rewrite IHHterm1.
+    rewrite IHHterm2.
+    reflexivity.
+  - pick_fresh y.
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hfv1].
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hx].
+    intro k; simpl.
+    clear Hx Hfv1.
+    
+   (* apply pterm_abs_open with y. *)
+    unfold open in *.
+    rewrite <- (H0 y) with (S k).
+    + apply open_k_Sk.
+      apply lt_0_neq.
+      apply gt_Sn_O.
+    + assumption.
+  - pick_fresh y.
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hfv2].
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hfv1].
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hx].
+    intro k; simpl.
+    rewrite IHHterm.
+    assert (H1: {S k ~> pterm_fvar x} close_rec (S k) x (t1 ^ y) = t1 ^ y).
+    {
+      apply H0; assumption.
+    }
+    clear Hx Hfv1 Hfv2 Fr H0 Hterm.
+Admitted.
+  
+Corollary open_close_term: forall t x, term t -> (close t x)^x = t.
+Proof.
+  intros t x.
+  apply open_rec_close_rec_term.
+Qed.
+
+
+(** The locally nameless framework manipulates expressions that are a representation of the lambda-terms, and not all pre-terms. In this sense, if t reduces to t' then both t and t' are terms: *)
+Definition term_regular (R : Rel pterm) :=
+  forall t t', R t t' -> term t /\ term t'.
+
+(* begin hide *)
+Definition red_rename (R : Rel pterm) :=
+  forall x t t' y,
+    x \notin (fv t) ->
+    x \notin (fv t') ->
+  R (t ^ x) (t' ^ x) -> 
+  R (t ^ y) (t' ^ y).
+
+
+Lemma body_app: forall t1 t2, body (pterm_app t1 t2) -> body t1 /\ body t2.
+Proof.
+  intros t1 t2 Hbody.
+  inversion Hbody; subst.
+  unfold body.
+  split.
+  - exists x.
+    intros x0 Hnot.
+    apply H in Hnot.
+    inversion Hnot; subst.
+    assumption.
+  - exists x.
+    intros x0 Hnot.
+    apply H in Hnot.
+    inversion Hnot; subst.
+    assumption.
+Qed.
+  
+Lemma term_regular_trans: forall R, term_regular R -> term_regular (trans R).
+Proof.
+unfold term_regular.
+intros R H t t' Htrans.
+induction Htrans.
+- apply H; assumption.
+- destruct IHHtrans as [Hb Hc].
+  apply H in H0.
+  destruct H0 as [Ha Hb'].
+  auto.
+Qed.
+   
+Corollary term_open_rename: forall t x y, term (t^x) -> term (t^y).  
+Proof.
+  intros t x y H.
+  apply term_to_lc_at in H.
+  apply term_equiv_lc_at.
+  unfold open in H.
+  apply lc_at_open_rec_rename with x; assumption.
+Qed.
+
+Lemma body_to_term: forall t x, x \notin fv t -> body t -> term (t^x).
+Proof.
+  intros t x Hfc Hbody.
+  unfold body in Hbody.
+  destruct Hbody as [L H].
+  pick_fresh y.
+  apply notin_union in Fr.
+  destruct Fr as [Fr Hfvt].
+  apply notin_union in Fr.
+  destruct Fr as [Fr Hfvx].
+  apply H in Fr.
+  apply term_open_rename with y; assumption.
+Qed.
+
 
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   match t with
