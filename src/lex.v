@@ -226,8 +226,21 @@ Proof.
   intros t x k Hterm.
   generalize dependent k.
   induction Hterm.
-  - admit.
-  - admit.
+  - intro k.
+    simpl.
+    case (x0 == x).
+    + intro Heq.
+      rewrite Heq.
+      simpl.
+      case (k === k).
+     *  reflexivity.
+     *  contradiction.
+    + reflexivity.
+  - intro k.
+    simpl.
+    rewrite IHHterm1.
+    rewrite IHHterm2.
+    reflexivity.
   - pick_fresh y.
     apply notin_union in Fr.
     destruct Fr as [Fr Hfv1].
@@ -239,9 +252,24 @@ Proof.
     unfold open in *.
     rewrite <- (H0 y) with (S k).
     + apply open_k_Sk.
-      admit.
+      apply lt_0_neq.
+      apply gt_Sn_O.
     + assumption.
-  - Admitted.
+  - pick_fresh y.
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hfv2].
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hfv1].
+    apply notin_union in Fr.
+    destruct Fr as [Fr Hx].
+    intro k; simpl.
+    rewrite IHHterm.
+    assert (H1: {S k ~> pterm_fvar x} close_rec (S k) x (t1 ^ y) = t1 ^ y).
+    {
+      apply H0; assumption.
+    }
+    clear Hx Hfv1 Hfv2 Fr H0 Hterm.
+Admitted.
   
 Corollary open_close_term: forall t x, term t -> (close t x)^x = t.
 Proof.
