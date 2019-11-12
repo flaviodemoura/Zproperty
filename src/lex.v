@@ -229,10 +229,6 @@ Inductive lc: pterm -> Prop :=
   | lc_app: forall t1 t2, lc t1 -> lc t2 -> lc (pterm_app t1 t2)
   | lc_abs: forall t1 L,  (forall x, x \notin L -> lc (t1^x)) -> lc (pterm_abs t1)
   | lc_sub: forall t1 t2 L,  (forall x, x \notin L -> lc (t1^x)) -> lc t2 -> lc (pterm_sub t1 t2).
-
-Lemma lc_equic_lc_at: forall t, lc t <-> lc_at 0 t.
-Proof.
-  Admitted.
   
 Lemma lc_at_weaken_ind : forall k1 k2 t,
   lc_at k1 t -> k1 <= k2 -> lc_at k2 t.
@@ -297,6 +293,51 @@ Proof.
     + apply IHt1; assumption.
     + apply IHt2; assumption.
 Qed.
+
+Lemma lc_equic_lc_at: forall t, lc t <-> lc_at 0 t.
+Proof.
+  split.
+  - intro Hlc.
+    induction Hlc.
+    + simpl.
+      tauto.
+    + simpl.
+      split; assumption.
+    + simpl.
+      pick_fresh x.
+      apply notin_union in Fr.
+      destruct Fr as [Fr Hfvt1].
+      clear Hfvt1 H.
+      apply H0 in Fr.
+      unfold open in Fr.
+      apply lc_rec_open_var_rec in Fr; assumption.
+    + split.
+      * pick_fresh x.
+        apply notin_union in Fr.
+        destruct Fr as [Fr Hfvt2].
+        apply notin_union in Fr.
+        destruct Fr as [Fr Hfvt1].
+        clear Hfvt1 Hfvt2 H.
+        apply H0 in Fr.
+        unfold open in Fr.
+        apply lc_rec_open_var_rec in Fr; assumption.
+      * assumption.
+  - intro Hlc_at.
+    induction t0.
+    + simpl in Hlc_at.
+      inversion Hlc_at.
+    + apply lc_var.
+    + simpl in Hlc_at.
+      destruct Hlc_at as [Hlc_at_t0_1 Hlc_at_t0_2].
+      apply lc_app.
+      * apply IHt0_1 in Hlc_at_t0_1; assumption.
+      * apply IHt0_2 in Hlc_at_t0_2; assumption.
+    + apply lc_abs with (fv t0).
+      intros x H.
+      unfold open.
+      admit.
+    + simpl in Hlc_at.
+  Admitted.
 
 Lemma term_to_lc_at : forall t, term t -> lc_at 0 t.
 Proof.
