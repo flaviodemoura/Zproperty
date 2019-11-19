@@ -707,6 +707,13 @@ Lemma term_bvar: forall n x, term (pterm_bvar n^x) -> n=0.
 Proof.
   Admitted.
 
+Lemma open_rec_close_rec_term'': forall t x k, term t ->  open_rec k (pterm_fvar x) (close_rec k x t) = t.
+Proof.
+  intros t x k Hterm.
+  apply term_equiv_lc_at in Hterm.
+  generalize dependent 0.
+  Admitted.
+  
 Lemma open_rec_close_rec_term: forall t x k, term t ->  open_rec k (pterm_fvar x) (close_rec k x t) = t.
 Proof.
   intros t x k Hterm.
