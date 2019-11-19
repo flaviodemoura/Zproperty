@@ -677,6 +677,36 @@ Proof.
 Admitted.
 
 (* The next lemma fails if t is not a term: take t = k = 0 *)
+Lemma open_rec_close_rec_term': forall t x k, term t ->  open_rec k (pterm_fvar x) (close_rec k x t) = t.
+Proof.
+  intro t; induction t.
+  - intros x k Hterm.
+    inversion Hterm.
+  - intros x k Hterm.
+    simpl.
+    destruct (v == x).
+    + subst. simpl.
+      destruct (k === k).
+      * reflexivity.
+      * contradiction.
+    + reflexivity.
+  - intros x k Hterm.
+    inversion Hterm; subst; clear Hterm.
+    apply (IHt1 x k) in H1.
+    apply (IHt2 x k) in H2.
+    simpl.
+    rewrite H1.
+    rewrite H2; reflexivity.
+  - intros x k Hterm.
+    inversion Hterm; subst.
+    simpl.
+    admit. (* não conseguimos utilizar a h.i.*)
+  - Admitted.
+
+Lemma term_bvar: forall n x, term (pterm_bvar n^x) -> n=0.
+Proof.
+  Admitted.
+
 Lemma open_rec_close_rec_term: forall t x k, term t ->  open_rec k (pterm_fvar x) (close_rec k x t) = t.
 Proof.
   intros t x k Hterm.
@@ -684,11 +714,10 @@ Proof.
   induction Hterm.
   - intro k.
     simpl.
-    case (x0 == x).
-    + intro Heq.
-      rewrite Heq.
+    destruct (x0 == x).
+    + rewrite e.
       simpl.
-      case (k === k).
+      destruct (k === k).
      *  reflexivity.
      *  contradiction.
     + reflexivity.
@@ -703,6 +732,38 @@ Proof.
     apply notin_union in Fr.
     destruct Fr as [Fr Hx].
     intro k; simpl.
+    unfold open in H0.
+    generalize dependent t1.
+    intro t1; induction t1.
+    + intros.
+      change (close_rec (S k) x (pterm_bvar n)) with (pterm_bvar n).
+      apply H in Fr.
+      apply term_bvar in Fr.
+      subst.
+      reflexivity.
+    + intros.
+      simpl.
+      destruct (v == x).
+      * subst. simpl.
+        destruct (k === k).
+        ** reflexivity.
+        ** contradiction.
+      * reflexivity.
+    + intros.
+      simpl.
+      
+    +
+      * unfold open in H2.
+        inversion H2.
+      *
+      *
+      *
+      simpl.
+    +
+    +
+    +
+    +
+      
     clear Hx Hfv1.
     
    (* apply pterm_abs_open with y. *)
