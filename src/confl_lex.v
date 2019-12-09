@@ -1,4 +1,4 @@
-Require Import lex.
+Require Import infraES lex.
 Require Import ZtoConfl.
 
 (** Superdevelopment function *)
