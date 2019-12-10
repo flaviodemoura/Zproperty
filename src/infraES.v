@@ -25,15 +25,8 @@ Notation "E \rem F" := (VarSet.remove F E) (at level 70).
 Lemma eq_var_dec : forall x y : var, {x = y} + {x <> y}.
 Proof. exact eq_nat_dec. Qed.
 
-Notation "x == y" := (eq_var_dec x y) (at level 67).
-Notation "i === j" := (Peano_dec.eq_nat_dec i j) (at level 67).
-
-Lemma notin_union : forall x E F,
-  x \notin (E \u F) <-> (x \notin E) /\ (x \notin F).
+Lemma not_or_equiv_and_not: forall (A B: Prop), ~(A \/ B) <-> ~ A /\ ~ B.
 Proof.
-assert (not_or: forall (A B: Prop), ~(A \/ B) <-> ~ A /\ ~ B).
-{
-  unfold not.
   split.
   - intro H.
     split.
@@ -48,10 +41,17 @@ assert (not_or: forall (A B: Prop), ~(A \/ B) <-> ~ A /\ ~ B).
   - intros H H0.
     destruct H.
     destruct H0; contradiction.
-}
+Qed.
+
+Notation "x == y" := (eq_var_dec x y) (at level 67).
+Notation "i === j" := (Peano_dec.eq_nat_dec i j) (at level 67).
+
+Lemma notin_union : forall x E F,
+  x \notin (E \u F) <-> (x \notin E) /\ (x \notin F).
+Proof.
 intros x E F.
 apply iff_stepl with (~((x \in E) \/ (x \in F))).
-- apply not_or.
+- apply not_or_equiv_and_not.
 - split; unfold not; intros; destruct H; apply union_spec in H0; assumption.
 Qed.
 (* end hide *)
@@ -674,7 +674,70 @@ Admitted.
 
 Lemma open_k_Sk: forall t x y k k', k <> k' -> {k ~> pterm_fvar y} ({k' ~> pterm_fvar x} close_rec k' x t) = {k' ~> pterm_fvar x} close_rec k' x ({k ~> pterm_fvar y} t).
 Proof.
-Admitted.
+  intros t x y k k' H.
+  generalize dependent k.
+  generalize dependent k'.
+  induction t.
+  - intros k' k H.
+    simpl.
+    case (k' === n).
+    + intro Heq'.
+      rewrite <- Heq'.
+      case (k === k').
+      * contradiction.
+      * simpl.
+        case (k' === k').
+        **  reflexivity.
+        **  contradiction.
+    + simpl.
+      case (k === n).
+      * unfold close_rec.
+        case (y == x).
+        **  intro Heq.
+            rewrite Heq.
+            simpl.
+            case (k' === k').
+            *** reflexivity.
+            *** contradiction.
+        **  reflexivity.
+      * simpl.
+        case (k' === n).
+        **  contradiction.
+        **  reflexivity.
+  - intros k' k H.
+    simpl.
+    case (v == x).
+    + simpl.
+      case (k' === k').
+      * reflexivity.
+      * contradiction.
+    + reflexivity.
+  - intros k' k H.
+    simpl.
+    rewrite IHt1.
+    + rewrite IHt2.
+      * reflexivity.
+      * assumption.
+    + assumption.
+  - intros k' k H.
+    specialize (IHt (S k')).
+    specialize (IHt (S k)).
+    simpl.
+    rewrite IHt.
+    + reflexivity.
+    + apply not_eq_S; assumption.
+  - intros k' k H.
+    simpl.
+    specialize (IHt1 (S k')).
+    specialize (IHt1 (S k)).
+    specialize (IHt2 k').
+    specialize (IHt2 k).
+    rewrite IHt1.
+    + rewrite IHt2.
+      * reflexivity.
+      * assumption.
+    + apply not_eq_S; assumption.
+Qed.
 
 (** bswap replaces 0s by 1s and vice-versa. Any other index is preserved. *)
 Fixpoint has_free_index (k:nat) (t:pterm) : Prop :=
@@ -696,154 +759,71 @@ Qed.
 Lemma open_rec_close_rec_term: forall t x k, ~(has_free_index k t) -> open_rec k (pterm_fvar x) (close_rec k x t) = t.
 Proof.
   intro t; induction t.
-  - admit.
-  - admit.
-  - admit.
+  - intros x k Hnot.
+    simpl in *.
+    case (k === n) in Hnot.
+    + contradiction.
+    + case (k === n).
+      * contradiction.
+      * reflexivity.
+  - intros x k Hnot.
+    unfold open_rec.
+    simpl.
+    case (v == x).
+    + intro Heq.
+      rewrite Heq.
+      case (k === k).
+        * reflexivity.
+        * contradiction.
+    + reflexivity.
+  - simpl.
+    intros x k Hnot.
+    apply not_or_equiv_and_not in Hnot.
+    destruct Hnot as [Hnot1 Hnot2].
+    specialize (IHt1 x).
+    specialize (IHt2 x).
+    apply IHt1 in Hnot1.
+    apply IHt2 in Hnot2.
+    rewrite Hnot1.
+    rewrite Hnot2.
+    reflexivity.
   - intros x k Hnot.
     simpl.
     rewrite IHt.
     + reflexivity.
     + simpl in Hnot; assumption.
-  - Admitted.
+  - simpl.
+    intros x k Hnot.
+    apply not_or_equiv_and_not in Hnot.
+    destruct Hnot as [Hnot1 Hnot2].
+    specialize (IHt1 x).
+    specialize (IHt2 x).
+    apply IHt1 in Hnot1.
+    apply IHt2 in Hnot2.
+    rewrite Hnot1.
+    rewrite Hnot2.
+    reflexivity.
+Qed.
 
 Lemma term_not_free_index: forall t, term t <-> (forall k, ~(has_free_index k t)). 
 Proof.
-  Admitted.
-
-(*
-Lemma open_rec_close_rec_term': forall t x k k', lc_at k' t -> k <= k' -> open_rec k (pterm_fvar x) (close_rec k x t) = t.
-
-(* The next lemma fails if t is not a term: take t = k = 0 *)
-Lemma open_rec_close_rec_term': forall t x k, term t -> open_rec k (pterm_fvar x) (close_rec k x t) = t.
-Proof.
-  intro t; induction t.
-  - intros x k Hterm.
-    inversion Hterm.
-  - intros x k Hterm.
-    simpl.
-    destruct (v == x).
-    + subst. simpl.
-      destruct (k === k).
-      * reflexivity.
-      * contradiction.
-    + reflexivity.
-  - intros x k Hterm.
-    inversion Hterm; subst; clear Hterm.
-    apply (IHt1 x k) in H1.
-    apply (IHt2 x k) in H2.
-    simpl.
-    rewrite H1.
-    rewrite H2; reflexivity.
-  - intros x k Hterm.
-    inversion Hterm; subst.
-    simpl.
-    admit. (* não conseguimos utilizar a h.i.*)
-  - Admitted.
-    
-Lemma term_bvar: forall n x, term (pterm_bvar n^x) -> n=0.
-Proof.
-  Admitted.
-
-Lemma open_rec_close_rec_term'': forall t x k, term t ->  open_rec k (pterm_fvar x) (close_rec k x t) = t.
-Proof.
-  intros t x k Hterm.
-  apply term_equiv_lc_at in Hterm.
-  generalize dependent 0.
-  induction n.
-  - admit.
-  -
-    
-  Admitted.
-  
-Lemma open_rec_close_rec_term: forall t x k, term t ->  open_rec k (pterm_fvar x) (close_rec k x t) = t.
-Proof.
-  intros t x k Hterm.
-  generalize dependent k.
-  induction Hterm.
-  - intro k.
-    simpl.
-    destruct (x0 == x).
-    + rewrite e.
-      simpl.
-      destruct (k === k).
-     *  reflexivity.
-     *  contradiction.
-    + reflexivity.
-  - intro k.
-    simpl.
-    rewrite IHHterm1.
-    rewrite IHHterm2.
-    reflexivity.
-  - pick_fresh y.
-    apply notin_union in Fr.
-    destruct Fr as [Fr Hfv1].
-    apply notin_union in Fr.
-    destruct Fr as [Fr Hx].
-    intro k; simpl.
-    unfold open in H0.
-    generalize dependent t1.
-    intro t1; induction t1.
-    + intros.
-      change (close_rec (S k) x (pterm_bvar n)) with (pterm_bvar n).
-      apply H in Fr.
-      apply term_bvar in Fr.
-      subst.
-      reflexivity.
-    + intros.
-      simpl.
-      destruct (v == x).
-      * subst. simpl.
-        destruct (k === k).
-        ** reflexivity.
-        ** contradiction.
-      * reflexivity.
-    + intros.
-      simpl.
-      
-    +
-      * unfold open in H2.
-        inversion H2.
-      *
-      *
-      *
-      simpl.
-    +
-    +
-    +
-    +
-      
-    clear Hx Hfv1.
-    
-   (* apply pterm_abs_open with y. *)
-    unfold open in *.
-    rewrite <- (H0 y) with (S k).
-    + apply open_k_Sk.
-      apply lt_0_neq.
-      apply gt_Sn_O.
-    + assumption.
-  - pick_fresh y.
-    apply notin_union in Fr.
-    destruct Fr as [Fr Hfv2].
-    apply notin_union in Fr.
-    destruct Fr as [Fr Hfv1].
-    apply notin_union in Fr.
-    destruct Fr as [Fr Hx].
-    intro k; simpl.
-    rewrite IHHterm.
-    assert (H1: {S k ~> pterm_fvar x} close_rec (S k) x (t1 ^ y) = t1 ^ y).
-    {
-      apply H0; assumption.
-    }
-    clear Hx Hfv1 Hfv2 Fr H0 Hterm.
 Admitted.
 
+Lemma term_bvar: forall n x, term (pterm_bvar n^x) -> n=0.
+Proof.
+  unfold open.
+  unfold open_rec.
+  intro n.
+  case (0 === n).
+  - intro Heq; rewrite Heq; reflexivity.
+  - intros Hneq v Hterm; inversion Hterm.
+Qed.
 
 Corollary open_close_term: forall t x, term t -> (close t x)^x = t.
 Proof.
   intros t x.
   apply open_rec_close_rec_term.
 Qed.
-*)
 
 (** The locally nameless framework manipulates expressions that are a representation of the lambda-terms, and not all pre-terms. In this sense, if t reduces to t' then both t and t' are terms: *)
 Definition term_regular (R : Rel pterm) :=
