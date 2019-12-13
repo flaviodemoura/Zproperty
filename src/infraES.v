@@ -737,13 +737,6 @@ Proof.
   intro i. simpl. destruct (i === i); auto.
 Qed.
 
-Corollary lc_at_open : forall n t u, term u -> (lc_at (S n) t <-> lc_at n (open_rec n u t)).
-Proof.
-  intros n t u; split.
-  - apply lc_at_open_rec; assumption. 
-  - apply lc_at_open_var_rec.
-Qed.
-
 Lemma open_rec_close_rec_term: forall t x k, ~(has_free_index k t) -> open_rec k (pterm_fvar x) (close_rec k x t) = t.
 Proof.
   intro t; induction t.
@@ -806,8 +799,9 @@ Qed.
 
 Corollary open_close_term: forall t x, term t -> (close t x)^x = t.
 Proof.
-  intros t x.
+  intros t x Hterm.
   apply open_rec_close_rec_term.
+  apply term_not_free_index; assumption.
 Qed.
 
 (** The locally nameless framework manipulates expressions that are a representation of the lambda-terms, and not all pre-terms. In this sense, if t reduces to t' then both t and t' are terms: *)
