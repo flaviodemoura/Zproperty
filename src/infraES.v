@@ -737,6 +737,173 @@ Proof.
   intro i. simpl. destruct (i === i); auto.
 Qed.
 
+Lemma not_has_free_index: forall t k x, ~(has_free_index k (open_rec k (pterm_fvar x) t)).
+Proof.
+  intro t; induction t.
+  - intros k x H.
+    case (k === n).
+    + intro Heq. subst.
+      simpl in H.
+      destruct (n === n).
+      * simpl in *.
+        auto.
+      * apply n0.
+        reflexivity.
+    + intro H'.
+      simpl in H.
+      destruct (k === n).
+      * contradiction.
+      * simpl in H.
+        destruct (k === n).
+        ** contradiction.
+        ** auto.
+  - intros k x H.
+    simpl in H.
+    auto.
+  - intros k x H.
+    simpl in H.
+    destruct H.
+    + generalize H.
+      apply IHt1.
+    + generalize H.
+      apply IHt2.
+  - intros k x H.
+    simpl in H.
+    generalize H.
+    apply IHt.
+  - intros k x H.
+    simpl in H.
+    destruct H.
+    + generalize H.
+      apply IHt1.
+    + generalize H.
+      apply IHt2.
+Qed.  
+
+(* Lemma not_has_free_index_open_rec: forall k n x t, k > n -> has_free_index k ({n ~> pterm_fvar x} t) -> has_free_index (S k) t. *)
+(* Proof. *)
+(*   intros k n x t. *)
+(*   generalize dependent x. *)
+(*   generalize dependent n. *)
+(*   generalize dependent k. *)
+(*   induction t. *)
+(*   - intros k n' x Hgt H. *)
+(* Admitted. *)
+
+Lemma has_index_open_rec: forall t k n x, k<>n -> has_free_index k t -> has_free_index k (open_rec n x t).
+Proof.
+    intro t; induction t.
+  - intros k n' x Hneq H.
+    simpl.
+    destruct (n' === n).
+    + subst.
+      simpl in H.
+      destruct (k === n); contradiction.
+    + assumption.
+  - intros k n x Hneq H.
+    simpl in *. auto.
+  - intros k n x Hneq Happ.
+    simpl in *.
+    destruct Happ.
+    + left.
+      apply IHt1; assumption.
+    + right.
+      apply IHt2; assumption.
+  - intros k n x Hneq H.
+    simpl in *.
+    apply IHt.
+    + apply not_eq_S; assumption. 
+    + assumption.
+  - intros k n x Hneq Hsub.
+    simpl in *.
+    destruct Hsub.
+    + left.
+      apply IHt1.
+      * apply not_eq_S; assumption.
+      * assumption.
+    + right.
+      apply IHt2; assumption.
+Qed.
+      
+Lemma has_index_open: forall t k x, has_free_index (S k) t -> has_free_index (S k) (t ^ x).
+Proof.
+  intros t k x H.
+  unfold open.
+  apply has_index_open_rec.
+  - apply Nat.neq_succ_0.
+  - assumption.
+Qed.    
+
+(* Lemma has_free_index_open: forall k x t, k > 0 -> has_free_index k t -> has_free_index k (t ^ x). *)
+(* Proof. *)
+(* Admitted. *)
+
+(* Lemma has_free_index_open_cp: forall k x t, k > 0 -> ~ has_free_index k (t ^ x) -> ~ has_free_index k t. *)
+(* Proof. *)
+(*   intros k x t Hgt H1 H2. *)
+(*   apply (has_free_index_open k x) in H2. *)
+(*   - contradiction. *)
+(*   - assumption. *)
+(* Qed.     *)
+
+  
+(* Lemma has_index_open_abs: forall k t x, has_free_index k (t ^ x) -> has_free_index k (pterm_abs t). *)
+(* Proof. *)
+(*   intro k; case k. *)
+(*   - intro t; induction t. *)
+(*     + intros x H. *)
+(*       generalize dependent n. *)
+(*       intro n; case n. *)
+(*       * simpl. auto. *)
+(*       * intros n' H. *)
+(*         unfold open in H. *)
+(*         simpl in H. auto. *)
+(*         contradiction. *)
+(*     + intros x H. *)
+(*       simpl in *. *)
+(*       contradiction. *)
+(*     + simpl in *. *)
+(*       intros x H. *)
+(*       destruct H. *)
+(*       * simpl; left. *)
+(*         apply IHt1 with x. *)
+(*         assumption. *)
+(*       * simpl; right. *)
+(*         apply IHt2 with x. *)
+(*         assumption. *)
+(*     + intros x H. *)
+(*       simpl in H. *)
+(*       apply not_has_free_index in H. *)
+(*       contradiction. *)
+(*     + simpl in  *. *)
+(*       intros x Hor. *)
+(*       destruct Hor. *)
+(*       * apply not_has_free_index in H. *)
+(*         contradiction. *)
+(*       * apply not_has_free_index in H. *)
+(*         contradiction. *)
+(*   - intros n t x H. *)
+(*     unfold open in H. *)
+(*     simpl in *. *)
+(*     apply not_has_free_index_open_rec in H. *)
+(*     + simpl. *)
+(*       assumption. *)
+(*     + apply gt_Sn_O. *)
+(* Qed. *)
+
+(* Lemma has_index_open_rec: forall t x k, has_free_index (S k) t -> has_free_index k (open_rec (S k) t x).  *)
+(* Proof. *)
+  
+(* Lemma has_index_open: forall t x k, has_free_index (S k) t -> has_free_index k (t ^ x).  *)
+(* Proof. *)
+(*   intro t; induction t. *)
+(*   - intros x k H. *)
+(*     inversion H; subst. *)
+(*     simpl in H. *)
+    
+(* Admitted. *)
+
+  
 Lemma open_rec_close_rec_term: forall t x k, ~(has_free_index k t) -> open_rec k (pterm_fvar x) (close_rec k x t) = t.
 Proof.
   intro t; induction t.
@@ -783,9 +950,47 @@ Proof.
     reflexivity.
 Qed.
 
-Lemma term_not_free_index: forall t, term t <-> (forall k, ~(has_free_index k t)). 
+Lemma term_not_free_index: forall t, term t -> (forall k, ~(has_free_index k t)). 
 Proof.
-Admitted.
+  intros t Hterm.
+  induction Hterm.
+  - intro k; simpl. auto.
+  - intros k H.
+    simpl in H.
+    destruct H.
+    + generalize H.
+      apply IHHterm1.
+    + generalize H.
+      apply IHHterm2.
+  - unfold open in H0.
+    intros k Habs.
+    simpl in *.
+    pick_fresh y.
+    apply (has_index_open _ _ y) in Habs.
+    generalize Habs.
+    apply H0.
+    apply notin_union in Fr.
+    destruct Fr.
+    apply notin_union in H1.
+    destruct H1.
+    assumption.
+  - intros k Hsub.
+    pick_fresh y.
+    inversion Hsub; subst.
+    + clear Hsub.
+      apply (has_index_open _ _ y) in H1.
+      generalize H1.
+      apply H0.
+      apply notin_union in Fr.
+      destruct Fr.
+      apply notin_union in H2.
+      destruct H2.
+      apply notin_union in H2.
+      destruct H2.
+      assumption.
+    + generalize H1.
+      apply IHHterm.
+Qed.    
 
 Lemma term_bvar: forall n x, term (pterm_bvar n^x) -> n=0.
 Proof.
