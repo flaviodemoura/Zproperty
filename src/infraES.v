@@ -1,6 +1,5 @@
 (** * An application: Proving Confluence of a Calculus with Explicit Substitutions *)
 
-(* begin hide *)
 Require Import ZtoConfl.
 
 Definition var := nat.
@@ -54,7 +53,6 @@ apply iff_stepl with (~((x \in E) \/ (x \in F))).
 - apply not_or_equiv_and_not.
 - split; unfold not; intros; destruct H; apply union_spec in H0; assumption.
 Qed.
-(* end hide *)
 
 (** Pre-terms are defined according to the following grammar: *)
 Inductive pterm : Set :=
@@ -65,7 +63,7 @@ Inductive pterm : Set :=
   | pterm_sub : pterm -> pterm -> pterm.
 
 Notation "t [ u ]" := (pterm_sub t u) (at level 70).
-(* begin hide *)
+
 Fixpoint fv (t : pterm) {struct t} : vars :=
   match t with
   | pterm_bvar i    => {}
@@ -193,7 +191,6 @@ Fixpoint close_rec  (k : nat) (x : var) (t : pterm) : pterm :=
 
 Definition close t x := close_rec 0 x t.
 
-(* end hide *)
 (** ES terms are expressions without dangling deBruijn indexes. *)
 
 Inductive term : pterm -> Prop :=
@@ -210,7 +207,6 @@ Inductive term : pterm -> Prop :=
      (forall x, x \notin L -> term (t1 ^ x)) ->
       term t2 -> 
       term (pterm_sub t1 t2).
-(* begin hide *)
 Hint Constructors term.
 
 Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
@@ -473,14 +469,12 @@ Proof.
     apply lt_le_trans with m; assumption.
 Qed.
 
-(* end hide *)  
 Lemma pterm_size_induction :
  forall P : pterm -> Prop,
  (forall t,
     (forall t', pterm_size t' < pterm_size t ->
     P t') -> P t) ->
  (forall t, P t).
-(* begin hide *)
 Proof.
   intros P IH t.
   remember (pterm_size t) as n eqn:H.
@@ -780,16 +774,6 @@ Proof.
       apply IHt2.
 Qed.  
 
-(* Lemma not_has_free_index_open_rec: forall k n x t, k > n -> has_free_index k ({n ~> pterm_fvar x} t) -> has_free_index (S k) t. *)
-(* Proof. *)
-(*   intros k n x t. *)
-(*   generalize dependent x. *)
-(*   generalize dependent n. *)
-(*   generalize dependent k. *)
-(*   induction t. *)
-(*   - intros k n' x Hgt H. *)
-(* Admitted. *)
-
 Lemma has_index_open_rec: forall t k n x, k<>n -> has_free_index k t -> has_free_index k (open_rec n x t).
 Proof.
     intro t; induction t.
@@ -833,76 +817,6 @@ Proof.
   - apply Nat.neq_succ_0.
   - assumption.
 Qed.    
-
-(* Lemma has_free_index_open: forall k x t, k > 0 -> has_free_index k t -> has_free_index k (t ^ x). *)
-(* Proof. *)
-(* Admitted. *)
-
-(* Lemma has_free_index_open_cp: forall k x t, k > 0 -> ~ has_free_index k (t ^ x) -> ~ has_free_index k t. *)
-(* Proof. *)
-(*   intros k x t Hgt H1 H2. *)
-(*   apply (has_free_index_open k x) in H2. *)
-(*   - contradiction. *)
-(*   - assumption. *)
-(* Qed.     *)
-
-  
-(* Lemma has_index_open_abs: forall k t x, has_free_index k (t ^ x) -> has_free_index k (pterm_abs t). *)
-(* Proof. *)
-(*   intro k; case k. *)
-(*   - intro t; induction t. *)
-(*     + intros x H. *)
-(*       generalize dependent n. *)
-(*       intro n; case n. *)
-(*       * simpl. auto. *)
-(*       * intros n' H. *)
-(*         unfold open in H. *)
-(*         simpl in H. auto. *)
-(*         contradiction. *)
-(*     + intros x H. *)
-(*       simpl in *. *)
-(*       contradiction. *)
-(*     + simpl in *. *)
-(*       intros x H. *)
-(*       destruct H. *)
-(*       * simpl; left. *)
-(*         apply IHt1 with x. *)
-(*         assumption. *)
-(*       * simpl; right. *)
-(*         apply IHt2 with x. *)
-(*         assumption. *)
-(*     + intros x H. *)
-(*       simpl in H. *)
-(*       apply not_has_free_index in H. *)
-(*       contradiction. *)
-(*     + simpl in  *. *)
-(*       intros x Hor. *)
-(*       destruct Hor. *)
-(*       * apply not_has_free_index in H. *)
-(*         contradiction. *)
-(*       * apply not_has_free_index in H. *)
-(*         contradiction. *)
-(*   - intros n t x H. *)
-(*     unfold open in H. *)
-(*     simpl in *. *)
-(*     apply not_has_free_index_open_rec in H. *)
-(*     + simpl. *)
-(*       assumption. *)
-(*     + apply gt_Sn_O. *)
-(* Qed. *)
-
-(* Lemma has_index_open_rec: forall t x k, has_free_index (S k) t -> has_free_index k (open_rec (S k) t x).  *)
-(* Proof. *)
-  
-(* Lemma has_index_open: forall t x k, has_free_index (S k) t -> has_free_index k (t ^ x).  *)
-(* Proof. *)
-(*   intro t; induction t. *)
-(*   - intros x k H. *)
-(*     inversion H; subst. *)
-(*     simpl in H. *)
-    
-(* Admitted. *)
-
   
 Lemma open_rec_close_rec_term: forall t x k, ~(has_free_index k t) -> open_rec k (pterm_fvar x) (close_rec k x t) = t.
 Proof.
@@ -1013,14 +927,12 @@ Qed.
 Definition term_regular (R : Rel pterm) :=
   forall t t', R t t' -> term t /\ term t'.
 
-(* begin hide *)
 Definition red_rename (R : Rel pterm) :=
   forall x t t' y,
     x \notin (fv t) ->
     x \notin (fv t') ->
   R (t ^ x) (t' ^ x) -> 
   R (t ^ y) (t' ^ y).
-
 
 Lemma body_app: forall t1 t2, body (pterm_app t1 t2) -> body t1 /\ body t2.
 Proof.
@@ -1111,21 +1023,6 @@ Proof.
     destruct HSn as [ HSnt1 HSnt2 ]. rewrite IHt0_1. rewrite IHt0_2. reflexivity.
     assumption. assumption. assumption. assumption.
 Qed.  
-
-(** The substitution is compositional.
-Lemma open_comp: forall t u v, (t ^^ u ) ^^ v  = ((&t) ^^ v) ^^ (u ^^ v).
-Proof.
-  intro t; induction t.
-  - case n.
-    + intros u v; unfold open; simpl.
-      admit.
-    + Admitted.
-*)
-
-(** The above notion of substitution is not capture free because it is
-defines over pre-terms. Nevertheless it is a capture free substitution
-when [u] is a term: *)
-(* Lemma open_capture_free: forall t u, term u -> *)
 
 Lemma lc_at_bswap_rec: forall t k i, k <> (S i) -> lc_at k t -> lc_at k (bswap_rec i t).
 Proof.
@@ -1307,85 +1204,6 @@ Proof.
   apply Peano.le_0_n.
 Qed.  
 
-(* Lemma term_open_rec_eq: forall t n x u, term (t^x) -> ~(has_free_index 0 t) -> {n ~> u} t ^ x = ({n ~> u} t) ^ x. *)
-(* Proof. *)
-(*   intro t; induction t. *)
-(*   - intros n' x u. *)
-(*     unfold open. *)
-(*     case n. *)
-(*     + intro H. *)
-(*       simpl. *)
-(* Admitted. *)
-
-(* assert (H': forall (n : nat) (u : pterm), {n ~> u} t1 ^ y = t1 ^ y). *)
-(* { *)
-(*   apply H0; assumption. *)
-(* } *)
-
-(* Lemma open_rec_f_equal:  forall t t' x,  t ^ x = t' ^ x -> t = t'. *)
-(* Proof. *)
-(* Admitted. *)
-
-(* apply open_rec_f_equal with y. *)
-(* rewrite <- term_open_rec_eq. *)
-(* + apply H'. *)
-(* + apply H; assumption. *)
-(* +  *)
-(* - Admitted. *)
-(* (*       intro t; induction t. *) *)
-(* (*   - intros u n' Hterm. *) *)
-(* (*     inversion Hterm. *) *)
-(* (*   - intros u n' Hterm. *) *)
-(* (*     reflexivity. *) *)
-(* (*   - intros u n' Hterm; simpl. *) *)
-(* (*     inversion Hterm; subst. *) *)
-(* (*     clear Hterm. f_equal.     *) *)
-(* (*     + apply IHt1; assumption. *) *)
-(* (*     + apply IHt2; assumption. *) *)
-(* (*   - intros u n' Hterm. simpl. *) *)
-
-    
-(* (*   generalize dependent n. *) *)
-(* (*   generalize dependent u. *) *)
-(* (*     generalize dependent t0. *) *)
-(* (*   intro t; induction t. *) *)
-(* (*   - intros IH u n' Hterm. *) *)
-(* (*     inversion Hterm. *) *)
-(* (*   - intros IH u n' Hterm. *) *)
-(* (*     reflexivity. *) *)
-(* (*   - intros IH u n' Hterm. *) *)
-(* (*     inversion Hterm; subst. clear Hterm. *) *)
-(* (*     simpl. f_equal. *) *)
-(* (*     + apply IHt1. *) *)
-(* (*       * intros t Hlt u' n'' Hterm. *) *)
-(* (*         apply IH. *) *)
-(* (*         apply lt_trans with (pterm_size t1). *) *)
-(* (*         ** assumption. *) *)
-(* (*         ** simpl. *) *)
-(* (*            rewrite <- plus_Sn_m. *) *)
-(* (*            apply lt_plus_trans. *) *)
-(* (*            auto. *) *)
-(* (*         ** assumption. *) *)
-(* (*       * assumption. *) *)
-(* (*     + apply IHt2. *) *)
-(* (*       * intros t Hlt u' n'' Hterm. *) *)
-(* (*         apply IH. *) *)
-(* (*         apply lt_trans with (pterm_size t2). *) *)
-(* (*         ** assumption. *) *)
-(* (*         ** simpl. *) *)
-(* (*            rewrite plus_n_Sm. *) *)
-(* (*            rewrite plus_comm. *) *)
-(* (*            apply lt_plus_trans. *) *)
-(* (*            auto. *) *)
-(* (*         ** assumption. *) *)
-(* (*       * assumption. *) *)
-(* (*   - intros IH u n' Hterm. *) *)
-(* (*     simpl. f_equal. *) *)
-(* (*     apply IH. *) *)
-(* (*     + auto. *) *)
-(* (*     + assumption *) *)
-(* (*   Admitted. *) *)
-
 Lemma open_rec_commute: forall t u k x, term u -> ({k ~> pterm_fvar x} ({S k ~> u} t)) = ({k ~> u}({S k ~> pterm_fvar x} (bswap_rec k t))).
 Proof.
   intro t; induction t.
@@ -1450,7 +1268,6 @@ Proof.
   apply open_rec_commute.
 Qed.
   
-(* end hide *)
 (** Contextual closure of terms. *)
 Inductive ES_contextual_closure (R: Rel pterm) : Rel pterm :=
   | ES_redex : forall t s, R t s -> ES_contextual_closure R t s
