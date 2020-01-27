@@ -207,7 +207,6 @@ Inductive term : pterm -> Prop :=
      (forall x, x \notin L -> term (t1 ^ x)) ->
       term t2 -> 
       term (pterm_sub t1 t2).
-Hint Constructors term.
 
 Definition body t := exists L, forall x, x \notin L -> term (t ^ x).
 

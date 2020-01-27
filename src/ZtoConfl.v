@@ -1,21 +1,3 @@
-(** * Introduction *)
-
-(**
-
-    This work is about confluence of abstract rewriting systems, which
-    is a model of computation based on the notion of
-    reduction. Confluence of abstract rewriting systems is concerned
-    about the decidability of the reduction relation. This property is
-    undecidable in general.
-
-    In ??, Oomstrom presents a property called Z, which turns out to be a sufficient condiction to get confluence. For a given abstract rewriting system [(A,\to)], one says that it satisfies the Z property if, forall [a,b \in A] there exists a function [f: A \to A] such that 
-
-We present a formalisation ...
-
-*)
-
-(** * Z Property implies Confluence *)
-(* begin hide *)
 Definition Rel (A:Type) := A -> A -> Prop.
 
 Inductive trans {A} (red: Rel A) : Rel A :=
@@ -102,7 +84,7 @@ Proof.
   - apply rtrans with b; assumption.
 Qed.    
 
-(* end hide *)  
+Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
 Definition Z_prop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
 
@@ -117,18 +99,116 @@ Proof.
   assumption.
 Qed.
 
+Theorem Z_prop_implies_Confl {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
+Proof.
+  intros R HZ_prop.
+  unfold Z_prop in HZ_prop.
+  unfold Confl.
+  destruct HZ_prop as [wb HZ_prop].
+  intros a b c Hrefl1 Hrefl2.
+  generalize dependent c.
+  induction Hrefl1.
+  - intros c Hrefl.
+    exists c; split.
+    + assumption.
+    + apply refl.
+  - intros c0 Hrefl2.
+    assert (Hbwba: refltrans R b (wb a)).
+    {
+      apply HZ_prop; assumption.
+    }
+    assert (Hawba: refltrans R a (wb a)).
+    {
+      apply rtrans with b; assumption.
+    }
+    clear H.
+    generalize dependent b.
+    induction Hrefl2.
+    + intros b Hone IHHrefl1 HZb.
+      assert (IHHrefl1_wba := IHHrefl1 (wb a)).
+      apply IHHrefl1_wba in HZb.
+      destruct HZb.
+      exists x; split.
+      * apply H.
+      * apply refltrans_composition with (wb a).
+        ** assumption.
+      ** apply H.
+    + intros b0 Hrefl1 IHHrefl1 H'.
+      apply IHHrefl2 with b0.
+      * apply refltrans_composition with (wb a); apply H'; assumption.
+      * assumption.
+      * assumption.
+      * apply refltrans_composition with (wb a).
+        ** assumption.
+        ** apply H; assumption.
+Qed.
+
+Theorem Z_prop_implies_Confl {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
+Proof.
+  intros R HZ_prop.
+  unfold Z_prop in HZ_prop.
+  unfold Confl.
+  destruct HZ_prop as [wb].
+  intros a b c Hrefl1 Hrefl2.
+  generalize dependent c.
+  induction Hrefl1.
+  - intros c Hrefl.
+    exists c. split.
+    + assumption.
+    + apply refl.
+  - intros c1 Hrefl2.
+    assert (Hbwba: refltrans R b (wb a)).
+    {
+      apply H; assumption.
+    }
+    assert (Hawba: refltrans R a (wb a)).
+    {
+      apply rtrans with b; assumption.
+    }
+    clear H0.
+    generalize dependent b.
+    induction Hrefl2.
+    + intros b Hrefl1 IHHrefl1 Hbxa.
+      destruct IHHrefl1 with (x a).
+      * assumption.
+      * exists x0.
+        split.
+        ** apply H0.
+        ** apply refltrans_composition with (x a).
+        *** assumption.
+        *** apply H0.
+    + intros b0 Hrefl1 IHHrefl1 Hb0xa.
+      apply IHHrefl2 with b0.
+      * apply refltrans_composition with (x a); apply H; assumption.
+      * assumption.
+      * assumption.
+      * apply refltrans_composition with (x a).
+        ** assumption.
+        ** apply H.
+           assumption.
+Qed.
+
+Corollary Z_comp_is_Confl {A}: forall (R: Rel A), Z_comp R -> Confl R.
+Proof.
+  intros R H.
+  apply Z_comp_implies_Z_prop in H.
+  apply Z_prop_implies_Confl; assumption.  
+Qed.
+
+(* begin hide *)
 Inductive union {A} (red1 red2: Rel A) : Rel A :=
  | union_left: forall a b,  red1 a b -> union red1 red2 a b
  | union_right: forall a b,  red2 a b -> union red1 red2 a b.
 
 Notation "R1 !_! R2" := (union R1 R2) (at level 40).
 
-Lemma union_idemp {A}: forall (R : Rel A), union R R = R.
+Lemma union_idemp {A}: forall (R : Rel A),  (R !_! R) = R.
 Proof.
 Admitted.  
   
 Definition comp {A} (f1 f2: A -> A) := fun x:A => f1 (f2 x).
 Notation "f1 # f2" := (comp f1 f2) (at level 40).
+(* end hide *)
 
 Definition f_is_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R')  b (f a) /\ (refltrans R') (f a) (f b)). 
 
@@ -437,59 +517,6 @@ Proof.
   unfold Z_comp.
 *)
 
-Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
-
-Theorem Z_prop_implies_Confl {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
-Proof.
-  intros R HZ_prop.
-  unfold Z_prop in HZ_prop.
-  destruct HZ_prop.
-  unfold Confl.
-  intros a b c Hrefl1.
-  generalize dependent c.
-  induction Hrefl1.
-  - intros c Hrefl.
-    exists c. split.
-    + assumption.
-    + apply refl.
-  - intros c1 Hrefl2.
-    assert (Hbxa: refltrans R b (x a)).
-    {
-      apply H; assumption.
-    }
-    assert (Haxa: refltrans R a (x a)).
-    {
-      apply rtrans with b; assumption.
-    }
-    clear H0.
-    generalize dependent b.
-    induction Hrefl2.
-    + intros b Hrefl1 IHHrefl1 Hbxa.
-      destruct IHHrefl1 with (x a).
-      * assumption.
-      * exists x0.
-        split.
-        ** apply H0.
-        ** apply refltrans_composition with (x a).
-        *** assumption.
-        *** apply H0.
-    + intros b0 Hrefl1 IHHrefl1 Hb0xa.
-      apply IHHrefl2 with b0.
-      * apply refltrans_composition with (x a); apply H; assumption.
-      * assumption.
-      * assumption.
-      * apply refltrans_composition with (x a).
-        ** assumption.
-        ** apply H.
-           assumption.
-Qed.
-
-Corollary Z_comp_is_Confl {A}: forall (R: Rel A), Z_comp R -> Confl R.
-Proof.
-  intros R H.
-  apply Z_comp_implies_Z_prop in H.
-  apply Z_prop_implies_Confl; assumption.  
-Qed.
 
 (** Some experiments: the next proof does not seem to have a constructive proof in the general setting of ARS. *)
 Lemma Z_prop_fun {A}: forall (R: Rel A) (x : A -> A), ( forall(a b: A), R a b -> (refltrans R b (x a) /\ refltrans R (x a) (x b))) -> ( forall(a : A), refltrans R a (x a)).
