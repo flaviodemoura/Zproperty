@@ -135,64 +135,12 @@ Proof.
       ** apply H.
     + intros b0 Hrefl1 IHHrefl1 H'.
       apply IHHrefl2 with b0.
-      * apply refltrans_composition with (wb a); apply H'; assumption.
+      * apply refltrans_composition with (wb a); apply HZ_prop; assumption.
       * assumption.
       * assumption.
       * apply refltrans_composition with (wb a).
         ** assumption.
-        ** apply H; assumption.
-Qed.
-
-Theorem Z_prop_implies_Confl {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
-Proof.
-  intros R HZ_prop.
-  unfold Z_prop in HZ_prop.
-  unfold Confl.
-  destruct HZ_prop as [wb].
-  intros a b c Hrefl1 Hrefl2.
-  generalize dependent c.
-  induction Hrefl1.
-  - intros c Hrefl.
-    exists c. split.
-    + assumption.
-    + apply refl.
-  - intros c1 Hrefl2.
-    assert (Hbwba: refltrans R b (wb a)).
-    {
-      apply H; assumption.
-    }
-    assert (Hawba: refltrans R a (wb a)).
-    {
-      apply rtrans with b; assumption.
-    }
-    clear H0.
-    generalize dependent b.
-    induction Hrefl2.
-    + intros b Hrefl1 IHHrefl1 Hbxa.
-      destruct IHHrefl1 with (x a).
-      * assumption.
-      * exists x0.
-        split.
-        ** apply H0.
-        ** apply refltrans_composition with (x a).
-        *** assumption.
-        *** apply H0.
-    + intros b0 Hrefl1 IHHrefl1 Hb0xa.
-      apply IHHrefl2 with b0.
-      * apply refltrans_composition with (x a); apply H; assumption.
-      * assumption.
-      * assumption.
-      * apply refltrans_composition with (x a).
-        ** assumption.
-        ** apply H.
-           assumption.
-Qed.
-
-Corollary Z_comp_is_Confl {A}: forall (R: Rel A), Z_comp R -> Confl R.
-Proof.
-  intros R H.
-  apply Z_comp_implies_Z_prop in H.
-  apply Z_prop_implies_Confl; assumption.  
+        ** apply HZ_prop; assumption.
 Qed.
 
 (* begin hide *)
@@ -212,67 +160,46 @@ Notation "f1 # f2" := (comp f1 f2) (at level 40).
 
 Definition f_is_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R')  b (f a) /\ (refltrans R') (f a) (f b)). 
 
-Definition Z_comp {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
+Definition Z_comp {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ f_is_Z R1 f1 /\ (forall a b, R1 a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
 
-(*
-Definition Z_comp {A:Type} (R1 R2 :Rel A) := exists (f1 f2: A -> A), f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans (R1 !_! R2)) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans (R1 !_! R2)) b (f2 b)) /\ (f_is_weak_Z R2 (R1 !_! R2) (f2 # f1)).
-
-Definition Z_comp_new {A:Type} (R :Rel A) := forall (R1 R2: Rel A), R = (R1 !_! R2) -> exists (f1 f2: A -> A), f_is_Z R1 f1 /\ (forall a b, (refltrans R1) a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
-
-Lemma Z_comp_implies_Z_comp_new {A: Type}: forall (R1 R2: Rel A), Z_comp R1 R2 <-> Z_comp_new (R1 !_! R2).
+Lemma refltrans_union {A:Type}: forall (R R' :Rel A) (a b: A), refltrans R a b -> refltrans (R !_! R') a b.
 Proof.
-  intros R1 R2; split.
-  - intro HZ_comp.
-    unfold Z_comp in HZ_comp.
-    destruct HZ_comp as [f1 [f2 [Hf_is_Z [H1 [H2 H3]]]]].
-    unfold Z_comp_new.
-    intros R3 R4 Heq.
-    admit.
-  - intro HZ_comp_new.
-    unfold Z_comp_new in HZ_comp_new.
-    unfold Z_comp.
-      apply HZ_comp_new.
-      reflexivity.
-Admitted.    
-*)
-
+  intros R R' a b Hrefl.
+  induction Hrefl.
+  - apply refl.
+  - apply rtrans with b.
+    + apply union_left; assumption.
+    + assumption.
+Qed.
+    
 Lemma Z_comp_implies_Z_prop {A:Type}: forall (R :Rel A), Z_comp R -> Z_prop R.
 Proof.
   intros R H.
   unfold Z_comp in H.
-  destruct H as [ R1 [ R2 [f1 [f2 [H0 [H1 [H2 [H3 H4]]]]]]]].
+  destruct H as [ R1 [ R2 [f1 [f2 [Hunion [HfZ [Hrefl [HIm Hweak]]]]]]]].
   apply f_is_Z_implies_Z_prop with (f2 # f1).
   unfold f_is_Z in *.
-  unfold f_is_weak_Z in H4.
-  intros.
-  split.
-  - inversion H0; subst.
-    clear H5.
-    destruct H.
+  unfold f_is_weak_Z in Hweak.
+  intros a b HR.
+  inversion Hunion; subst.
+  clear H.
+  inversion HR; subst.
+  - split.
     + apply refltrans_composition with (f1 a).
-      * apply H1 in H.
+      * apply HfZ in H.
         destruct H.
-        induction H.
-        **  apply refl.
-        **  apply rtrans with b.
-            *** apply union_left.
-                assumption.
-            *** apply IHrefltrans.
-                apply refltrans_composition with (f1 a0).
-                **** assumption.
-                **** apply H1.
-                     assumption.
-      * apply H3 with a. trivial.
-    + apply H4 in H.
-      apply H.
-  - inversion H0; subst.
-    clear H5.
-    destruct H.
-    + apply H2.
-      apply H1.
-      assumption.
-    + apply H4 in H.
-      apply H.
+        apply refltrans_union; assumption.
+      * apply HIm with a; reflexivity.
+    + apply HfZ in H.
+      destruct H.
+      clear H HR.
+      unfold comp.
+      induction H0.
+      * apply refl.
+      * apply refltrans_composition with (f2 b0).
+        ** apply Hrefl; assumption.
+        ** assumption.
+  - apply Hweak; assumption.    
 Qed.
 
 Lemma Z_prop_implies_Z_comp {A:Type}: forall (R : Rel A), Z_prop R -> Z_comp R.
@@ -288,65 +215,27 @@ Proof.
     + assumption.
     + split.
       * intros a b Hab.
-        assumption.
+        apply rtrans with b.
+        ** assumption.
+        ** apply refl.
       * split.
         ** intros a b Heq.
            apply refl.
-        ** assumption.
+        ** auto.
 Qed.
-
-(*
-Lemma Z_comp_new_implies_Z_prop {A:Type}: forall (R : Rel A), Z_comp_new R -> Z_prop R.
-Proof.
-  intros R HZ_comp_new.
-  unfold Z_comp_new in HZ_comp_new.
-  unfold Z_prop.
-
-  
-Lemma Z_comp_new_implies_Z_prop {A:Type}: forall (R R1 R2 :Rel A), R = R1 !_! R2 -> Z_comp_new R -> Z_prop R.
-Proof.
-  intros R R1 R2 Hunion HZ_comp_new.
-  unfold Z_comp_new in HZ_comp_new.
-  unfold Z_prop.
-  assert (H: exists f1 f2 : A -> A,
-                  f_is_Z R1 f1 /\
-                  (forall a b : A, refltrans R1 a b -> refltrans R (f2 a) (f2 b)) /\
-                  (forall a b : A, b = f1 a -> refltrans R b (f2 b)) /\ f_is_weak_Z R2 R (f2 # f1)).
-  {
-    apply HZ_comp_new.
-    assumption.
-  }
-  clear HZ_comp_new.
-  destruct H as [f1 [f2 [Hf_is_Z [H1 H2]]]].
-  exists (f2 # f1).
-  intros a b Hred; split.
-
-  
-  assert (Haux: forall R R1 R2 : Rel A, R = R1 !_! R2 -> Z_comp_new R -> Z_comp R).
-  {
-    unfold Z_comp_new.
-    unfold Z_comp.
-    intros R R1 R2 H H0.
-    destruct H0 with R1 R2.
-    - assumption.
-    - exists R1.
-      exists R2.
-      exists x.
-      destruct H1.
-      exists x0.
-      split; assumption.
-  }
-  intros R R1 R2 H H0.
-  apply Z_comp_implies_Z_prop.
-  apply Haux with R1 R2; assumption.
-Qed.
- *)
 
 Theorem Z_comp_equiv_Z_prop {A:Type}: forall (R : Rel A), Z_prop R <-> Z_comp R.
 Proof.
   split.
   - apply Z_prop_implies_Z_comp.
   - apply Z_comp_implies_Z_prop.
+Qed.
+
+Corollary Z_comp_is_Confl {A}: forall (R: Rel A), Z_comp R -> Confl R.
+Proof.
+  intros R H.
+  apply Z_comp_implies_Z_prop in H.
+  apply Z_prop_implies_Confl; assumption.  
 Qed.
 
 Definition Z_comp_eq {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ (forall a b, R1 a b -> (f1 a) = (f1 b)) /\ (forall a, (refltrans R1) a (f1 a)) /\ (forall b a, a = f1 b -> (refltrans R) a (f2 a)) /\ (f_is_weak_Z R2 R (f2 # f1)).
