@@ -1,3 +1,20 @@
+(** * The Z property implies Confluence
+
+  Confluence is an important property concerning the determinism of
+  the computational process in the sense one says that a program is
+  confluent if every two ways of evaluating this program result in the
+  very same answer. In the particular case of Abstract Rewriting
+  Systems (ARS), which are the focus of this work, confluence can be
+  beautifully expressed by diagrams as we will see next. By
+  definition, an ARS is simply a pair composed of a set and binary
+  operation over this set. Given an ARS $(A,R)$, where $A$ is a set
+  and $R:A\times A$ and $a,b: A$, we write $a\ R\ b$ or $a\to_R b$ to
+  denote that $a$ reduces to $b$ via $R$. The arrow notation will be
+  prefered because it is more convenient for expressing reductions, so
+  the reflexive transitive closure of a relation [R] is written as
+  $\tto_R$, or simply $\tto$ is [R] if clear from the context. *)
+
+(* begin hide *)
 Definition Rel (A:Type) := A -> A -> Prop.
 
 Inductive trans {A} (red: Rel A) : Rel A :=
@@ -49,21 +66,111 @@ Proof.
        ** apply H1.
      * apply H1.
 Qed.
+(* end hide *)
+
+(** Formally the reflexive transitive closure of a relation [R] is
+inductively defined as: *)
 
 Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
 | refl: forall a, (refltrans R) a a
 | rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c.
 
+(** This definition has two constructors ([refl] and [[rtrans]]). The
+first constructor states that [R] is reflexive, and [rtrans] extends
+the reflexive transitive closure of [R] if one has at least a one step
+reduction. As a first example, we will prove that the reflexive
+transitive closure of a relation [R] is transitive. Although it is too
+simple, it will made clear the way we will decorate and explain the
+mechanic proofs. The lemma named [refltrans_composition] is stated as
+follows: *)
+
 Lemma refltrans_composition {A} (R: Rel A):
   forall t u v, refltrans R t u -> refltrans R u v -> refltrans R t v.
-Proof.
-  intros t u v H1 H2. induction H1.
+
+(** This work is not a Coq tutorial, but our idea is that it should be
+readable for those unfamiliar to the Coq proof Assistant. In addition,
+this paper is built directly from a Coq proof script, which means that
+we are forced to present the ideas and the results in a more organized
+and systematic way that is not necessarily the more pedagogical
+one. In this way, we decided to comment the proof steps giving the
+general idea of what they do. It is a good practice to write proofs
+between the reserved words [Proof] and [Qed]. *)
+
+Proof. 
+  intros t u v H1 H2.
+  induction H1.
   - assumption.
   - apply rtrans with b.
     + assumption.
     + apply IHrefltrans; assumption.
 Qed.
 
+(** The first line introduces the universally quantified variables
+[t,u,v] and the hypothesis [H1] and [H2], that correspond to the
+antecedent of the implications, to the proof context. This
+introduction could be read as: let [t,u] and [v] be elements of type
+[A] (or be elements of the set [A]), [H1] be the fact that the pair
+[(t,u)] is in the reflexive transitive closure of [R], and [H2], the
+fact that [(u,v)] is in the reflexive transitive closure of [R]. The
+corresponding proof context is as follows: %\newline%
+ 
+%\includegraphics[scale=0.6]{fig1.png}%
+
+The proof is by induction on the reflexive transitive closure of
+[R]. Therefore, we will have two cases, one for each constructor of
+[refltrans]. Note that proofs can be structured with bullets that
+represent the different branches within the proof. The first case,
+means that [refltrans R t u], i.e. the hypothesis [H1] was built with
+the constructor [refl], and hence [t] and [u] must be the same
+element, say [t]. Therefore, [H2] becomes [refltrans T t v], which is
+exactly the goal. Therefore, this branch of the proof is closed by the
+tactic [assumption] that tells the system that the goal corresponds to
+one of the hypothesis of the current proof context. The second case,
+i.e. the recursive case is more interesting: now we are assuming that
+the hypothesis [H1] was built with the constructor [rtrans], and hence
+there exists an element, say [w], such that [R t w] and [refltrans R w
+u]. In addition, we have the induction hypothesis stating the property
+we want to prove (i.e. the transitivity of [refltrans]) but restricted
+from [w]. This corresponds to the following proof context up to
+renaming of variables: %\newline%
+
+%\includegraphics[scale=0.6]{fig2.png}%
+
+Therefore, in order to prove the goal [refltrans R a v] we apply the
+constructor [rtrans] with [b] as the intermediate term. This split the
+goal into two new subgoals, each of them now identified with the
+bullet [+]. The first argument of the [rtrans] constructor is a
+one-step reduction that corresponds to the hypothesis [H] because we
+choose [b] as the intermediate term. This subgoal then closes by the
+tactic [assumption]. The other subgoal is [refltrans R b v] that is
+proved by the induction hypothesis [IHrefltrans] followed by
+[assumption] because its antecedent is exactly the hypothesis
+[H2]. The corresponding description as a natural deduction tree is as
+follows:
+
+$\begin{mathpar}
+\inferrule*[Right=MP]{\inferrule[Right={rtrans}]{\inefrrule[Right={$\to_i$}]{\inferrule[Right=MP]{\inferrule[Right=IHrefltrans]{~}{refltrans\
+R\ c\ v \to refltrans\ R\ b\ v} \and
+\inferrule[Right=H2]{~}{refltrans\ R\ c\ v}}{refltrans\ R\ b\ v}}{R\
+a\ b\ \to refltrans\ R\ b\ v}}{refltrans\ R\ a\ v} \end{mathpar}$ *)
+
+
+
+(* The confluence property
+  states that, no matter how the reduction is done, the result will
+  always be the same, as stated by the following diagram:
+
+  $\xymatrix{ & a \ar@{->>}[dl] \ar@{->>}[dr] & \\ b \ar@{.>>}[dr] & &
+  c \ar@{.>>}[dl] \\ & d & }
+  \end{center}$
+
+  The diagram states that if the expression $a$ can be reduced in two
+  different ways to the expressions $b$ and $c$, then there exists an
+  expression $d$ such that both $b$ and $c$ reduces to $d$. The
+  ambiguous reduction from $a$ is also called a _divergence_. This
+  notion is defined in the Coq system as follows: *)
+
+(* begin hide *)
 Lemma rtrans' {A} (R: Rel A): forall t u v, refltrans R t u -> R u v -> refltrans R t v.
 Proof.
   intros t u v H1 H2. induction H1.
@@ -83,6 +190,7 @@ Proof.
     + apply refl.
   - apply rtrans with b; assumption.
 Qed.    
+(* end hide *)
 
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
@@ -90,14 +198,14 @@ Definition Z_prop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> 
 
 Definition f_is_Z {A:Type} (R: Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R)  b (f a) /\ (refltrans R) (f a) (f b)). 
 
-Lemma f_is_Z_implies_Z_prop {A:Type}: forall (R: Rel A) (f:A -> A), f_is_Z R f -> Z_prop R.
-Proof.
-  intros R f H.
-  unfold Z_prop.
-  exists f.
-  unfold f_is_Z in H.
-  assumption.
-Qed.
+(* Lemma f_is_Z_implies_Z_prop {A:Type}: forall (R: Rel A) (f:A -> A), f_is_Z R f -> Z_prop R. *)
+(* Proof. *)
+(*   intros R f H. *)
+(*   unfold Z_prop. *)
+(*   exists f. *)
+(*   unfold f_is_Z in H. *)
+(*   assumption. *)
+(* Qed. *)
 
 Theorem Z_prop_implies_Confl {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
 Proof.
@@ -150,13 +258,36 @@ Inductive union {A} (red1 red2: Rel A) : Rel A :=
 
 Notation "R1 !_! R2" := (union R1 R2) (at level 40).
 
+Lemma union_or {A}: forall (r1 r2: Rel A) (a b: A), (r1 !_! r2) a b <-> (r1 a b) \/ (r2 a b).
+Proof.
+  intros r1 r2 a b; split.
+  - intro Hunion.
+    inversion Hunion; subst.
+    + left; assumption.
+    + right; assumption.
+  - intro Hunion.
+    inversion Hunion.
+    + apply union_left; assumption.
+    + apply union_right; assumption.
+Qed.
+
+(*
+Lemma union_idemp_arg {A}: forall (R : Rel A) (a b: A),  (R !_! R) a b = R a b.
+Proof.
+  intros R a b.
+  assert (H := union_or R R).
+  destruct (H a b) as [Hl Hr].
+  clear H Hr.
+Admitted.
+
 Lemma union_idemp {A}: forall (R : Rel A),  (R !_! R) = R.
 Proof.
+  intros R.
 Admitted.  
-  
+*)
+
 Definition comp {A} (f1 f2: A -> A) := fun x:A => f1 (f2 x).
 Notation "f1 # f2" := (comp f1 f2) (at level 40).
-(* end hide *)
 
 Definition f_is_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R')  b (f a) /\ (refltrans R') (f a) (f b)). 
 
@@ -177,9 +308,8 @@ Proof.
   intros R H.
   unfold Z_comp in H.
   destruct H as [ R1 [ R2 [f1 [f2 [Hunion [HfZ [Hrefl [HIm Hweak]]]]]]]].
-  apply f_is_Z_implies_Z_prop with (f2 # f1).
-  unfold f_is_Z in *.
-  unfold f_is_weak_Z in Hweak.
+  unfold Z_prop.
+  exists (f2 # f1).
   intros a b HR.
   inversion Hunion; subst.
   clear H.
@@ -202,6 +332,7 @@ Proof.
   - apply Hweak; assumption.    
 Qed.
 
+(*
 Lemma Z_prop_implies_Z_comp {A:Type}: forall (R : Rel A), Z_prop R -> Z_comp R.
 Proof.
   intros R HZ_prop.
@@ -210,6 +341,7 @@ Proof.
   unfold Z_comp.
   exists R. exists R. exists x. exists (@id A). split.
   - symmetry.
+    change (R !_! R) with R \/ R.
     apply union_idemp.
   - split.
     + assumption.
@@ -230,6 +362,7 @@ Proof.
   - apply Z_prop_implies_Z_comp.
   - apply Z_comp_implies_Z_prop.
 Qed.
+*)
 
 Corollary Z_comp_is_Confl {A}: forall (R: Rel A), Z_comp R -> Confl R.
 Proof.
@@ -425,7 +558,6 @@ Proof.
 Qed.
 
 Theorem Z_prop_implies_Confl' {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
-(* begin hide *)
 Proof.
   intros R HZ_prop.
   unfold Z_prop in HZ_prop.
@@ -585,3 +717,4 @@ Proof.
   unfold tri_prop_elem in Htri.
   unfold Z_prop.
 Admitted.
+(* end hide *)
