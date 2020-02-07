@@ -148,27 +148,24 @@ proved by the induction hypothesis [IHrefltrans] followed by
 [H2]. The corresponding description as a natural deduction tree is as
 follows:
 
-$\begin{mathpar}
-\inferrule*[Right=MP]{\inferrule[Right={rtrans}]{\inefrrule[Right={$\to_i$}]{\inferrule[Right=MP]{\inferrule[Right=IHrefltrans]{~}{refltrans\
-R\ c\ v \to refltrans\ R\ b\ v} \and
-\inferrule[Right=H2]{~}{refltrans\ R\ c\ v}}{refltrans\ R\ b\ v}}{R\
-a\ b\ \to refltrans\ R\ b\ v}}{refltrans\ R\ a\ v} \end{mathpar}$ *)
+%{\small \begin{mathpar}
+  \inferrule*[Right=MP]{\inferrule*[Right=MP]{\inferrule*[Right={\sf
+  rtrans}]{~}{\inferrule*[Right={$(\forall_e)$}]{\forall x\ y\ z, R\
+  x\ y \to refltrans\ R\ y\ z \to refltrans\ R\ x\ z}{R\ a\ b \to
+  refltrans\ R\ b\ v \to refltrans\ R\ a\ v}} \and
+  \inferrule*[Right=H]{~}{R\ a\ b}}{refltrans\ R\ b\ v \to refltrans\
+  R\ a\ v} \and \nabla}{refltrans\ R\ a\ v} \end{mathpar}}%
 
+%\noindent% where $\nabla$ denotes the following derivation tree:
 
+%\begin{mathpar} \inferrule*[Right=MP]{\inferrule*[Left={\sf
+ IHrefltrans}]{~}{refltrans\ R\ c\ v \to refltrans\ R\ b\ v} \and
+ \inferrule*[Right=H2]{~}{refltrans\ R\ c\ v}}{refltrans\ R\ b\ v}
+ \end{mathpar}%
 
-(* The confluence property
-  states that, no matter how the reduction is done, the result will
-  always be the same, as stated by the following diagram:
-
-  $\xymatrix{ & a \ar@{->>}[dl] \ar@{->>}[dr] & \\ b \ar@{.>>}[dr] & &
-  c \ar@{.>>}[dl] \\ & d & }
-  \end{center}$
-
-  The diagram states that if the expression $a$ can be reduced in two
-  different ways to the expressions $b$ and $c$, then there exists an
-  expression $d$ such that both $b$ and $c$ reduces to $d$. The
-  ambiguous reduction from $a$ is also called a _divergence_. This
-  notion is defined in the Coq system as follows: *)
+This example is interesting because it shows how Coq works, how
+tactics correspond in general to several steps of natural deduction
+rules, and how proofs can be structured with bullets. *)
 
 (* begin hide *)
 Lemma rtrans' {A} (R: Rel A): forall t u v, refltrans R t u -> R u v -> refltrans R t v.
@@ -192,9 +189,44 @@ Proof.
 Qed.    
 (* end hide *)
 
+(** The reflexive transitive closure of a relation is used to define the
+notion of confluence: no matter how the reduction is done, the result
+will always be the same. In other words, every divergence is joinable
+as stated by the following diagram:
+
+  $\xymatrix{ & a \ar@{->>}[dl] \ar@{->>}[dr] & \\ b
+    \ar@{.>>}[dr] & & c \ar@{.>>}[dl] \\ & d & }$
+
+  Therefore, if an expression $a$ can be reduced in two different ways
+  to the expressions $b$ and $c$, then there exists an expression $d$
+  such that both $b$ and $c$ reduces to $d$. The existential
+  quantification is expressed by the dotted lines in the diagram. This
+  notion is defined in the Coq system as follows: *)
+
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
-Definition Z_prop {A:Type} (R: Rel A) := exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)).
+(** 
+    In %\cite{ZPropertyDraft}%, V. van Oostrom gives a suficient condition for an ARS to be confluent, known as the _Z Property_:
+
+%\begin{definition}
+      Let $(A,\to)$ be an abstract rewriting system (ARS). The system
+    $(A,\to)$ has the Z property, if there exists a map $f:A \to A$
+    such that the following diagram holds:
+    
+      \[
+      \xymatrix{
+        a \ar[r] &  b \ar@{.>>}[dl]\\
+        f(a) \ar@{.>>}[r] & f(b) \\ 
+      }
+    \]
+\end{definition}%
+
+The corresponding Coq definition is given as:
+*)
+
+Definition Z_prop {A:Type} (R: Rel A) := exists f:A -> A, forall a b, R a b -> ((refltrans R) b (f a) /\ (refltrans R) (f a) (f b)).
+
+(** Alternatively,  *)
 
 Definition f_is_Z {A:Type} (R: Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R)  b (f a) /\ (refltrans R) (f a) (f b)). 
 

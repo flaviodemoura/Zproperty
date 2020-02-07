@@ -1,0 +1,85 @@
+\documentclass[a4paper,UKenglish,cleveref, autoref, thm-restate,authorcolumns]{lipics-v2019}
+\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+%\usepackage[british]{babel}
+%\usepackage{lmodern}
+%\usepackage{fullpage}
+\usepackage{coqdoc}
+\usepackage{mathpartir}
+% \usepackage{amsmath,amssymb}
+% \usepackage{amsfonts, color}
+% \usepackage{url}
+% \usepackage{alltt}
+\usepackage[all]{xy}
+% \usepackage{hyperref}
+% \usepackage{graphicx}
+% \usepackage[backend=bibtex,style=numeric-comp,sorting=none,firstinits=true]{biblatex}
+% \usepackage{tikz}
+% \usetikzlibrary{positioning,shapes,fit,arrows}
+
+% \definecolor{myblue}{RGB}{56,94,141}
+
+\bibliographystyle{plainurl}
+
+
+% \newcommand{\flavio}[1]{{\color{red} #1}}
+% \newcommand{\cflavio}[2]{{\color{red} {#2}}}
+
+\newcommand{\tto}{\twoheadrightarrow}
+
+
+\title{Confluence via the Z Property in Coq}
+
+\titlerunning{Dummy short title}
+
+\author{Flávio L. C. de Moura\footnote{Corresponding author}}{Departamento de Ci\^encia da Computacao, Universidade de Brasilia \and
+  \url{http://flaviomoura.mat.br}
+}{flaviomoura@unb.br}{https://orcid.org/0000-0002-9390-5751}{}
+
+\author{Leandro O. Rezende}{Departamento de }{L-ordo.ab.chao@hotmail.com}{}{}
+
+\authorrunning{F. L. C. de Moura and L. O. Rezende}
+
+\Copyright{Flávio L. C. de Moura and Leandro O. Rezende}
+
+\ccsdesc[100]{\textcolor{red}{Replace ccsdesc macro with valid one}}
+
+\keywords{Dummy keyword}
+
+%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\EventEditors{John Q. Open and Joan R. Access}
+\EventNoEds{2}
+\EventLongTitle{42nd Conference on Very Important Topics (CVIT 2016)}
+\EventShortTitle{CVIT 2016}
+\EventAcronym{CVIT}
+\EventYear{2016}
+\EventDate{December 24--27, 2016}
+\EventLocation{Little Whinging, United Kingdom}
+\EventLogo{}
+\SeriesVolume{42}
+\ArticleNo{23}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+%\pagestyle{plain}
+
+\begin{abstract}
+  TBD
+\end{abstract}
+
+\section{Introduction}
+
+TBD
+
+\begin{itemize}
+\item add use cases of Z (kesner)
+\item add use cases of comp Z \cite{Nakazawa-Fujita2016}
+\end{itemize}
+
+\input{../src/ZtoConfl.tex}
+
+\bibliography{/Users/flaviomoura/idrive/bibliography/references.bib}
+
+\end{document}
