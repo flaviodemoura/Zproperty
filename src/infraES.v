@@ -570,30 +570,12 @@ Lemma lc_equiv_lc_at: forall t, lc t <-> lc_at 0 t.
 Proof.
   split.
   - intro Hlc.
+    apply term_equiv_lc_at.
     induction Hlc.
-    + simpl.
-      tauto.
-    + simpl.
-      split; assumption.
-    + simpl.
-      pick_fresh x.
-      apply notin_union in Fr.
-      destruct Fr as [Fr Hfvt1].
-      clear Hfvt1 H.
-      apply H0 in Fr.
-      unfold open in Fr.
-      apply lc_at_open_var_rec in Fr; assumption.
-    + split.
-      * pick_fresh x.
-        apply notin_union in Fr.
-        destruct Fr as [Fr Hfvt2].
-        apply notin_union in Fr.
-        destruct Fr as [Fr Hfvt1].
-        clear Hfvt1 Hfvt2 H.
-        apply H0 in Fr.
-        unfold open in Fr.
-        apply lc_at_open_var_rec in Fr; assumption.
-      * assumption.
+    + apply term_var.
+    + apply term_app; assumption.
+    + apply term_abs with L; assumption.
+    + apply term_sub with L; assumption.
   - intro Hlc_at.
     apply term_equiv_lc_at in Hlc_at.
     induction Hlc_at.

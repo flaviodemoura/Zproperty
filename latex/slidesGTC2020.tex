@@ -104,6 +104,12 @@
       % Leandro, minha sugestão é que você explique esta prova em uma
       % sessão de Coq. Como a prova é relativamente simples, acredito
       % que possa ser interessante para a plateia.
+
+     % Concordo, a única questão que pode complicar isso é que eu não sei
+     % em que computador a apresentação vai ser feita, e precisamos de um
+     % computador que rode scripts em coq.  Quanto à apresentação da prova
+     % em Coq, estou confiante de que posso apresentá-la entre 5 e 10 minutos.
+
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -200,7 +206,11 @@
   \begin{itemize}
   \item where (\coqdocvar{t1} \^{} \coqdocvar{x}) is obtained from
     \coqdocvar{t1} by replacing all its occurrences of the index 0 for
-    \coqdocvar{x}.
+    \coqdocvar{x}, \coqdocvar{x} being a free variable.
+  \item   (\coqdocvar{t1} \^{} \coqdocvar{x}) is a particular case of 
+     \{\coqdocvar{k} \ensuremath{\sim}\ensuremath{>} \coqdocvar{u}\} \coqdocvar{t1}, 
+      is obtained from \coqdocvar{t1} by replacing all its occurrences of the index 
+      \coqdocvar{k} for \coqdocvar{u}.
   \end{itemize}
 \end{frame}
 
@@ -241,6 +251,14 @@
 \end{coqdoccode}
 % Aqui tem muita coisa interessante para mostrar, mas precisa
 % selecionar bem por conta do tempo.
+
+% Eu acho a prova complicada demais para ser apresentada, mas 
+% eu poderia mostrar apenas a implicação term t -> lc_at 0 t, que 
+% é o lema term_to_lc_at. Por essa razão, eu adicionei a nota 
+% sobre open_rec, já que a prova desse lema usa o lema auxiliar 
+% que relaciona open_rec a lc_at (lc_at_open_var_rec). 
+% Nesse caso, eu apenas mencionaria lc_at_open_var_rec, que está logo 
+% acima de term_to_lc_at, e explicaria a demonstração de term_to_lc_at. 
 \end{frame}
 
 \begin{frame}[fragile]{Another alternative notion of term}
@@ -284,6 +302,12 @@
   % mas precisamos selecionar alguns pontos interessantes viáveis no
   % tempo disponível. Vou deixar para você pensar nisto e me dar um
   % retorno por email amanhã ou no sábado, ok?
+
+  % Os dois caminhos são triviais, porque a definição de termo é idêntica à
+  % definição de lc. Acho que não vale à pena apresentar esse tópico, apenas 
+  % dar a ideia de que a equivalência entre os três facilita o trabalho com termos, 
+  % por tornar as três noções intercambiáveis.
+
 \end{frame}
 
 \begin{frame}[fragile]{Future work}
@@ -297,9 +321,16 @@
 
 % Leandro, acredito que não vai dar tempo nem mesmo de citar o lex. Eu
 % deixaria de fora.
+
+% Infelizmente, eu concordo. A única questão que me preocupa é que o título 
+% da apresentação dá a entender que trabalhar o lex seria o foco do seminário, 
+% mas a LNR só é mencionada em um slide. Talvez seja interessante reformular 
+% a apresentação, tirando a demonstração que eu queria fazer sobre 
+% term_equiv_lc_at, mas ainda assim eu não sei como eu apresentaria 
+% o lex como extensão da LNR.
 % \begin{frame}[fragile]{The $\lambda{\tt ex}$-calculus}
 %   $$\term ::= x \mid \lambda x.\term \mid \term\term \mid \term[x/\term]$$
-
+%
 %   $$\begin{array}{llll}
 %       t[x/u][y/v] & =_C & t[y/v][x/u], & \mbox{ if } y \notin\fv{u} \mbox{ and } x \notin \fv{v} \\[.3cm]
 %       (\lambda x. t)\ u & \to_{\tt B} & t[x/u] & \\      
