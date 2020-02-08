@@ -205,54 +205,164 @@ as stated by the following diagram:
 
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
-(** 
-    In %\cite{ZPropertyDraft}%, V. van Oostrom gives a suficient condition for an ARS to be confluent, known as the _Z Property_:
+(** Direct proofs of confluence are sometimes difficult, and the Z
+    property provides a sufficient condition to conclude the
+    confluence of an ARS. In %\cite{ZPropertyDraft}%, V. van Oostrom
+    gives a suficient condition for an ARS to be confluent, known as
+    the _Z Property_:
 
-%\begin{definition}
-      Let $(A,\to)$ be an abstract rewriting system (ARS). The system
-    $(A,\to)$ has the Z property, if there exists a map $f:A \to A$
-    such that the following diagram holds:
+    %\begin{definition} Let $(A,\to)$ be an abstract rewriting system
+      (ARS). The system $(A,\to)$ has the Z property, if there exists
+      a map $f:A \to A$ such that the following diagram holds:
     
-      \[
-      \xymatrix{
-        a \ar[r] &  b \ar@{.>>}[dl]\\
-        f(a) \ar@{.>>}[r] & f(b) \\ 
-      }
-    \]
-\end{definition}%
+      \[ \xymatrix{ a \ar[r] & b \ar@{.>>}[dl]\\ f(a) \ar@{.>>}[r] &
+      f(b) \\ } \] \end{definition}%
 
-The corresponding Coq definition is given as:
-*)
+The corresponding Coq definition is given as: *)
 
 Definition Z_prop {A:Type} (R: Rel A) := exists f:A -> A, forall a b, R a b -> ((refltrans R) b (f a) /\ (refltrans R) (f a) (f b)).
 
-(** Alternatively,  *)
+(** Alternatively, when [f] satisfies the Z property one says that [f] is Z: *)
 
 Definition f_is_Z {A:Type} (R: Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R)  b (f a) /\ (refltrans R) (f a) (f b)). 
 
-(* Lemma f_is_Z_implies_Z_prop {A:Type}: forall (R: Rel A) (f:A -> A), f_is_Z R f -> Z_prop R. *)
-(* Proof. *)
-(*   intros R f H. *)
-(*   unfold Z_prop. *)
-(*   exists f. *)
-(*   unfold f_is_Z in H. *)
-(*   assumption. *)
-(* Qed. *)
+(** The first contribution of this work is a constructive proof of the
+    fact that the Z property implies confluence. Our proof is
+    constructive, and hence differs from the one in %\cite{kes09}%
+    (that follows %\cite{ZPropertyDraft}%) in the sense that it does
+    not rely on the law of the excluded middle. As a result, we have
+    an elegant inductive proof of the fact that if a binary relation
+    has the Z property then it is confluent. In addition, we
+    formalized this proof in the Coq proof assistant. In
+    %\cite{zproperty}%, B. Felgenhauer et.al. formalized the Z
+    property in Isabelle/HOL. In what follows we present the theorem
+    and its proof interleaving English and Coq code. *)
 
 Theorem Z_prop_implies_Confl {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
+
+(** The hole proof is written between the reserved words [Proof] and
+    [Qed]. We comment the commands in blocks in order to stay as close
+    as possible to the corresponding English explanation. In addition,
+    Coq commands (or tactics) usually perform blocks of natural
+    deduction steps followed by simplification steps as seen in the
+    previous example. Let [R] be a relation over [A] that satisfies
+    the Z property, which will be denoted by [HZ_prop] for future
+    reference. *)
+
 Proof.
   intros R HZ_prop.
+
+  (** %\noindent% Then we unfold both definitions, *)
+
   unfold Z_prop in HZ_prop.
   unfold Confl.
-  destruct HZ_prop as [wb HZ_prop].
+
+  (** %\noindent% and we get the following proof context:
+
+     % \includegraphics[scale=0.6]{fig3.png}%
+
+     Let [a, b] and [c] be elements of the set [A], [Hrefl1] the
+     hypothesis that [a] [R]-reduces to [b] in an arbitrary number of
+     steps, i.e. that [(a,b)] is in the reflexive transitive closure
+     of [R], and [Hrefl2] the hypothesis that [(a,c)] is in the
+     reflexive transitive closure of [R]. 
+   *)
+  
   intros a b c Hrefl1 Hrefl2.
+
+  (** In addition, by the hypothesis [HZ_prop], we know that there
+     exists a mapping [f] that is Z. Let's call [g] this mapping. *)
+  
+  destruct HZ_prop as [g HZ_prop].
+
+  (** The corresponding proof context is as follows:
+
+      %\includegraphics[scale=0.6]{fig4.png}%
+
+      Now we need to show that there exists an element [d] such that
+      both [b] and [c] [R]-reduces to [d]. The proof proceeds by
+      nested induction, firstly on the length of the reduction from
+      [a] to [b], and then on the length of the reduction from [a] to
+      [c]. While performing the first induction, i.e. on [Hrefl1] that
+      depends only on [a] and [b], the element [c] needs to be
+      generalized so that it can be afterwards instantiated with any
+      reduct of [a].
+
+   *)
+  
   generalize dependent c.
   induction Hrefl1.
-  - intros c Hrefl.
+
+  (** The induction on [Hrefl1] means that we are performing induction
+      on the reflexive transitive closure of the relation [R], and
+      since [refltrans] has two constructors, the goal split in two
+      subgoals, one for each constructor of [refltrans]:
+
+      %\includegraphics[scale=0.6]{fig5.png}%
+
+      The first constructor, namely [refl], is the reflexive part of
+      the closure of [R], i.e. the case when [a] is equal to [b]. This
+      case is proved by taking [c] as [d].  *)
+  
+  - intros c Hrefl2.
     exists c; split.
+
+    (** The goal is then the conjunction [refltrans\ R\ a\ c\ /\
+        refltrans\ R\ c\ c] whose first component is exactly the
+        hypothesis [Hrefl2] and the second corresponds to an
+        application of the [refl] axiom. *)
+    
     + assumption.
     + apply refl.
+
+    (** The interesting case is given by the inductive case, i.e. by
+        the constructor [rtrans], where the reduction from [a] to [b]
+        is done in at least one step. Therefore, in this case there
+        exists an element [a'] such that the following diagram holds.
+
+        %\xymatrix{ & & a \ar@{->}[dl] \ar@{->>}[dr] & \\ & b
+        \ar@{->>}[dl] & & c0 \ar@{.>>}[ddll] \\ c \ar@{.>>}[dr] & & &
+        \\ & d & & }%
+
+     *)  
+      
   - intros c0 Hrefl2.
+
+    (** The corresponding proof context is as follows:
+
+        %\includegraphics[scale=0.6]{fig5.png}%
+
+        The induction hypothesis [IHHrefl1] states that every
+        divergence from [b], that goes to [c] from one side,
+        converges. The idea is to then apply induction on the
+        hypothesis [Hrefl2], but the current proof context has the
+        hypothesis [H: R\ a\ b] which will generate in the induction
+        hypothesis the condition that the one-step reduct of [a] must
+        reduce in one step to [b], and this is clearly not the case in
+        general. In order to circumvent this problem, we need to
+        remove the hypothesis [H], but the information ([R\ a\ b]) is
+        essential in the sense that if we simply remove the hypothesis
+
+by another one before applying induction to \coqdocvar{Hrefl2}. At
+        this point, the fact that \coqdocvar{R} satisfies the Z
+        property is used. Basically, we will be replace (\coqdocvar{R}
+        \coqdocvar{a} \coqdocvar{b}) by (\coqdocvar{refltrans}
+        \coqdocvar{R} \coqdocvar{b} (\coqdocvar{wb} \coqdocvar{a}))
+        and (\coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{a}
+        (\coqdocvar{wb} \coqdocvar{a})), which is a direct consequence
+        of the Z property from the removed
+        hypothesis. Diagrammatically, we change from left to right:
+
+  \begin{tabular}{c@{\hskip 5cm}c} \xymatrix{ & & a \ar@{->>}[ddrr]
+    \ar@{->}[dl] & & \\ & b \ar@{->>}[dl] & & & \\ \bullet
+    \ar@{.>>}[ddrr] & & & & \bullet \ar@{.>>}[ddll]\\ & & & & \\ & &
+    \bullet & & } & \xymatrix{ & & a \ar@{->>}[ddrr] \ar@{->>}[dd] & &
+    \\ & b \ar@{->>}[dl] \ar@{->>}[dr] & & & \\ \bullet
+    \ar@{.>>}[ddrr] & & wb \; a & & \bullet \ar@{.>>}[ddll]\\ & & & &
+    \\ & & \bullet & & } \end{tabular}
+
+     *)
+    
     assert (Hbwba: refltrans R b (wb a)).
     {
       apply HZ_prop; assumption.
