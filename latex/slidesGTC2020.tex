@@ -261,55 +261,6 @@
 % acima de term_to_lc_at, e explicaria a demonstração de term_to_lc_at. 
 \end{frame}
 
-\begin{frame}[fragile]{Another alternative notion of term}
-
-  \begin{coqdoccode}
-    \coqdockw{Inductive} \coqdocvar{lc}: \coqdocvar{pterm}
-    \ensuremath{\rightarrow} \coqdockw{Prop} :=\coqdoceol
-    \coqdocindent{1.00em} \ensuremath{|} \coqdocvar{lc\_var}:
-    \coqdockw{\ensuremath{\forall}} \coqdocvar{x}, \coqdocvar{lc}
-    (\coqdocvar{pterm\_fvar} \coqdocvar{x})\coqdoceol
-    \coqdocindent{1.00em} \ensuremath{|} \coqdocvar{lc\_app}:
-    \coqdockw{\ensuremath{\forall}} \coqdocvar{t1} \coqdocvar{t2},
-    \coqdocvar{lc} \coqdocvar{t1} \ensuremath{\rightarrow}
-    \coqdocvar{lc} \coqdocvar{t2} \ensuremath{\rightarrow}
-    \coqdocvar{lc} (\coqdocvar{pterm\_app} \coqdocvar{t1}
-    \coqdocvar{t2})\coqdoceol \coqdocindent{1.00em} \ensuremath{|}
-    \coqdocvar{lc\_abs}: \coqdockw{\ensuremath{\forall}}
-    \coqdocvar{t1} \coqdocvar{L}, (\coqdockw{\ensuremath{\forall}}
-    \coqdocvar{x}, \coqdocvar{x} \symbol{92}\coqdocvar{notin}
-    \coqdocvar{L} \ensuremath{\rightarrow} \coqdocvar{lc}
-    (\coqdocvar{t1}\^{}\coqdocvar{x})) \ensuremath{\rightarrow}
-    \coqdocvar{lc} (\coqdocvar{pterm\_abs} \coqdocvar{t1})\coqdoceol
-    \coqdocindent{1.00em} \ensuremath{|} \coqdocvar{lc\_sub}:
-    \coqdockw{\ensuremath{\forall}} \coqdocvar{t1} \coqdocvar{t2}
-    \coqdocvar{L}, (\coqdockw{\ensuremath{\forall}} \coqdocvar{x},
-    \coqdocvar{x} \symbol{92}\coqdocvar{notin} \coqdocvar{L}
-    \ensuremath{\rightarrow} \coqdocvar{lc}
-    (\coqdocvar{t1}\^{}\coqdocvar{x})) \ensuremath{\rightarrow}
-    \coqdocvar{lc} \coqdocvar{t2} \ensuremath{\rightarrow} \coqdoceol
-    \coqdocindent{5.00em} \coqdocvar{lc} (\coqdocvar{pterm\_sub} \coqdocvar{t1}
-    \coqdocvar{t2}).\coqdoceol
-  \end{coqdoccode}\vspace{1cm}
-
-  \begin{coqdoccode}
-    \coqdockw{Lemma} \coqdocvar{lc\_equiv\_lc\_at}:
-    \coqdockw{\ensuremath{\forall}} \coqdocvar{t}, \coqdocvar{lc}
-    \coqdocvar{t} \ensuremath{\leftrightarrow} \coqdocvar{lc\_at} 0
-    \coqdocvar{t}.\coqdoceol
-  \end{coqdoccode}
-  % Leandro, aqui também temos várias coisas interessantes para falar,
-  % mas precisamos selecionar alguns pontos interessantes viáveis no
-  % tempo disponível. Vou deixar para você pensar nisto e me dar um
-  % retorno por email amanhã ou no sábado, ok?
-
-  % Os dois caminhos são triviais, porque a definição de termo é idêntica à
-  % definição de lc. Acho que não vale à pena apresentar esse tópico, apenas 
-  % dar a ideia de que a equivalência entre os três facilita o trabalho com termos, 
-  % por tornar as três noções intercambiáveis.
-
-\end{frame}
-
 \begin{frame}[fragile]{Future work}
   \begin{itemize}
   \item Complete the proof that the formalized calculus satisfies the

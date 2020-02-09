@@ -219,12 +219,6 @@ Fixpoint lc_at (k:nat) (t:pterm) : Prop :=
   | pterm_sub t1 t2 => (lc_at (S k) t1) /\ lc_at k t2
   end.
 
-Inductive lc: pterm -> Prop :=
-  | lc_var: forall x, lc (pterm_fvar x)
-  | lc_app: forall t1 t2, lc t1 -> lc t2 -> lc (pterm_app t1 t2)
-  | lc_abs: forall t1 L,  (forall x, x \notin L -> lc (t1^x)) -> lc (pterm_abs t1)
-  | lc_sub: forall t1 t2 L,  (forall x, x \notin L -> lc (t1^x)) -> lc t2 -> lc (pterm_sub t1 t2).
-  
 Lemma lc_at_weaken_ind : forall k1 k2 t,
   lc_at k1 t -> k1 <= k2 -> lc_at k2 t.
 Proof.
@@ -232,26 +226,26 @@ Proof.
   generalize dependent k2.
   generalize dependent k1.
   induction t.
-  - intros k1 k2 Hlc H.
+  - intros k1 k2 Hlc_at Hle.
     simpl in *.
     apply Nat.lt_le_trans with k1; assumption.
-  - intros k1 k2 Hlc Hle.
+  - intros k1 k2 Hlc_at Hle.
     simpl. auto.
-  - intros k1 k2 Hlc Hle.
+  - intros k1 k2 Hlc_at Hle.
     simpl in *.
-    destruct Hlc as [H1 H2].
+    destruct Hlc_at as [H1 H2].
     split.
     + apply IHt1 with k1; assumption.
     + apply IHt2 with k1; assumption.
-  - intros k1 k2 Hlc Hle.
+  - intros k1 k2 Hlc_at Hle.
     simpl.
-    simpl in Hlc.
+    simpl in Hlc_at.
     apply IHt with (S k1).
     + assumption.
     + apply Peano.le_n_S; assumption.
-  - intros k1 k2 Hlc Hle.
+  - intros k1 k2 Hlc_at Hle.
     simpl in *.
-    destruct Hlc as [H1 H2].
+    destruct Hlc_at as [H1 H2].
     split.
     + apply IHt1 with (S k1).
       * assumption.
@@ -272,7 +266,7 @@ Proof.
     split.
     + apply IHt1; assumption.
     + apply IHt2; assumption.
-  - intros k Hlc.
+  - intros k Hlc_at.
     apply IHt; assumption.
   - intros k H.
     destruct H as [Ht1 Ht2].
@@ -311,7 +305,7 @@ Proof.
   intros n t u T H.
   generalize dependent n.
   induction t.
-  - intros n' Hlc.
+  - intros n' Hlc_at.
     simpl in *.
     destruct (n' === n).
     + apply term_to_lc_at in T.
@@ -319,23 +313,23 @@ Proof.
       * assumption.
       * auto with arith.
     + simpl.
-      apply lt_n_Sm_le in Hlc.
-      apply le_lt_or_eq in Hlc.
-      destruct Hlc.
+      apply lt_n_Sm_le in Hlc_at.
+      apply le_lt_or_eq in Hlc_at.
+      destruct Hlc_at.
       * assumption.
       * symmetry in H. contradiction.
-  - intros n Hlc.
+  - intros n Hlc_at.
     simpl in *.
     auto.
-  - intros n Hlc.
+  - intros n Hlc_at.
     simpl in *.
-    destruct Hlc as [H1 H2].
+    destruct Hlc_at as [H1 H2].
     split.
     + apply IHt1; assumption.
     + apply IHt2; assumption.
-  - intros n Hlc.
+  - intros n Hlc_at.
     apply IHt.
-    simpl in Hlc; assumption.    
+    simpl in Hlc_at; assumption.    
   - intros n H.
     inversion H; subst; clear H.
     simpl; split.
@@ -404,9 +398,9 @@ Proof.
   - intros x y m n H.
     simpl in *.
     apply IHt with x; assumption.
-  - intros x y m n Hlc.
+  - intros x y m n Hlc_at.
     simpl in *.
-    destruct Hlc as [H1 H2]; split.
+    destruct Hlc_at as [H1 H2]; split.
     + apply IHt1 with x; assumption.      
     + apply IHt2 with x; assumption.
 Qed.
@@ -495,13 +489,13 @@ Proof.
   - apply term_to_lc_at.
   - induction t using pterm_size_induction.
     induction t0.
-    + intro Hlc.
-      inversion Hlc.
-    + intro Hlc.
+    + intro Hlc_at.
+      inversion Hlc_at.
+    + intro Hlc_at.
       apply term_var.
     + simpl.
-      intro Hlc.
-      destruct Hlc as [Hlc1 Hlc2].
+      intro Hlc_at.
+      destruct Hlc_at as [Hlc1 Hlc2].
       apply term_app.
       * apply H.
         ** simpl.
@@ -517,26 +511,26 @@ Proof.
                apply pterm_size_positive.
            *** auto.
         ** assumption.
-    + intro Hlc. 
+    + intro Hlc_at. 
       apply term_abs with (fv t0).
       intros x Hfv.
       apply H.
       * rewrite pterm_size_open.
         simpl; auto.
-      * simpl in Hlc.
+      * simpl in Hlc_at.
         apply lc_at_open.
         ** apply term_var.
         ** assumption.
-    + intro Hlc.
+    + intro Hlc_at.
       apply term_sub with (fv t0_1).
       * intros x Hfv.
         apply H.
         ** rewrite pterm_size_open.
            simpl; auto with arith.
-        ** simpl in Hlc.
+        ** simpl in Hlc_at.
            apply lc_at_open.
            *** apply term_var.
-           *** apply Hlc.
+           *** apply Hlc_at.
       * apply IHt0_2.
         ** intros t H0 H1.
            apply H.
@@ -562,27 +556,8 @@ Proof.
                apply a_lt_ab.
                auto with arith.
            *** assumption.
-        ** simpl in Hlc.
-           apply Hlc.
-Qed.
-
-Lemma lc_equiv_lc_at: forall t, lc t <-> lc_at 0 t.
-Proof.
-  split.
-  - intro Hlc.
-    apply term_equiv_lc_at.
-    induction Hlc.
-    + apply term_var.
-    + apply term_app; assumption.
-    + apply term_abs with L; assumption.
-    + apply term_sub with L; assumption.
-  - intro Hlc_at.
-    apply term_equiv_lc_at in Hlc_at.
-    induction Hlc_at.
-    + apply lc_var.
-    + apply lc_app; assumption.
-    + apply lc_abs with L; assumption.
-    + apply lc_sub with L; assumption.
+        ** simpl in Hlc_at.
+           apply Hlc_at.
 Qed.
 
 Theorem body_lc_at: forall t, body t <-> lc_at 1 t.
@@ -1008,13 +983,13 @@ Qed.
 Lemma lc_at_bswap_rec: forall t k i, k <> (S i) -> lc_at k t -> lc_at k (bswap_rec i t).
 Proof.
   intro t; induction t.
-  - intros k i Hneq Hlc.
+  - intros k i Hneq Hlt.
     simpl in *.
     case (i === n).
     + intro.
       inversion e; subst.
       simpl.
-      destruct Hlc. 
+      destruct Hlt. 
       * contradiction.
       * auto with arith.
     + intro.
@@ -1036,21 +1011,21 @@ Proof.
         ** contradiction. 
         ** trivial.
   - trivial.
-  - intros k i Hneq Hlc.
+  - intros k i Hneq Hlc_at.
     simpl in *.
     split.
     + apply IHt1 in Hneq.
       * assumption.
-      * apply Hlc.
+      * apply Hlc_at.
     + apply IHt2 in Hneq.
       * assumption.
-      * apply Hlc.
-  - intros k i Hneq  Hlc .
+      * apply Hlc_at.
+  - intros k i Hneq Hlc_at.
     simpl in *.
     apply IHt.
     + auto.
     + assumption.
-  - intros k i Hneq Hlc.
+  - intros k i Hneq Hlc_at.
     simpl in *.
     split.
     + assert (HneqS: S k <> S (S i)).
@@ -1059,10 +1034,10 @@ Proof.
       }
       apply IHt1 in HneqS.
       * assumption. 
-      * apply Hlc.
+      * apply Hlc_at.
     + apply IHt2 in Hneq.
       * assumption.
-      * apply Hlc.
+      * apply Hlc_at.
 Qed.
 
 Corollary lc_at_bswap: forall t k, k <> 1 -> lc_at k t -> lc_at k (& t).
