@@ -465,15 +465,31 @@ Proof.
 Qed.
 
 (** * An extension of the Z property: Compositional Z
- *)
 
-(* begin hide *)
+    In this section we present a formalization of an extension of the
+    Z property with compositional functions, known as _Compositional
+    Z_, as presented in %\cite{Nakazawa-Fujita2016}%. The
+    compositional Z is an interesting property because it allows a
+    kind of modular approach to the Z property in such a way that the
+    reduction relation can be split into two parts. More precisely,
+    given an ARS $(A,\to)$, one must be able to decompose the relation
+    $\to$ into two parts, say $\to_1$ and $\to_2$ such that $\to =
+    \to_1\cup \to_2$. The disjoint union can be inductively defined in
+    Coq as follows: *)
+
 Inductive union {A} (red1 red2: Rel A) : Rel A :=
  | union_left: forall a b,  red1 a b -> union red1 red2 a b
  | union_right: forall a b,  red2 a b -> union red1 red2 a b.
 
 Notation "R1 !_! R2" := (union R1 R2) (at level 40).
 
+(** This kind of decomposition can be done in several interesting
+    situations such as the $\lambda$-calculus with
+    $\beta\eta$-reduction%\cite{Ba84}%, extensions of the
+    $\lambda$-calculus with explicit substitutions%\cite{accl91}%, the
+    $\lambda\mu$-calculus%\cite{Parigot92}%, etc.  *)
+
+(* begin hide *)
 Lemma union_or {A}: forall (r1 r2: Rel A) (a b: A), (r1 !_! r2) a b <-> (r1 a b) \/ (r2 a b).
 Proof.
   intros r1 r2 a b; split.
@@ -486,29 +502,47 @@ Proof.
     + apply union_left; assumption.
     + apply union_right; assumption.
 Qed.
+(* end hide *)
 
-(*
-Lemma union_idemp_arg {A}: forall (R : Rel A) (a b: A),  (R !_! R) a b = R a b.
-Proof.
-  intros R a b.
-  assert (H := union_or R R).
-  destruct (H a b) as [Hl Hr].
-  clear H Hr.
-Admitted.
+(** The compositional Z is defined in terms of a weaker property:
 
-Lemma union_idemp {A}: forall (R : Rel A),  (R !_! R) = R.
-Proof.
-  intros R.
-Admitted.  
-*)
+    %\begin{definition} Let $(A,\to)$ be an ARS and $\to_x$ another
+    relation on $A$. A mapping $f$ satisfies the {\it weak Z property}
+    for $\to$ by $\to_x$ if $a\to b$ implies $b \tto_x f(a)$ and $f(a)
+    \tto_x f(b)$. Therefore, a mapping $f$ satisfies the Z property
+    for $\to$, if it satisfies the weak Z property by itself.
+    \end{definition}%
+
+    When $f$ satisfies the weak Z property, we also say that $f$ is
+    weakly Z, and the corresponding definition in Coq is given as
+    follows: *)
+
+Definition f_is_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R')  b (f a) /\ (refltrans R') (f a) (f b)).
+
+(** The compositional Z is an extension of the Z property for
+    compositional functions, where composition is defined as usual: *)
 
 Definition comp {A} (f1 f2: A -> A) := fun x:A => f1 (f2 x).
 Notation "f1 # f2" := (comp f1 f2) (at level 40).
 
-Definition f_is_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R')  b (f a) /\ (refltrans R') (f a) (f b)). 
+(** We are now ready to present the definition of the compositional Z:
+
+    %\begin{definition}\label{def:zcomp} Let $(A,\to)$ be an ARS such
+    that $\to = \to_1 \cup \to_2$. If there exists mappings $f_1,f_2:
+    A \to A$ such that \begin{enumerate} \item $f_1$ is Z for $\to_1$
+    \item $a \to_1 b$ implies $f_2(a) \tto f_2(b)$ \item $a \tto
+    f_2(a)$ holds for any $a\in Im(f_1)$ \item $f_2 \circ f_1$ is
+    weakly Z for $\to_2$ by $\to$ \end{enumerate} then $f_2 \circ f_1$
+    is Z for $(A,\to)$, and hence $(A,\to)$ is confluent.
+    \end{definition}%
+
+    %\noindent% and the corresponding Coq definition, where $\to_1$
+    (resp. $\to_2$) appears as [R1] (resp. [R2]),
+    is given by: *)
 
 Definition Z_comp {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ f_is_Z R1 f1 /\ (forall a b, R1 a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
 
+(* begin hide *)
 Lemma refltrans_union {A:Type}: forall (R R' :Rel A) (a b: A), refltrans R a b -> refltrans (R !_! R') a b.
 Proof.
   intros R R' a b Hrefl.
@@ -518,13 +552,39 @@ Proof.
     + apply union_left; assumption.
     + assumption.
 Qed.
-    
+(* end hide *)
+
+(** The compositional Z gives a sufficient condition for compositional
+    functions to be Z. In other words, compositional Z implies Z,
+    which is given by the following diagrams:
+ 
+    %\begin{tabular}{l@{\hskip 3cm}l} \xymatrix{ a \ar@{->}[rr]^1 && b
+    \ar@{.>>}[dll]_1\\ f_1(a)\ar@{.>>}[d] \ar@{.>>}[rr]^1 && f_1(b) \\
+    f_2(f_1(a)) \ar@{.>>}[rr] && f_2(f_1(b)) } & \xymatrix{ a
+    \ar@{->}[rr]^2 && b \ar@{.>>}[ddll]\\ & & \\ f_2(f_1(a))
+    \ar@{.>>}[rr] && f_2(f_1(b)) } \end{tabular}%
+  
+    In what follows, we present our Coq proof of this fact in the same
+    style of the first section by interleaving English followed by the
+    corresponding Coq code. *)
+
 Lemma Z_comp_implies_Z_prop {A:Type}: forall (R :Rel A), Z_comp R -> Z_prop R.
 Proof.
+
+  (** Let [R] be a relation over [A], and [H] the hypothesis that [R]
+      satisfies compositional Z. *)
+  
   intros R H.
+
+  (** Now unfold the definitions of [Z_prop] and [Z_comp] as presented
+      before, and organize the items of compositional Z as in
+      Definition %\ref{def:zcomp}%. *)
+  
+  unfold Z_prop.
   unfold Z_comp in H.
   destruct H as [ R1 [ R2 [f1 [f2 [Hunion [HfZ [Hrefl [HIm Hweak]]]]]]]].
-  unfold Z_prop.
+
+  
   exists (f2 # f1).
   intros a b HR.
   inversion Hunion; subst.
@@ -587,6 +647,7 @@ Proof.
   apply Z_prop_implies_Confl; assumption.  
 Qed.
 
+(* begin hide *)
 Definition Z_comp_eq {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ (forall a b, R1 a b -> (f1 a) = (f1 b)) /\ (forall a, (refltrans R1) a (f1 a)) /\ (forall b a, a = f1 b -> (refltrans R) a (f2 a)) /\ (f_is_weak_Z R2 R (f2 # f1)).
 
 Definition Z_comp_eq' {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f : A -> A), R = (R1 !_! R2) /\ (forall a b, R1 a b -> (f a) = (f b)) /\ (forall a, (refltrans R2) a (f a)) /\ (f_is_weak_Z R2 R f).
