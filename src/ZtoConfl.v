@@ -1,14 +1,8 @@
 (** * The Z property implies Confluence
 
-  Confluence is an important property concerning the determinism of
-  the computational process in the sense one says that a program is
-  confluent if every two ways of evaluating this program result in the
-  very same answer. In the particular case of Abstract Rewriting
-  Systems (ARS), which are the focus of this work, confluence can be
-  beautifully expressed by diagrams as we will see next. By
-  definition, an ARS is simply a pair composed of a set and binary
-  operation over this set. Given an ARS $(A,R)$, where $A$ is a set
-  and $R:A\times A$ and $a,b: A$, we write $a\ R\ b$ or $a\to_R b$ to
+  An ARS is defined as a pair composed of a set and binary operation
+  over this set. Given an ARS $(A,R)$, where $A$ is a set and
+  $R:A\times A$ and $a,b: A$, we write $a\ R\ b$ or $a\to_R b$ to
   denote that $a$ reduces to $b$ via $R$. The arrow notation will be
   prefered because it is more convenient for expressing reductions, so
   the reflexive transitive closure of a relation [R] is written as
@@ -464,6 +458,91 @@ Proof.
         ** apply HZ_prop; assumption.
 Qed.
 
+(** An alternative proof that Z implies confluence is possible via the
+    notion of semiconfluence, which is equivalent to confluence, as
+    done in %\cite{zproperty}%. Our proof is also constructive, but we
+    will not explain it here due to lack of space, but as the
+    interested reader can visit the Coq file in our GitHub
+    repository. *)
+
+Definition SemiConfl {A:Type} (R: Rel A) := forall a b c, R a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
+
+Theorem Z_prop_implies_SemiConfl {A:Type}: forall R: Rel A, Z_prop R -> SemiConfl R.
+(* begin hide *)
+Proof.
+  intros R HZ_prop.
+  unfold Z_prop in HZ_prop.
+  unfold SemiConfl.
+  destruct HZ_prop.
+  intros a b c Hrefl Hrefl'.
+  assert (Haxa: refltrans R a (x a)).
+  {
+   apply rtrans with b.
+   - assumption.
+   - apply H.
+     assumption.
+  }
+  apply H in Hrefl.
+  destruct Hrefl.
+  clear H1.
+  generalize dependent b.
+  induction Hrefl'.
+  - intros.
+    exists (x a).
+    split; assumption.
+  - intros.
+    destruct IHHrefl' with b0.
+    + apply refltrans_composition with (x a); apply H; assumption.
+    + apply refltrans_composition with (x b).
+      * apply refltrans_composition with (x a).
+        ** assumption.
+        ** apply H.
+           assumption.
+      * apply refl.
+    + exists x0.
+      assumption.
+Qed.
+(* end hide *)
+
+Theorem Semi_equiv_Confl {A: Type}: forall R: Rel A, Confl R <-> SemiConfl R.
+(* begin hide *)
+Proof.
+unfold Confl.
+unfold SemiConfl.
+intro R.
+split.
+- intros.
+  apply H with a.
+  + apply rtrans with b.
+    * assumption.
+    * apply refl.
+  + assumption.
+- intros.
+  generalize dependent c.
+  induction H0.
+  + intros.
+    exists c.
+    split.
+    * assumption.
+    * apply refl.
+  + intros. 
+    specialize (H a).
+    specialize (H b).
+    specialize (H c0).
+    apply H in H0.
+    * destruct H0.
+      destruct H0.
+      apply IHrefltrans in H0.
+      destruct H0.
+      destruct H0.
+      exists x0.
+      split.
+      ** assumption.
+      ** apply refltrans_composition with x; assumption.
+    * assumption.
+Qed.
+(* end hide *)
+
 (** * An extension of the Z property: Compositional Z
 
     In this section we present a formalization of an extension of the
@@ -527,18 +606,18 @@ Notation "f1 # f2" := (comp f1 f2) (at level 40).
 
 (** We are now ready to present the definition of the compositional Z:
 
-    %\begin{definition}\label{def:zcomp} Let $(A,\to)$ be an ARS such
-    that $\to = \to_1 \cup \to_2$. If there exists mappings $f_1,f_2:
-    A \to A$ such that \begin{enumerate} \item $f_1$ is Z for $\to_1$
-    \item $a \to_1 b$ implies $f_2(a) \tto f_2(b)$ \item $a \tto
-    f_2(a)$ holds for any $a\in Im(f_1)$ \item $f_2 \circ f_1$ is
-    weakly Z for $\to_2$ by $\to$ \end{enumerate} then $f_2 \circ f_1$
-    is Z for $(A,\to)$, and hence $(A,\to)$ is confluent.
-    \end{definition}%
+    %\begin{theorem}\cite{Nakazawa-Fujita2016}\label{thm:zcomp} Let
+    $(A,\to)$ be an ARS such that $\to = \to_1 \cup \to_2$. If there
+    exists mappings $f_1,f_2: A \to A$ such that \begin{enumerate}
+    \item $f_1$ is Z for $\to_1$ \item $a \to_1 b$ implies $f_2(a)
+    \tto f_2(b)$ \item $a \tto f_2(a)$ holds for any $a\in Im(f_1)$
+    \item $f_2 \circ f_1$ is weakly Z for $\to_2$ by $\to$
+    \end{enumerate} then $f_2 \circ f_1$ is Z for $(A,\to)$, and hence
+    $(A,\to)$ is confluent.  \end{theorem}%
 
-    %\noindent% and the corresponding Coq definition, where $\to_1$
-    (resp. $\to_2$) appears as [R1] (resp. [R2]),
-    is given by: *)
+    We define the predicate [Z_comp] that corresponds to the
+    hypothesis of Theorem %\ref{them:zcomp}%, where $\to_1$
+    (resp. $\to_2$) is written as [R1] (resp. [R2]): *)
 
 Definition Z_comp {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ f_is_Z R1 f1 /\ (forall a b, R1 a b -> (refltrans R) (f2 a) (f2 b)) /\ (forall a b, b = f1 a -> (refltrans R) b (f2 b)) /\ (f_is_weak_Z R2 R (f2 # f1)).
 
@@ -554,91 +633,133 @@ Proof.
 Qed.
 (* end hide *)
 
-(** The compositional Z gives a sufficient condition for compositional
-    functions to be Z. In other words, compositional Z implies Z,
-    which is given by the following diagrams:
+(** As stated by Theorem %\ref{them:zcomp}%, the compositional Z gives
+    a sufficient condition for compositional functions to be Z. In
+    other words, compositional Z implies Z, which can be seen by the
+    diagrams of Figure %\ref{fig:zcomp}%
  
-    %\begin{tabular}{l@{\hskip 3cm}l} \xymatrix{ a \ar@{->}[rr]^1 && b
-    \ar@{.>>}[dll]_1\\ f_1(a)\ar@{.>>}[d] \ar@{.>>}[rr]^1 && f_1(b) \\
-    f_2(f_1(a)) \ar@{.>>}[rr] && f_2(f_1(b)) } & \xymatrix{ a
-    \ar@{->}[rr]^2 && b \ar@{.>>}[ddll]\\ & & \\ f_2(f_1(a))
-    \ar@{.>>}[rr] && f_2(f_1(b)) } \end{tabular}%
+    %\begin{figure}\begin{tabular}{l@{\hskip 3cm}l} \xymatrix{ a
+    \ar@{->}[rr]^1 && b \ar@{.>>}[dll]_1\\ f_1(a)\ar@{.>>}[d]
+    \ar@{.>>}[rr]^1 && f_1(b) \\ f_2(f_1(a)) \ar@{.>>}[rr] &&
+    f_2(f_1(b)) } & \xymatrix{ a \ar@{->}[rr]^2 && b \ar@{.>>}[ddll]\\
+    & & \\ f_2(f_1(a)) \ar@{.>>}[rr] && f_2(f_1(b)) }
+    \end{tabular}\caption{Compositional Z implies
+    Z}\label{fig:zcomp}\end{figure}%
   
     In what follows, we present our Coq proof of this fact in the same
     style of the first section by interleaving English followed by the
     corresponding Coq code. *)
 
-Lemma Z_comp_implies_Z_prop {A:Type}: forall (R :Rel A), Z_comp R -> Z_prop R.
+Theorem Z_comp_implies_Z_prop {A:Type}: forall (R :Rel A), Z_comp R -> Z_prop R.
 Proof.
 
   (** Let [R] be a relation over [A], and [H] the hypothesis that [R]
       satisfies compositional Z. *)
-  
+
   intros R H.
 
   (** Now unfold the definitions of [Z_prop] and [Z_comp] as presented
-      before, and organize the items of compositional Z as in
-      Definition %\ref{def:zcomp}%. *)
-  
+      before, and name the hypothesis of compositional Z as in
+      Theorem %\ref{thm:zcomp}%. *)
+
   unfold Z_prop.
   unfold Z_comp in H.
-  destruct H as [ R1 [ R2 [f1 [f2 [Hunion [HfZ [Hrefl [HIm Hweak]]]]]]]].
+  destruct H as [ R1 [ R2 [f1 [f2 [Hunion [H1 [H2 [H3 H4]]]]]]]].
 
+  (** We need to prove that there exists a map, say [f], that is Z as
+      shown by the current proof context:
+
+      %\includegraphics[scale=0.6]{fig8.png}%
+
+      Take the composition [f2 # f1] as [f] as suggested by the above
+      diagrams, and show that [f2 # f1] is Z. *)
   
   exists (f2 # f1).
+
+  (** So, let [a] and [b] be elements of [A], and suppose that [a]
+  [R]-reduces to [b] in one step. Call [HR] this hypothesis.  *)
+  
   intros a b HR.
+
+  (** Since [R] is the union of [R1] and [R2], one has that [a]
+  reduces to [b] in one step via either [R1] or [R2].  *)
+  
   inversion Hunion; subst.
   clear H.
   inversion HR; subst.
+
+  (** Firstly, suppose that [a] [R1]-reduces in one step to [b].  *)
+  
   - split.
+
+    (** In order to prove that [b] R-reduces to [((f2 # f1) a)], we
+    first need to show that [b] [R1]-reduces to [(f1 a)] as shown in
+    Figure %\ref{fig:zcomp}%. *)
+    
     + apply refltrans_composition with (f1 a).
-      * apply HfZ in H.
+      * apply H1 in H.
         destruct H.
         apply refltrans_union; assumption.
-      * apply HIm with a; reflexivity.
-    + apply HfZ in H.
+
+        (** The next step is then to prove that [(f1 a)] [R]-reduces
+            to [((f2 # f1) a)], which is a direct consequence of
+            [H3]. *)
+        
+      * apply H3 with a; reflexivity.
+
+    (** The proof that [((f2 # f1) a)] [R]-reduces to [((f2 # f1) b)]
+    is more tricky. Initially, note that, since [R1 a b] then we get
+    that [refltrans R1 (f1 a) (f1 b)] by the Z property. *)
+        
+    + apply H1 in H.
       destruct H.
       clear H HR.
       unfold comp.
+
+      (** Now, the goal can be obtained from [H2] as long as [R1 (f1
+      a) (f1 b)], but we only have that [refltrans R1 (f1 a) (f1
+      b)]. Therefore, we use induction on this hypothesis. *)
+      
       induction H0.
+
+      (** The reflexive case is trivial because [a] and [b] are equal.
+      *)
+      
       * apply refl.
+
+      (** In the transitive case, we have that [(f1 a)] [R1]-reduces
+      to [(f1 b)] in at least one step. The current proof context is
+      as follows:
+
+      %\includegraphics[scale=0.6]{fig9.png}%
+
+      Therefore, there exists some [b0] such that [R1 a0 b0] and
+      [refltrans R1 b0 c] and we need to prove that [refltrans (R1 !_!
+      R2) (f2 a0) (f2 c)]. This can be done in two steps by
+      transitivity of [refltrans] taking [(f2 b0)] as the intermediary
+      term. *)
+        
       * apply refltrans_composition with (f2 b0).
-        ** apply Hrefl; assumption.
+
+        (** The first subgoal is then [refltrans (R1 !_! R2) (f2 a0)
+        (f2 b0)] that is proved by hypothesis [H2]. *)
+        
+        ** apply H2; assumption.
+
+        (** And the second subgoal [refltrans (R1 !_! R2) (f2 b0) (f2
+        c)] is proved by the induction hypothesis. *)
+           
         ** assumption.
-  - apply Hweak; assumption.    
+
+  (** Finally, when [a] [R2]-reduces in one step to [b] one concludes
+      the proof using the assumption that [(f2 # f1)] is weak Z. *)
+           
+  - apply H4; assumption.    
 Qed.
 
-(*
-Lemma Z_prop_implies_Z_comp {A:Type}: forall (R : Rel A), Z_prop R -> Z_comp R.
-Proof.
-  intros R HZ_prop.
-  unfold Z_prop in HZ_prop.
-  destruct HZ_prop.
-  unfold Z_comp.
-  exists R. exists R. exists x. exists (@id A). split.
-  - symmetry.
-    change (R !_! R) with R \/ R.
-    apply union_idemp.
-  - split.
-    + assumption.
-    + split.
-      * intros a b Hab.
-        apply rtrans with b.
-        ** assumption.
-        ** apply refl.
-      * split.
-        ** intros a b Heq.
-           apply refl.
-        ** auto.
-Qed.
-
-Theorem Z_comp_equiv_Z_prop {A:Type}: forall (R : Rel A), Z_prop R <-> Z_comp R.
-Proof.
-  split.
-  - apply Z_prop_implies_Z_comp.
-  - apply Z_comp_implies_Z_prop.
-Qed.
-*)
+(** Now we can use the proofs of the theorems [Z_comp_implies_Z_prop]
+    and [Z_prop_implies_Confl] to conclude that compositional Z is a
+    suficient condition for confluence. *)
 
 Corollary Z_comp_is_Confl {A}: forall (R: Rel A), Z_comp R -> Confl R.
 Proof.
@@ -647,351 +768,124 @@ Proof.
   apply Z_prop_implies_Confl; assumption.  
 Qed.
 
-(* begin hide *)
+(** Rewriting Systems with equations is another interesting and
+    non-trivial topic %\cite{winkler89,terese03}%. The confluence of
+    rewriting systems with an equivalence relation can also be proved
+    by a variant of the compositional Z, known as Z property
+    modulo%~\cite{AK12b}%.
+
+    %\begin{corollary}\cite{Nakazawa-Fujita2016}\label{cor:zcomp} Let
+    $(A,\to)$ be an ARS such that $\to = \to_1 \cup \to_2$. If there
+    exists mappings $f_1,f_2: A \to A$ such that \begin{enumerate}
+    \item $a \to_1 b$ implies $f_1(a) = f_1(b)$ \item $a \tto_1
+    f_1(a), \forall a$ \item $a \tto f_2(a)$ holds for any $a\in
+    Im(f_1)$ \item $f_2 \circ f_1$ is weakly Z for $\to_2$ by $\to$
+    \end{enumerate} then $f_2 \circ f_1$ is Z for $(A,\to)$, and hence
+    $(A,\to)$ is confluent.  \end{corollary}%
+
+    We define the predicate [Z_comp_eq] corresponding to the
+    hypothesis of Corollary %\ref{cor:zcomp}%, and then we prove
+    directly that if [Z_comp_eq] holds for a relation [R] then [Zprop
+    R] also holds. This approach differs from
+    %\cite{Nakazawa-Fujita2016}% that proves Corollary
+    %\ref{cor:zcomp}% directly from Theorem %\ref{thm:zcomp}% *)
+
 Definition Z_comp_eq {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f1 f2: A -> A), R = (R1 !_! R2) /\ (forall a b, R1 a b -> (f1 a) = (f1 b)) /\ (forall a, (refltrans R1) a (f1 a)) /\ (forall b a, a = f1 b -> (refltrans R) a (f2 a)) /\ (f_is_weak_Z R2 R (f2 # f1)).
-
-Definition Z_comp_eq' {A:Type} (R :Rel A) := exists (R1 R2: Rel A) (f : A -> A), R = (R1 !_! R2) /\ (forall a b, R1 a b -> (f a) = (f b)) /\ (forall a, (refltrans R2) a (f a)) /\ (f_is_weak_Z R2 R f).
-
-(*
-Definition Z_comp_new_eq {A:Type} (R :Rel A) := forall (R1 R2: Rel A), R = (R1 !_! R2) -> exists (f1 f2: A -> A), (forall a b, R1 a b -> (f1 a) = (f1 b)) /\ (forall a, (refltrans R1) a (f1 a)) /\ (forall b a, a = f1 b -> (refltrans R) a (f2 a)) /\ (f_is_weak_Z R2 R (f2 # f1)).
- *)
-
-Lemma Z_comp_eq'_implies_Z_prop {A:Type}: forall (R : Rel A), Z_comp_eq' R -> Z_prop R.
-Proof.
-  unfold Z_comp_eq'.
-  unfold Z_prop.
-  intros R H.
-  destruct H as [R1 [R2 [f [Hunion [HR1eqf [HR2f Hweak]]]]]].
-  exists f.
-  intros a b Hab.
-  inversion Hunion; subst.
-  clear H.
-  split.
-  - induction Hab.
-    + apply HR1eqf in H.
-      apply refltrans_composition with (f b).
-      * specialize (HR2f b).
-        induction HR2f.
-        ** apply refl.
-        **  apply rtrans with b.
-            *** apply union_right; assumption.
-            *** apply IHHR2f; assumption.
-      * rewrite H; apply refl.
-    + apply Hweak; assumption.
-  - induction Hab.
-    + apply HR1eqf in H.
-      rewrite <- H.
-      apply refl.
-    + apply Hweak; assumption.
-Qed.
-
+        
 Lemma Z_comp_eq_implies_Z_prop {A:Type}: forall (R : Rel A), Z_comp_eq R -> Z_prop R.
 Proof.
-  unfold Z_comp_eq.
+
+  (** Let [R] be a relation and suppose that [R] satisfies the
+      predicate [Z_comp_eq]. *)
+  
+  intros R Heq.
+  unfold Z_comp_eq in Heq.
+
+  (** Call [Hi] the [i]th hypothesis as in %\ref{cor:zcomp}%.  *)
+  
+  destruct Heq as [R1 [R2 [f1 [f2 [Hunion [H1 [H2 [H3 H4]]]]]]]].
+
+  (** From the definition of the predicate [Z_prop], we need to find a
+      map, say [f] that is Z. Let [(f2 # f1)] be such map.  *)
+  
   unfold Z_prop.
-  intros R H.
-  destruct H as [R1 [R2 [f1 [f2 [Hunion [HR1eqf1 [Haf1a [HRf2 Hweak]]]]]]]].
   exists (f2 # f1).
-  inversion Hunion; subst.
-  clear H.
+
+  (** In order to prove that [(f2 # f1)] is Z, let [a] and [b] be
+      arbitrary elements of type [A], and [Hab] be the hypothesis that
+      [a] [R]-reduces in one step to [b].  *)
+  
   intros a b Hab.
-  split.
-  - induction Hab.
-    + apply HR1eqf1 in H.
-      apply refltrans_composition with (f1 b).
-      * specialize (Haf1a b).
-        induction Haf1a.
-        **  apply refl.
-        **  apply rtrans with b.
-            *** apply union_left.
-                assumption.
-            *** apply IHHaf1a; assumption.
-      * rewrite <- H in *.
-        apply HRf2 with b; assumption.
-    + apply Hweak; assumption.
-  - inversion Hab; subst.
-    + apply HR1eqf1 in H.
-      assert (H2: ((f2 # f1) a) = ((f2 # f1) b)).
-      {
-        unfold comp.
-        apply f_equal; assumption.
-      }
-      rewrite H2.
+
+  (** Since [a] [R]-reduces in one step to [b] and [R] is the union of
+      the relations [R1] and [R2] then we consider two cases: *)
+  
+  inversion Hunion; subst; clear H.
+  inversion Hab; subst; clear Hab.
+  
+  (** The first case is when [a] [R1]-reduces in one step to [b]. *)
+  
+  - unfold comp; split.
+
+    (** This is equivalent to say that [f2 # f1] is weak Z for [R1] by
+    [R1 !_! R2]. Therefore, we first prove that [refltrans (R1 !_! R2)
+    b (f2 (f1 a))], which can be reduced to [refltrans (R1 !_! R2) b
+    (f1 b)] and [refltrans (R1 !_! R2) (f1 b) (f2 (f1 a))] by the
+    transitivity of [refltrans]. *)
+    
+    + apply refltrans_composition with (f1 b).
+
+      (** From hypothesis [H2], we know that [refltrans R1 a (f1 a)]
+          for all [a], and hence [refltrans (R1 !_! R2) a (f1 a)] and
+          we conclude.*)
+      
+      * apply refltrans_union.
+        apply H2.
+
+        (** The proof that [refltrans (R1 !_! R2) (f1 b) (f2 (f1 a))]
+        is exactly the content of hypothesis [H3].  *)
+        
+      * apply H1 in H.
+        rewrite H.
+        apply H3 with b; reflexivity.
+
+        (** The proof that [refltrans (R1 !_! R2) (f2 (f1 a)) (f2 (f1
+            b))] is done using the reflexivity of [refltrans] because
+            [ (f2 (f1 a)) = (f2 (f1 b))] by hypothesis [H1. ]*)
+        
+    + apply H1 in H.
+      rewrite H.
       apply refl.
-    + apply Hweak; assumption.
+
+      (** When [a] [R2]-reduces in one step to [b] then we are done by
+      hypothesis [H4]. *)
+      
+  - apply H4; assumption.
 Qed.
 
 (*
-Lemma Z_comp_eq_implies_Z_prop {A:Type}: forall (R : Rel A), Z_comp_eq R -> Z_prop R.
+Corollary Z_comp_eq_implies_Z_comp {A:Type}: forall (R : Rel A), Z_comp_eq R -> Z_comp R.
 Proof.
-  unfold Z_comp_eq.
-  unfold Z_prop.
-  intros.
-  destruct H as [R1 [R2 [f1 [f2 [Hunion [HR1eqf1 [Haf1a [HRf2 Hweak]]]]]]]].
-  exists (f2 # f1).
-  inversion Hunion; subst.
-  clear H.
-  intros a b Hab.
-  assert (H':  forall a : A, refltrans R2 a (f1 a)).
-  {
-    admit.
-  }
-  split.
-  - induction Hab.
-    + apply HR1eqf1 in H.
-      apply refltrans_composition with (f1 b).
-      * specialize (H' b).
-        induction H'.
-        **  apply refl.
-        **  apply rtrans with b.
-            *** apply union_right.
-                assumption.
-            *** apply IHH'; assumption.
-
-
-
-
-        induction Haf1a.
-        **  apply refl.
-        **  apply rtrans with b.
-            *** apply union_left.
-                assumption.
-            *** apply IHHaf1a; assumption.
-      * rewrite <- H in *.
-        apply HRf2 with b; assumption.
-    + apply Hweak; assumption.
-  - inversion Hab; subst.
-    + apply HR1eqf1 in H.
-      assert (H2: ((f2 # f1) a) = ((f2 # f1) b)).
-      {
-        unfold comp.
-        apply f_equal; assumption.
-      }
-      rewrite H2.
-      apply refl.
-    + apply Hweak; assumption.
-Qed.
-*)
-
-Require Import Morphisms.
-
-(*
-Require Import Setoid.
-
-Definition Z_prop_mod {A:Type} (R : Rel A) := exists eqA, Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
-
-Definition Z_prop_mod' {A:Type} (R : Rel A) := exists eqA, Equivalence eqA /\  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
-
-Definition Z_prop_mod2 {A:Type} (R : Rel A) := forall eqA, Equivalence eqA ->  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
- *)
-
-Definition Z_prop_mod3 {A:Type} (R eqA : Rel A) := Equivalence eqA /\  (exists wb:A -> A, forall a b, R a b -> ((refltrans R) b (wb a) /\ (refltrans R) (wb a) (wb b)) /\ (forall c d, eqA c d -> wb c = wb d)).
-
-(*
-Lemma Z_prop_mod2_implies_Z_prop_mod3 {A:Type}: forall (R eqA : Rel A), Z_prop_mod2 R -> Z_prop_mod3 R eqA. 
-Proof.
-  intros R eqA Hmod.
-  unfold Z_prop_mod2 in Hmod.
-  unfold Z_prop_mod3.
-  intros HeqA.
-  apply Hmod in HeqA.
-  assumption.
-Qed.
-
-Lemma Z_prop_mod3_implies_Z_prop_mod {A:Type}: forall (R eqA : Rel A), Z_prop_mod3 R eqA -> Z_prop_mod R. 
-Proof.
-  intros R eqA Hmod3.
-  unfold Z_prop_mod3 in Hmod3.
-  unfold Z_prop_mod.
-  exists eqA.
-  intros HeqA.
-  apply Hmod3 in HeqA.
-  assumption.
-Qed.
-
-Corollary Z_prop_mod_implies_Z_comp {A:Type}: forall (R eqA: Rel A), Z_prop_mod2 R eqA -> Z_comp R.
-Proof.
-  intros R eqA H.
-  unfold Z_prop_mod2 in H.
+  intros R Heq.
+  unfold Z_comp_eq in Heq.
+  destruct Heq as [R1 [R2 [f1 [f2 [Hunion [H1 [H2 [H3 H4]]]]]]]].
   unfold Z_comp.
-*)
-
-
-(** Some experiments: the next proof does not seem to have a constructive proof in the general setting of ARS. *)
-Lemma Z_prop_fun {A}: forall (R: Rel A) (x : A -> A), ( forall(a b: A), R a b -> (refltrans R b (x a) /\ refltrans R (x a) (x b))) -> ( forall(a : A), refltrans R a (x a)).
-Proof.
-  intros R x HZ_prop a.
-Admitted.
-
-Lemma Z_prop_mon {A}: forall (R: Rel A) (x : A -> A), ( forall(a b: A), R a b -> (refltrans R b (x a) /\ refltrans R (x a) (x b))) -> forall u v : A, refltrans R u v -> refltrans R (x u) (x v).
-Proof.
-  intros R x H a b H0.
-  induction H0.
-  - apply refl.
-  - apply H in H0.
-    apply refltrans_composition with (x b).
-    + apply H0.
-    + assumption.
-Qed.
-
-Theorem Z_prop_implies_Confl' {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
-Proof.
-  intros R HZ_prop.
-  unfold Z_prop in HZ_prop.
-  destruct HZ_prop.
-  unfold Confl.
-  intros a b c Hrefl1.
-  generalize dependent c.
-  induction Hrefl1.
-  - intros c Hrefl.
-    exists c; split.
-    + assumption.
-    + apply refl.      
-  - intros c' Hrefl2.
-    inversion Hrefl2; subst.
-    + exists c; split.
-      * apply refl.
-      * apply rtrans with b; assumption.
-    + assert (H3 := IHHrefl1 (x c')).
-      assert (H4 : refltrans R b (x c')).
-      {
-        apply refltrans_composition with (x b0).
-        - apply refltrans_composition with (x a).
-          + apply H; assumption.
-          + apply H; assumption.
-        - apply Z_prop_mon; assumption.
-      }
-      apply H3 in H4.
-      destruct H4 as [d].
-      exists d; split.
-      * apply H4.
-      * apply refltrans_composition with (x c').
-        ** apply Z_prop_fun; assumption.
+  exists R1, R2, f1, f2; split.
+  - assumption.
+  - split.
+    + unfold f_is_Z.
+      intros a b Hab; split.
+      * apply H1 in Hab.
+        rewrite Hab.
+        apply H2.
+      * apply H1 in Hab.
+        rewrite Hab.
+        apply refl.
+    + split.
+      * intros a b Hab.
+        admit.
+      * split.
+        ** apply H3.
         ** apply H4.
-Qed.
-
-(** Proof using semi-confluence *)
-Definition SemiConfl {A:Type} (R: Rel A) := forall a b c, R a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
-
-Theorem Z_prop_implies_SemiConfl {A:Type}: forall R: Rel A, Z_prop R -> SemiConfl R.
-Proof.
-  intros R HZ_prop.
-  unfold Z_prop in HZ_prop.
-  unfold SemiConfl.
-  destruct HZ_prop.
-  intros a b c Hrefl Hrefl'.
-  assert (Haxa: refltrans R a (x a)).
-  {
-   apply rtrans with b.
-   - assumption.
-   - apply H.
-     assumption.
-  }
-  apply H in Hrefl.
-  destruct Hrefl.
-  clear H1.
-  generalize dependent b.
-  induction Hrefl'.
-  - intros.
-    exists (x a).
-    split; assumption.
-  - intros.
-    destruct IHHrefl' with b0.
-    + apply refltrans_composition with (x a); apply H; assumption.
-    + apply refltrans_composition with (x b).
-      * apply refltrans_composition with (x a).
-        ** assumption.
-        ** apply H.
-           assumption.
-      * apply refl.
-    + exists x0.
-      assumption.
-Qed.
-
-Theorem Semi_equiv_Confl {A: Type}: forall R: Rel A, Confl R <-> SemiConfl R.
-Proof.
-unfold Confl.
-unfold SemiConfl.
-intro R.
-split.
-- intros.
-  apply H with a.
-  + apply rtrans with b.
-    * assumption.
-    * apply refl.
-  + assumption.
-- intros.
-  generalize dependent c.
-  induction H0.
-  + intros.
-    exists c.
-    split.
-    * assumption.
-    * apply refl.
-  + intros. 
-    specialize (H a).
-    specialize (H b).
-    specialize (H c0).
-    apply H in H0.
-    * destruct H0.
-      destruct H0.
-      apply IHrefltrans in H0.
-      destruct H0.
-      destruct H0.
-      exists x0.
-      split.
-      ** assumption.
-      ** apply refltrans_composition with x; assumption.
-    * assumption.
-Qed.
-
-(** Comparing regularity *)
-
-Definition P_regular {A} (R: Rel A) :=
-  forall (P:A -> Prop) t t', R t t' -> P t /\ P t'.
-
-Definition P_wregular {A} (R: Rel A) :=
-  forall (P:A -> Prop) t t', P t -> R t t' -> P t'.
-
-Definition P_wregular' {A} (R: Rel A) :=
-  forall (P:A -> Prop) t t', (P t /\ R t t') -> P t'.
-
-Lemma P_wregular_equiv_P_wregular' {A}: forall (R: Rel A), P_wregular R <-> P_wregular' R.
-Proof.
-  intro R; split.
-  - unfold P_wregular.
-    unfold P_wregular'.
-    intros Hwreg P t t' Hand.
-    destruct Hand as [Ht Hred].
-    apply Hwreg with t; assumption.
-  - unfold P_wregular.
-    unfold P_wregular'.
-    intros Hwreg P t t' Ht Hred.
-    apply Hwreg with t.
-    split; assumption.
-Qed.
-
-Lemma P_wregular_imples_P_regular {A}: forall (R: Rel A), P_regular R -> P_wregular R.
-Proof.
-  intros R Hreg.
-  unfold P_regular in Hreg.
-  unfold P_wregular.
-  intros P t t' Ht Hred.
-  apply (Hreg P) in Hred.
-  apply Hred.
-Qed.
-
-Definition tri_prop_elem {A} (a : A) (R: Rel A) :=
-  exists a', forall b, R a b -> R b a'.
-
-Definition tri_prop {A} (R: Rel A) :=
-  forall a, tri_prop_elem a R.
-
-Lemma tri_prop_imples_Z_prop {A}: forall R: Rel A, tri_prop R -> Z_prop R.
-Proof.
-  intros R Htri.
-  unfold tri_prop in Htri.
-  unfold tri_prop_elem in Htri.
-  unfold Z_prop.
 Admitted.
-(* end hide *)
+*)
