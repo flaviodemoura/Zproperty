@@ -1,7 +1,7 @@
 (** * An application: Proving Confluence of a Calculus with Explicit Substitutions *)
 
 (* begin hide *)
-Require Import ZtoConfl.
+Require Import ZtoConfl infraES.
 
 (** Context for the equation is different from the reduction
 context. The equation is not term regular. *)
@@ -91,11 +91,11 @@ Proof.
   generalize dependent Hterm.
   induction Heqc.
   - intro Hterm.
-    apply term_sub with (fv t0).
+    apply term_sub with (fv t).
     + intros x Hfv.
       unfold open.
       simpl.
-      apply term_sub with (fv t0).
+      apply term_sub with (fv t).
       * intros x' Hfv'.
         unfold open.
         apply term_equiv_lc_at in Hterm.
@@ -162,7 +162,7 @@ Qed. *)
 Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
 Proof.
   intros t u H. induction H.
-  - replace t0 with (&(& t0)) at 2.
+  - replace t with (&(& t)) at 2.
     + apply eqc_def; assumption.
     + apply bswap_idemp.
   - apply eqc_app_left; assumption. 
@@ -278,6 +278,8 @@ Proof.
    apply IHrefltrans in H''.
    apply rtrans with b; assumption.
 Qed.
+
+Require Import Morphisms.
 
 Instance eqC_equiv : Equivalence eqC.
 Proof.
@@ -462,7 +464,7 @@ Proof.
       unfold open.
       apply term_equiv_lc_at.
       apply lc_at_open_rec.
-      * auto.
+      * apply term_var.
       * apply lc_at_open_rec_leq.
         ** apply Peano.le_n_S.
            apply Peano.le_0_n.
