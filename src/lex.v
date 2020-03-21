@@ -91,11 +91,11 @@ Proof.
   generalize dependent Hterm.
   induction Heqc.
   - intro Hterm.
-    apply term_sub with (fv t).
+    apply term_sub with (fv t0).
     + intros x Hfv.
       unfold open.
       simpl.
-      apply term_sub with (fv t).
+      apply term_sub with (fv t0).
       * intros x' Hfv'.
         unfold open.
         apply term_equiv_lc_at in Hterm.
@@ -162,7 +162,7 @@ Qed. *)
 Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
 Proof.
   intros t u H. induction H.
-  - replace t with (&(& t)) at 2.
+  - replace t0 with (&(& t0)) at 2.
     + apply eqc_def; assumption.
     + apply bswap_idemp.
   - apply eqc_app_left; assumption. 
@@ -647,9 +647,51 @@ Proof.
     + apply term_app.
       * apply term_sub with x; assumption.
       * apply term_sub with x0; assumption.
-  - unfold body in H.
+  - split.
+    + apply term_sub with (fv (pterm_abs t0)).
+      * intros x Hnot.
+        apply body_to_term.
+        **  assumption.
+        **  apply body_lc_at.
+            apply H.
+      * assumption.
+    + apply term_abs with (fv (& t0 [u])).
+      intros x Hnot.
+      apply body_to_term.
+      * assumption.
+      * apply body_lc_at.
+        split.
+        **  clear x u H0 Hnot.
+            admit.
+        **  apply lc_at_weaken_ind with 0.
+            *** apply term_to_lc_at; assumption.
+            *** auto with arith.
+  - split.
+    + apply term_sub with (fv (t0 [u])).
+      * intros x Hnot.
+        apply body_to_term.
+        **  assumption.
+        **  apply body_lc_at.
+            split; assumption.
+      * assumption.
+    + apply term_sub with (fv (& t0 [v])).
+      * intros x Hnot.
+        apply body_to_term.
+        **  assumption.
+        **  apply body_lc_at.
+            split.
+            *** clear u v H0 H1 H2 x Hnot.
+                admit.
+            *** apply lc_at_weaken_ind with 0.
+                ****  apply term_equiv_lc_at; assumption.
+                **** auto with arith.
+      * apply term_sub with (fv u).
+        **  intros x Hnot.
+            apply body_to_term.
+            *** assumption.
+            *** apply body_lc_at; assumption.
+        **  assumption.
 Admitted.
-
         
 (*         unfold open; simpl. *)
 (*         apply term_abs with x. *)
