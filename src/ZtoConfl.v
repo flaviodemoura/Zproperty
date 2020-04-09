@@ -185,7 +185,7 @@ Qed.
 
     Therefore, if an expression $a$ can be reduced in two different
     ways to the expressions $b$ and $c$, then there exists an
-    expression $d$ such that both $b$ and $c$ reduces to $d$. The
+    expression $d$ such that both $b$ and $c$ reduce to $d$. The
     existential quantification is expressed by the dotted lines in the
     diagram. This notion is defined in the Coq system as follows: *)
 
@@ -195,7 +195,7 @@ Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refl
     condition for an ARS to be confluent, known as the _Z Property_:
 
     %\begin{definition} Let $(A,\to_R)$ be an abstract rewriting system
-      (ARS). The system $(A,\to_R)$ has the Z property, if there exists
+      (ARS). The system $(A,\to_R)$ has the Z property if there exists
       a map $f:A \to A$ such that the following diagram holds:
     
       \[ \xymatrix{ a \ar[r]_R & b \ar@{.>>}[dl]^R\\ f(a) \ar@{.>>}[r]_R &
@@ -205,7 +205,7 @@ The corresponding Coq definition is given as: *)
 
 Definition Z_prop {A:Type} (R: Rel A) := exists f:A -> A, forall a b, R a b -> ((refltrans R) b (f a) /\ (refltrans R) (f a) (f b)).
 
-(** Alternatively, when [f] satisfies the Z property one says that [f] is Z: *)
+(** Alternatively, when [f] satisfies the Z property, one says that [f] is Z: *)
 
 Definition f_is_Z {A:Type} (R: Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R)  b (f a) /\ (refltrans R) (f a) (f b)). 
 
@@ -218,7 +218,7 @@ Definition f_is_Z {A:Type} (R: Rel A) (f: A -> A) := forall a b, R a b -> ((refl
     has the Z property then it is confluent. In addition, we
     formalized this proof in the Coq proof assistant. In
     %\cite{zproperty}%, B. Felgenhauer et.al. formalized the Z
-    property in Isabelle/HOL. In what follows we present the theorem
+    property in Isabelle/HOL. In what follows, we present the theorem
     and its proof interleaving Coq code and the corresponding
     comments. *)
 
@@ -261,11 +261,11 @@ Proof.
        subgoals, one for each possible way of constructing $a \tto_R
        b$. *)
   
-  - intros c Hrefl2. (** In the first case, $a = b$ since we are in
+  - intros c Hrefl2. (** In the first case, $b = a$ since we are in
     the reflexive case. *)
     
     exists c; split. (** Therefore, there is no divergence and this case is
-      proved by taking [c] as [d]. *)
+      proved by taking [d] as [c]. *)
 
     + assumption. (** The goal is then the conjunction $a\tto_R c
         \land c \tto_R c$ whose first component is exactly the
@@ -402,8 +402,8 @@ Qed.
 (** An alternative proof that Z implies confluence is possible via the
     notion of semiconfluence, which is equivalent to confluence, as
     done in %\cite{zproperty}%. Our proof is also constructive, but we
-    will not explain it here due to lack of space, but as the
-    interested reader can visit the Coq file in our GitHub
+    will not explain it here due to lack of space; any
+    interested reader can find the Coq file in our GitHub
     repository. *)
 
 Lemma red_to_f {A: Type}: forall (R: Rel A) (f: A -> A), f_is_Z R f -> (forall a b: A, refltrans R a b -> refltrans R (f a) (f b)).  Proof.  intros R f H a b Hred.  unfold f_is_Z in H.  induction Hred.  - apply refl.  - apply refltrans_composition with (f b).  + apply H; assumption.  + assumption.  Qed.
@@ -427,7 +427,7 @@ Theorem Semi_equiv_Confl {A: Type}: forall R: Rel A, Confl R <-> SemiConfl R.  (
     reduction relation can be split into two parts. More precisely,
     given an ARS $(A,\to)$, one must be able to decompose the relation
     $\to$ into two parts, say $\to_1$ and $\to_2$ such that $\to =
-    \to_1\cup \to_2$. The disjoint union can be inductively defined in
+    \to_1\cup \to_2$. The union can be inductively defined in
     Coq as follows: *)
 
 Inductive union {A} (red1 red2: Rel A) : Rel A := | union_left: forall a b, red1 a b -> union red1 red2 a b | union_right: forall a b, red2 a b -> union red1 red2 a b.
@@ -445,13 +445,13 @@ hide
 *) Lemma union_or {A}: forall (r1 r2: Rel A) (a b: A), (r1 !_! r2) a b <-> (r1 a b) \/ (r2 a b).  Proof.  intros r1 r2 a b; split.  - intro Hunion.  inversion Hunion; subst.  + left; assumption.  + right; assumption.  - intro Hunion.  inversion Hunion.  + apply union_left; assumption.  + apply union_right; assumption.  Qed.  (* end
 hide *)
 
-(** The compositional Z is defined in terms of a weaker property:
+(** The Compositional Z is defined in terms of a weaker property:
 
-    %\begin{definition} Let $(A,\to)$ be an ARS and $\to_x$ another
+    %\begin{definition} Let $(A,\to)$ be an ARS and $\to_x$ a
      relation on $A$. A mapping $f$ satisfies the {\it weak Z
      property} for $\to$ by $\to_x$ if $a\to b$ implies $b \tto_x
      f(a)$ and $f(a) \tto_x f(b)$. Therefore, a mapping $f$ satisfies
-     the Z property for $\to$, if it satisfies the weak Z property by
+     the Z property for $\to$ if it satisfies the weak Z property by
      itself.  \end{definition}%
 
     When $f$ satisfies the weak Z property, we also say that $f$ is

@@ -142,7 +142,7 @@ The reflexive transitive closure of a relation is used to define
 
     Therefore, if an expression $a$ can be reduced in two different
     ways to the expressions $b$ and $c$, then there exists an
-    expression $d$ such that both $b$ and $c$ reduces to $d$. The
+    expression $d$ such that both $b$ and $c$ reduce to $d$. The
     existential quantification is expressed by the dotted lines in the
     diagram. This notion is defined in the Coq system as follows: \begin{coqdoccode}
 \coqdocemptyline
@@ -155,7 +155,7 @@ In \cite{ZPropertyDraft}, V. van Oostrom gives a suficient
 
 
     \begin{definition} Let $(A,\to_R)$ be an abstract rewriting system
-      (ARS). The system $(A,\to_R)$ has the Z property, if there exists
+      (ARS). The system $(A,\to_R)$ has the Z property if there exists
       a map $f:A \to A$ such that the following diagram holds:
     
       \[ \xymatrix{ a \ar[r]_R & b \ar@{.>>}[dl]^R\\ f(a) \ar@{.>>}[r]_R &
@@ -168,7 +168,7 @@ The corresponding Coq definition is given as: \begin{coqdoccode}
 \coqdockw{Definition} \coqdef{ZtoConfl.Z prop}{Z\_prop}{\coqdocdefinition{Z\_prop}} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R}: \coqref{ZtoConfl.Rel}{\coqdocdefinition{Rel}} \coqdocvariable{A}) := \coqexternalref{::type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{\ensuremath{\exists}}} \coqdocvar{f}:\coqdocvariable{A} \coqexternalref{::type scope:x '->' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdocvariable{A}\coqexternalref{::type scope:'exists' x '..' x ',' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{,}} \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvariable{R} \coqdocvariable{a} \coqdocvariable{b} \coqexternalref{::type scope:x '->' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{::type scope:x '->' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{(}}(\coqref{ZtoConfl.refltrans}{\coqdocinductive{refltrans}} \coqdocvariable{R}) \coqdocvariable{b} (\coqdocvariable{f} \coqdocvariable{a}) \coqexternalref{::type scope:x '/x5C' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{\ensuremath{\land}}} (\coqref{ZtoConfl.refltrans}{\coqdocinductive{refltrans}} \coqdocvariable{R}) (\coqdocvariable{f} \coqdocvariable{a}) (\coqdocvariable{f} \coqdocvariable{b})\coqexternalref{::type scope:x '->' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{)}}.\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
-Alternatively, when \coqdocvar{f} satisfies the Z property one says that \coqdocvar{f} is Z: \begin{coqdoccode}
+Alternatively, when \coqdocvar{f} satisfies the Z property\ one says that \coqdocvar{f} is Z: \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Definition} \coqdef{ZtoConfl.f is Z}{f\_is\_Z}{\coqdocdefinition{f\_is\_Z}} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R}: \coqref{ZtoConfl.Rel}{\coqdocdefinition{Rel}} \coqdocvariable{A}) (\coqdocvar{f}: \coqdocvariable{A} \coqexternalref{::type scope:x '->' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqdocvariable{A}) := \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvariable{R} \coqdocvariable{a} \coqdocvariable{b} \coqexternalref{::type scope:x '->' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{\ensuremath{\rightarrow}}} \coqexternalref{::type scope:x '->' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{(}}(\coqref{ZtoConfl.refltrans}{\coqdocinductive{refltrans}} \coqdocvariable{R})  \coqdocvariable{b} (\coqdocvariable{f} \coqdocvariable{a}) \coqexternalref{::type scope:x '/x5C' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{\ensuremath{\land}}} (\coqref{ZtoConfl.refltrans}{\coqdocinductive{refltrans}} \coqdocvariable{R}) (\coqdocvariable{f} \coqdocvariable{a}) (\coqdocvariable{f} \coqdocvariable{b})\coqexternalref{::type scope:x '->' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{)}}.\coqdoceol
@@ -183,7 +183,7 @@ The first contribution of this work is a constructive proof of the
     has the Z property then it is confluent. In addition, we
     formalized this proof in the Coq proof assistant. In
     \cite{zproperty}, B. Felgenhauer et.al. formalized the Z
-    property in Isabelle/HOL. In what follows we present the theorem
+    property in Isabelle/HOL. In what follows, we present the theorem
     and its proof interleaving Coq code and the corresponding
     comments. \begin{coqdoccode}
 \coqdocemptyline
@@ -245,13 +245,13 @@ The induction on \coqdocvar{Hrefl1} corresponds to
 \coqdocemptyline
 \coqdocindent{1.00em}
 - \coqdoctac{intros} \coqdocvar{c} \coqdocvar{Hrefl2}. \end{coqdoccode}
-In the first case, $a = b$ since we are in
+In the first case, $b = a$ since we are in
     the reflexive case. \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 \coqdoctac{\ensuremath{\exists}} \coqdocvar{c}; \coqdoctac{split}. \end{coqdoccode}
 Therefore, there is no divergence and this case is
-      proved by taking \coqdocvar{c} as \coqdocvar{d}. \begin{coqdoccode}
+      proved by taking \coqdocvar{d} as \coqdocvar{c}. \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 + \coqdoctac{assumption}. \end{coqdoccode}
@@ -433,8 +433,8 @@ The second goal, i.e. the inductive
 An alternative proof that Z implies confluence is possible via the
     notion of semiconfluence, which is equivalent to confluence, as
     done in \cite{zproperty}. Our proof is also constructive, but we
-    will not explain it here due to lack of space, but as the
-    interested reader can visit the Coq file in our GitHub
+    will not explain it here due to lack of space; any
+    interested reader can find the Coq file in our GitHub
     repository. \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -461,7 +461,7 @@ An alternative proof that Z implies confluence is possible via the
     reduction relation can be split into two parts. More precisely,
     given an ARS $(A,\to)$, one must be able to decompose the relation
     $\to$ into two parts, say $\to_1$ and $\to_2$ such that $\to =
-    \to_1\cup \to_2$. The disjoint union can be inductively defined in
+    \to_1\cup \to_2$. The union can be inductively defined in
     Coq as follows: \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -479,14 +479,14 @@ $\lambda\mu$-calculus\cite{Parigot92}, etc.  \begin{coqdoccode}
 \coqdocemptyline
  \coqdockw{Lemma} \coqdef{ZtoConfl.union or}{union\_or}{\coqdoclemma{union\_or}} \{\coqdocvar{A}\}: \coqdockw{\ensuremath{\forall}} (\coqdocvar{r1} \coqdocvar{r2}: \coqref{ZtoConfl.Rel}{\coqdocdefinition{Rel}} \coqdocvariable{A}) (\coqdocvar{a} \coqdocvar{b}: \coqdocvariable{A}), (\coqdocvariable{r1} \coqref{ZtoConfl.:::x '! !' x}{\coqdocnotation{!}}\coqref{ZtoConfl.:::x '! !' x}{\coqdocnotation{\_}}\coqref{ZtoConfl.:::x '! !' x}{\coqdocnotation{!}} \coqdocvariable{r2}) \coqdocvariable{a} \coqdocvariable{b} \coqexternalref{::type scope:x '<->' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{\ensuremath{\leftrightarrow}}} \coqexternalref{::type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{(}}\coqdocvariable{r1} \coqdocvariable{a} \coqdocvariable{b}\coqexternalref{::type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{)}} \coqexternalref{::type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{\ensuremath{\lor}}} \coqexternalref{::type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{(}}\coqdocvariable{r2} \coqdocvariable{a} \coqdocvariable{b}\coqexternalref{::type scope:x 'x5C/' x}{http://coq.inria.fr/distrib/V8.11.0/stdlib//Coq.Init.Logic}{\coqdocnotation{)}}. \coqdockw{Proof}. \coqdoctac{intros} \coqdocvar{r1} \coqdocvar{r2} \coqdocvar{a} \coqdocvar{b}; \coqdoctac{split}. - \coqdoctac{intro} \coqdocvar{Hunion}. \coqdoctac{inversion} \coqdocvar{Hunion}; \coqdoctac{subst}. + \coqdoctac{left}; \coqdoctac{assumption}. + \coqdoctac{right}; \coqdoctac{assumption}. - \coqdoctac{intro} \coqdocvar{Hunion}. \coqdoctac{inversion} \coqdocvar{Hunion}. + \coqdoctac{apply} \coqref{ZtoConfl.union left}{\coqdocconstructor{union\_left}}; \coqdoctac{assumption}. + \coqdoctac{apply} \coqref{ZtoConfl.union right}{\coqdocconstructor{union\_right}}; \coqdoctac{assumption}. \coqdockw{Qed}. \coqdocemptyline
 \end{coqdoccode}
-The compositional Z is defined in terms of a weaker property:
+The Compositional Z is defined in terms of a weaker property:
 
 
-    \begin{definition} Let $(A,\to)$ be an ARS and $\to_x$ another
+    \begin{definition} Let $(A,\to)$ be an ARS and $\to_x$ a 
      relation on $A$. A mapping $f$ satisfies the {\it weak Z
      property} for $\to$ by $\to_x$ if $a\to b$ implies $b \tto_x
      f(a)$ and $f(a) \tto_x f(b)$. Therefore, a mapping $f$ satisfies
-     the Z property for $\to$, if it satisfies the weak Z property by
+     the Z property for $\to$ if it satisfies the weak Z property by
      itself.  \end{definition}
 
 
