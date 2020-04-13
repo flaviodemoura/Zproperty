@@ -14,7 +14,7 @@
 
 \newcommand{\tto}{\twoheadrightarrow}
 
-\def\lastname{de Moura}
+\def\lastname{de Moura {\it et. al.}}
 
 \begin{document}
 \begin{frontmatter}
@@ -54,8 +54,8 @@
 
 
 Confluence is an important and undecidable property concerning the
-determinism of the computational process. In this sense one says that
-a program is confluent if every two ways of evaluating it result in
+determinism of the computational process. In this sense, one says that
+a program is confluent if every two ways of evaluating it, result in
 the very same answer. In the particular case of Abstract Rewriting
 Systems (ARS), which are the focus of this work, confluence can be
 beautifully expressed by diagrams as we will see in the next section.
@@ -70,11 +70,10 @@ The contributions of this work are as follows:
   way, the annotations are done directly in the Coq files using the
   coqdoc annotation style. We believe that this approach is
   interesting for those that are not familiar with the Coq proof
-  assistant because the English explanation followed by the
-  corresponding Coq code gives a good idea on how they relate to each
-  other. This discipline also forces a better organization of the
-  formalization and of the proofs so that the explanation in English
-  is comprehensible.
+  assistant because the Coq code followed by English explanations
+  gives a good idea on how they relate to each other. This discipline
+  also forces a better organization of the formalization and of the
+  proofs so that the explanation in English is comprehensible.
 \item We formalize an extension of the Z property, known as
   compositional Z property, as presented in
   \cite{Nakazawa-Fujita2016}.
@@ -87,23 +86,29 @@ The contributions of this work are as follows:
 
 \section{Conclusion}
 
+In this work we presented a constructive proof that the Z property
+implies confluence, an important property for rewriting systems. In
+addition, we formally proved this result in the Coq proof
+assistant. The corresponding files are available in our GitHub
+repository: \url{https://github.com/flaviodemoura/Zproperty}.
 
-Our work provides an intuitionist framework that can be used to prove 
-confluence of innumerous ARSs in a rigorously tested proof management 
-system, the Coq proof assistent. As a motivation to use the relation 
-between the Z property and confluence, we present a type of $\lambda$-calculus 
-with explicit substitutions \cite{kes09}. Although their work relies on the 
-law of the excluded middle, the proof can be written following intuitionist rules only.
+The Z property was presented by V. van Oostrom as a sufficient
+condition for an ARS to be confluent~\cite{ZPropertyDraft}, and since
+then has been used to prove confluence in different contexts such as
+the $\lambda$-calculus with $\beta\eta$-reduction, extensions of the
+$\lambda$-calculus with explicit substitutions and the
+$\lambda\mu$-calculus. The Coq proofs of the main results are
+commented line by line which serve both as an informal presentation of
+the proofs (i.e. proofs explained in natural language) and as its
+formal counterpart. Moreover, we formalize an extension of the Z
+property, known as compositional Z property, as presented in
+\cite{Nakazawa-Fujita2016}
 
-The main advantage of this type of work is its flexibility. When trying to prove 
-confluence of a computational process or processes, instead of working on a 
-case-by-case basis, one can (when applicable) prove that it has the Z property.
-This way, proofs of confluence of similar ARSs can be adapted with much more ease, 
-largely skipping the repetitive process of proving the necessary conditions the ARS 
-has to obey for it to be confluent.
-
-Furthermore, we hope the work shown here may inspire future studies of the confluence 
-of diverse ARSs.
+As future work, this formalization will be used to prove the
+confluence property of a calculus with explicit substitution based on
+the $\lambda_{ex}$-calculus (cf. ~\cite{kes09}). In addition, we hope
+that our formalization can be used as a framework for proving
+confluence of others rewriting systems.
 
 \bibliographystyle{plain}
 \bibliography{references.bib}
