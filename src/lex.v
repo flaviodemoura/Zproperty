@@ -91,11 +91,11 @@ Proof.
   generalize dependent Hterm.
   induction Heqc.
   - intro Hterm.
-    apply term_sub with (fv t0).
+    apply term_sub with (fv t).
     + intros x Hfv.
       unfold open.
       simpl.
-      apply term_sub with (fv t0).
+      apply term_sub with (fv t).
       * intros x' Hfv'.
         unfold open.
         apply term_equiv_lc_at in Hterm.
@@ -162,7 +162,7 @@ Qed. *)
 Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
 Proof.
   intros t u H. induction H.
-  - replace t0 with (&(& t0)) at 2.
+  - replace t with (&(& t)) at 2.
     + apply eqc_def; assumption.
     + apply bswap_idemp.
   - apply eqc_app_left; assumption. 
@@ -618,14 +618,14 @@ Proof.
   intros t u Hsys.
   induction Hsys.
   - split.
-    + apply term_sub with (fv t0).
+    + apply term_sub with (fv t).
       * intros x Hfv.
         unfold open; simpl.
         apply term_var.
       * assumption.
     + assumption.
   - split.
-    + apply term_sub with (fv t0).
+    + apply term_sub with (fv t).
       * intros x Hfv.
         unfold open; simpl.
         rewrite open_rec_term; assumption.
@@ -648,14 +648,14 @@ Proof.
       * apply term_sub with x; assumption.
       * apply term_sub with x0; assumption.
   - split.
-    + apply term_sub with (fv (pterm_abs t0)).
+    + apply term_sub with (fv (pterm_abs t)).
       * intros x Hnot.
         apply body_to_term.
         **  assumption.
         **  apply body_lc_at.
             apply H.
       * assumption.
-    + apply term_abs with (fv (& t0 [u])).
+    + apply term_abs with (fv (& t[u])).
       intros x Hnot.
       apply body_to_term.
       * assumption.
@@ -669,14 +669,14 @@ Proof.
             *** apply term_to_lc_at; assumption.
             *** auto with arith.
   - split.
-    + apply term_sub with (fv (t0 [u])).
+    + apply term_sub with (fv (t[u])).
       * intros x Hnot.
         apply body_to_term.
         **  assumption.
         **  apply body_lc_at.
             split; assumption.
       * assumption.
-    + apply term_sub with (fv (& t0 [v])).
+    + apply term_sub with (fv (& t[v])).
       * intros x Hnot.
         apply body_to_term.
         **  assumption.
