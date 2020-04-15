@@ -504,12 +504,33 @@ Admitted. *)
 
 Lemma open_close_redex: forall t t0 u x y, t^x = pterm_app (pterm_abs t0) u -> t^y = pterm_app ((close (pterm_abs t0) x)^y) (close u x)^y.
 Proof.
-  Admitted.
-  
+Admitted.
+
+(** avaliar *)
+Lemma red_out:  forall t t' x n, rule_b ({n ~> pterm_fvar x} t) ({n ~> pterm_fvar x} t') -> rule_b t t'.
+Proof.
+  induction t.
+  - intros t' x n0 H.
+    simpl in H.
+    destruct (n0 === n); subst.
+    + inversion H.
+    + inversion H.
+  - intros t' x n H.
+    simpl in H; inversion H.
+  - admit.
+  - intros t' x n H.
+    simpl in H.
+    Admitted.
+
+(** Focar nesta prova *)
 Lemma red_rename_b: red_rename rule_b.
 Proof.
   unfold red_rename.
   intros x t t' y Hfv Hfv' Hb.
+  unfold open in *.
+  apply rule_b_compat_open.
+
+
   inversion Hb; subst.
   symmetry in H.
   assert (Hy : t^y = pterm_app ((close (pterm_abs t0) x)^y) (close u x)^y).
@@ -556,6 +577,8 @@ Qed.
 
 Lemma red_rename_b_ctx: red_rename b_ctx.
 Proof.
+  unfold red_rename.
+  intros x t t' y Ht Ht' HB.
 Admitted.
 (* Lemma eqC_preserves_redex: forall t1 t2 u, pterm_app (pterm_abs t2) u =e t1 -> exists t v, t1 = pterm_app (pterm_abs t) v.
 Proof.
