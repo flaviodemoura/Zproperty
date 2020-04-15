@@ -662,7 +662,9 @@ Proof.
       * apply body_lc_at.
         split.
         **  clear x u H0 Hnot.
-            admit.
+            apply lc_at_bswap_rec.
+            *** auto.
+            *** assumption.
         **  apply lc_at_weaken_ind with 0.
             *** apply term_to_lc_at; assumption.
             *** auto with arith.
@@ -681,7 +683,9 @@ Proof.
         **  apply body_lc_at.
             split.
             *** clear u v H0 H1 H2 x Hnot.
-                admit.
+                apply lc_at_bswap_rec.
+                ****  auto.
+                ****  assumption.
             *** apply lc_at_weaken_ind with 0.
                 ****  apply term_equiv_lc_at; assumption.
                 **** auto with arith.
@@ -691,69 +695,8 @@ Proof.
             *** assumption.
             *** apply body_lc_at; assumption.
         **  assumption.
-Admitted.
-        
-(*         unfold open; simpl. *)
-(*         apply term_abs with x. *)
-(*         intros x'' Hfv'. *)
-(*         unfold open. *)
-(*         apply term_equiv_lc_at. *)
-(*         apply lc_at_open_rec. *)
-(*         ** apply term_var. *)
-(*         ** apply H in Hfv. *)
-(*            unfold open in Hfv. *)
-(*            apply term_equiv_lc_at in Hfv. *)
-(*            apply lc_at_weaken_ind with 0. *)
-(*            admit. *)
-(*       * assumption. *)
-(*     + admit. *)
-(*   - split. *)
-(*     + apply term_sub with (fv t0). *)
-(*       * intros x Hfv. *)
-(*         unfold open; simpl. *)
-(*         apply term_sub with (fv t0). *)
-(*         ** intros x' Hfv'. *)
-(*            unfold open. *)
-(*            apply term_equiv_lc_at. *)
-(*            apply lc_at_open_rec. *)
-(*            *** apply term_var. *)
-(*            *** apply lc_at_open_rec. *)
-(*                **** apply term_var. *)
-(*                **** assumption. *)
-(*         ** apply term_equiv_lc_at. *)
-(*            apply lc_at_open_rec. *)
-(*            *** apply term_var. *)
-(*            *** assumption. *)
-(*       * assumption. *)
-(*     + apply term_sub with (fv t0). *)
-(*       * intros x Hfv. *)
-(*         unfold open; simpl. *)
-(*         apply term_sub with (fv t0). *)
-(*         ** intros x' Hfv'. *)
-(*            unfold open. *)
-(*            apply term_equiv_lc_at. *)
-(*            apply lc_at_open_rec. *)
-(*            *** apply term_var. *)
-(*            *** apply lc_at_open_rec. *)
-(*                **** apply term_var. *)
-(*                **** apply lc_at_bswap. *)
-(*                     { *)
-(*                       auto.                       *)
-(*                     } *)
-(*                     { *)
-(*                       assumption. *)
-(*                     } *)
-(*         ** rewrite open_rec_term; assumption. *)
-(*       * apply term_sub with (fv u). *)
-(*         ** intros x Hfv. *)
-(*            unfold open. *)
-(*            apply term_equiv_lc_at. *)
-(*            apply lc_at_open_rec. *)
-(*            *** apply term_var. *)
-(*            *** assumption. *)
-(*         ** assumption. *)
-(* Admitted. *)
-    
+Qed.
+
 Definition x_ctx t u := ES_contextual_closure sys_x t u. 
 Notation "t ->_x u" := (x_ctx t u) (at level 59, left associativity).
 
