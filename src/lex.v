@@ -91,11 +91,11 @@ Proof.
   generalize dependent Hterm.
   induction Heqc.
   - intro Hterm.
-    apply term_sub with (fv t).
+    apply term_sub with (fv t0).
     + intros x Hfv.
       unfold open.
       simpl.
-      apply term_sub with (fv t).
+      apply term_sub with (fv t0).
       * intros x' Hfv'.
         unfold open.
         apply term_equiv_lc_at in Hterm.
@@ -162,7 +162,7 @@ Qed. *)
 Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
 Proof.
   intros t u H. induction H.
-  - replace t with (&(& t)) at 2.
+  - replace t0 with (&(& t0)) at 2.
     + apply eqc_def; assumption.
     + apply bswap_idemp.
   - apply eqc_app_left; assumption. 
@@ -509,7 +509,7 @@ Admitted.
 (** avaliar *)
 Lemma red_out:  forall t t' x n, rule_b ({n ~> pterm_fvar x} t) ({n ~> pterm_fvar x} t') -> rule_b t t'.
 Proof.
-  induction t.
+  induction t0.
   - intros t' x n0 H.
     simpl in H.
     destruct (n0 === n); subst.
@@ -537,7 +537,7 @@ Proof.
   {
     apply open_close_redex; assumption.
   }
-  rewrite Hy.
+
   Admitted.
 (*   rewrite open_close_term. *)
 (*   (* escrever o lema open_close_redex *) *)
@@ -641,14 +641,14 @@ Proof.
   intros t u Hsys.
   induction Hsys.
   - split.
-    + apply term_sub with (fv t).
+    + apply term_sub with (fv t0).
       * intros x Hfv.
         unfold open; simpl.
         apply term_var.
       * assumption.
     + assumption.
   - split.
-    + apply term_sub with (fv t).
+    + apply term_sub with (fv t0).
       * intros x Hfv.
         unfold open; simpl.
         rewrite open_rec_term; assumption.
@@ -671,14 +671,14 @@ Proof.
       * apply term_sub with x; assumption.
       * apply term_sub with x0; assumption.
   - split.
-    + apply term_sub with (fv (pterm_abs t)).
+    + apply term_sub with (fv (pterm_abs t0)).
       * intros x Hnot.
         apply body_to_term.
         **  assumption.
         **  apply body_lc_at.
             apply H.
       * assumption.
-    + apply term_abs with (fv (& t[u])).
+    + apply term_abs with (fv (& t0[u])).
       intros x Hnot.
       apply body_to_term.
       * assumption.
@@ -692,14 +692,14 @@ Proof.
             *** apply term_to_lc_at; assumption.
             *** auto with arith.
   - split.
-    + apply term_sub with (fv (t[u])).
+    + apply term_sub with (fv (t0[u])).
       * intros x Hnot.
         apply body_to_term.
         **  assumption.
         **  apply body_lc_at.
             split; assumption.
       * assumption.
-    + apply term_sub with (fv (& t[v])).
+    + apply term_sub with (fv (& t0[v])).
       * intros x Hnot.
         apply body_to_term.
         **  assumption.
@@ -723,6 +723,14 @@ Qed.
 Definition x_ctx t u := ES_contextual_closure sys_x t u. 
 Notation "t ->_x u" := (x_ctx t u) (at level 59, left associativity).
 
+(** avaliar *)
+
+Lemma red_rename_x_ctx: red_rename x_ctx.
+Proof.
+  unfold red_rename.
+  intros x t t' y Ht Ht' HX.
+Admitted.
+
 Corollary term_regular_x_ctx : term_regular x_ctx.
 Proof.
   apply term_regular_ctx.
@@ -734,6 +742,19 @@ Inductive lx: Rel pterm :=
 | x_ctx_rule : forall t u, t ->_x u -> lx t u.
 Notation "t ->_Bx u" := (lx t u) (at level 59, left associativity).
 Notation "t ->_lx* u" := ((refltrans lx) t u) (at level 59, left associativity).
+
+Lemma red_rename_lx: red_rename lx.
+Proof.
+  unfold red_rename.
+  intros x t t' y Ht Ht' Hlx.
+  inversion Hlx; subst.
+  - apply b_ctx_rule.
+    generalize x t t' y Ht Ht' H.
+    apply red_rename_b_ctx.
+  - apply x_ctx_rule.
+    generalize x t t' y Ht Ht' H.
+    apply red_rename_x_ctx.
+Qed.
 
 Lemma Bx_app_left: forall t1 t2 t3, term t3 -> t1 ->_Bx t2 -> pterm_app t1 t3 ->_Bx pterm_app t2 t3.
 Proof.
@@ -771,8 +792,12 @@ Proof.
     intros x' HL.
     generalize H.
     apply red_rename_b_ctx; assumption.
-  - admit.
-Admitted.
+  - apply x_ctx_rule.
+    apply ES_abs_in with (fv t1 \u fv t2).
+    intros.
+    generalize H.
+    apply red_rename_x_ctx; assumption.
+Qed.
 
 Lemma Bx_sub: forall t1 t2 t3 L, (forall x, x \notin L -> t1^x ->_Bx t2^x) -> term t3 -> pterm_sub t1 t3 ->_Bx pterm_sub t2 t3.
 Proof.
@@ -785,17 +810,21 @@ Proof.
   apply notin_union in Fr.
   destruct Fr as [Fr Fvt1].
   apply HBx in Fr.
-  clear Fvt1 Fvt2 Fvt3.
+  clear Fvt3.
   inversion Fr; subst.
   - apply b_ctx_rule.
     apply ES_sub with L.
-    + admit.
+    + intros x' Hnot.
+      generalize H.
+      apply red_rename_b_ctx; assumption.
     + assumption.
   - apply x_ctx_rule.
     apply ES_sub with L.
-    + admit.
+    + intros x' Hnot.
+      generalize H.
+      apply red_rename_x_ctx; assumption.
     + assumption.
-Admitted.
+Qed.
 
 Lemma Bx_sub_in: forall t1 t2 t3, body t1 -> t2 ->_Bx t3 -> pterm_sub t1 t2 ->_Bx pterm_sub t1 t3.
 Proof.
@@ -837,9 +866,6 @@ Proof.
   destruct Fr as [Fr Fvt1].
   apply Hlx in Fr.
   clear Hlx Fvt1 Fvt2.
-  induction Fr.
-  - admit.
-  - assumption.
 Admitted.
 
 Lemma lx_star_sub: forall t1 t2 t3 L, (forall x, x \notin L -> t1^x ->_lx* t2^x) -> term t3 -> pterm_sub t1 t3 ->_lx* pterm_sub t2 t3.
@@ -854,9 +880,6 @@ Proof.
   destruct Fr as [Fr Fvt1].
   apply Hlx in Fr.
   clear Fvt1 Fvt2 Fvt3.
-  induction Fr.
-  - admit.
-  - assumption.
 Admitted.
 
 Lemma lx_star_sub_in: forall t1 t2 t3, body t1 -> t2 ->_lx* t3 -> pterm_sub t1 t2 ->_lx* pterm_sub t1 t3.
@@ -898,7 +921,9 @@ Proof.
     generalize dependent x'.
     generalize dependent u'.
     induction HBx.
-    + admit.
+    + intros.
+      apply b_ctx_rule.
+      admit.
     + admit.
   - Admitted.
 
@@ -1154,8 +1179,12 @@ Proof.
         ** unfold x_ctx.
            apply ES_redex.
            apply reg_rule_var.
-           Admitted.
-  (*       ** reflexivity. *)
+           assumption.
+        ** reflexivity.
+    + intros Hbody IH.
+      unfold open.
+      simpl.
+      Admitted.
   (*   + intros Hbody IH. *)
   (*     unfold open. *)
   (*     simpl. *)
