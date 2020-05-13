@@ -1,6 +1,7 @@
 (** * An application: Proving Confluence of a Calculus with Explicit Substitutions *)
 
 (* begin hide *)
+
 Require Import ZtoConfl infraES.
 
 (** Context for the equation is different from the reduction
@@ -1562,7 +1563,36 @@ Qed.
   
 Lemma trans_ex_to_lex: forall t u, t ->_ex+ u -> t ->_lex+ u.
 Proof.
-Admitted.
+  intros t u Hex.
+  induction Hex.
+  - apply singl.
+    unfold ex in H.
+    unfold lex.
+    unfold red_ctx_mod_eqC in *.
+    destruct H.
+    destruct H.
+    exists x.
+    exists x0.
+    split.
+    + apply H.
+    + split.
+      * apply x_ctx_rule; apply H.
+      * apply H.
+  - apply transit with b.
+    + unfold ex in H.
+      unfold lex.
+      unfold red_ctx_mod_eqC in *.
+      destruct H.
+      destruct H.
+      exists x.
+      exists x0.
+      split.
+      * apply H.
+      * split.
+        **  apply x_ctx_rule; apply H.
+        **  apply H.
+    + assumption.
+Qed.
 
 Definition refltrans_lex t u := refltrans lex t u.
 Notation "t ->_lex* u" := (refltrans_lex t u) (at level 59, left associativity).

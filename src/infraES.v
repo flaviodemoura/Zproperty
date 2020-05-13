@@ -1,5 +1,3 @@
-(** * An application: Proving Confluence of a Calculus with Explicit Substitutions *)
-
 Require Import ZtoConfl.
 
 Definition var := nat.
@@ -1277,4 +1275,3 @@ Proof.
         apply body_to_term; assumption.
       * apply IHHcc.
 Qed.
-

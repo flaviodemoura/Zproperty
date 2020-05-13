@@ -73,7 +73,8 @@ Proof.
     }
 Admitted. *)
   
-Lemma sd_open_rec:  forall t x i, sd ({i ~> x} t) = {i ~> x} (sd t).
+(* Falso: tome i = 0, t = pterm_bvar 0 e x = pterm_sub x1 x2*)
+(* Lemma sd_open_rec:  forall t x i, sd ({i ~> x} t) = {i ~> x} (sd t).
 Proof.
   intro t; induction t.
   - admit.
@@ -90,7 +91,7 @@ Proof.
     +
   -
   -
-Admitted. 
+Admitted. *)
   
 Lemma sd_open:  forall x t, sd (t ^ x) = sd t ^ x.
 Proof.
@@ -120,16 +121,13 @@ Proof.
            rewrite IHt2; reflexivity. 
       * simpl.
         rewrite IHt2; reflexivity. 
-      *
-      *
-      *
-      fold sd.
-      simpl.
-      reflexivity.
-    +
-    +
+      * admit.
+      * admit.
+      * admit.
+    + admit.
+    + admit.
       
-    generalize dependent t1.
+(*    generalize dependent t1.
     intro t1. case t1.
     + intro n; case n. 
       * intro IH.
@@ -160,11 +158,23 @@ Proof.
     + admit.
     + admit.
   - intros x. simpl.
-    admit. 
+    admit. *)
 Admitted.
     
 Lemma sd_term: forall t, term t -> term (sd t).
 Proof.
+  intros.
+  induction H.
+  - apply term_var.
+  - simpl.
+    induction (sd t1).
+    + inversion IHterm1.
+    + apply term_app; assumption.
+    + apply term_app; assumption.
+    + admit.
+    + apply term_app; assumption.
+  - admit.
+  - admit.
   Admitted.
   (* intros t Hterm. *)
   (* induction Hterm.   *)
@@ -181,7 +191,15 @@ Proof.
 
 Corollary sd_body: forall t, body t -> body (sd t).
 Proof.
-Admitted. 
+  intros t Hbody.
+  unfold body in *.
+  destruct Hbody as [L Hbody].
+  exists L.
+  intros x Hnot.
+  apply Hbody in Hnot.
+  apply sd_term in Hnot.
+  rewrite sd_open in Hnot; assumption.
+Qed.
 
 Lemma sd_app_lx: forall t u, pterm_app (sd t) (sd u) ->_lx* sd(pterm_app t u). 
 Proof.
@@ -189,14 +207,10 @@ Admitted.
 
 Lemma sd_app_lex: forall t u, pterm_app (sd t) (sd u) ->_lex* sd(pterm_app t u). 
 Proof.
-  intro t; induction t.
-  - intro u; simpl.
-    apply refl.
-  - intro u; simpl.
-    apply refl.
-  - intro u.
-Admitted.
- 
+  intros t u.
+  apply refltrans_lx_to_lex.
+  apply sd_app_lx.
+Qed.
 
 (* Lemma lex_refltrans_app: forall t u t' u', t ->_lex* t' -> u ->_lex* u' -> pterm_app t u  ->_lex* pterm_app t' u'.
 Proof.
@@ -260,16 +274,13 @@ Proof.
     rewrite sd_open in Hfv.
     apply lx_star_abs with (fv t1).
     intros x Hfv'.
-    + assert (H3: t1 = sd t1).
-      {
-        admit.
-      }
-      rewrite <- H3.
-      apply refl.
-    + subst.
-      clear IHHfv.
+    assert (H3: t1 = sd t1).
+    {
       admit.
-    - admit.
+    }
+    rewrite <- H3.
+    apply refl.
+  - admit.
 Admitted.
   
 (*Lemma to_sd: forall t, term t -> t ->_lex* (sd t).
