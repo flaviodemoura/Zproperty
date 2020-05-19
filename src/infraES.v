@@ -189,6 +189,52 @@ Fixpoint close_rec  (k : nat) (x : var) (t : pterm) : pterm :=
 
 Definition close t x := close_rec 0 x t.
 
+(** Implicit substitution for free names *)
+Fixpoint m_sb (z : var) (u : pterm) (t : pterm) : pterm :=
+  match t with
+  | pterm_bvar i    => pterm_bvar i
+  | pterm_fvar x    => if x == z then u else (pterm_fvar x)
+  | pterm_abs t1    => pterm_abs (m_sb z u t1)
+  | pterm_app t1 t2 => pterm_app (m_sb z u t1) (m_sb z u t2)
+  | pterm_sub t1 t2 => pterm_sub (m_sb z u t1) (m_sb z u t2)
+  end.
+Notation "[ z ~> u ] t" := (m_sb z u t) (at level 62).
+
+(** Substitution for a fresh name is identity. *)
+Lemma subst_fresh : forall x t u,   x \notin fv t ->  [x ~> u] t = t.
+Proof.
+  intros x t.
+  generalize dependent x.
+  induction t.
+  - intros x u Hfv.
+    reflexivity.
+  - intros x u Hfv.
+    simpl.
+    destruct (v == x); subst.
+    + simpl in *.
+      admit.
+    + reflexivity.
+  - intros x u Hfv.
+    Admitted.
+
+Lemma m_sb_intro: forall x t u, [x ~> u] (t ^ x)  = t ^^ u.
+Proof.
+  intros x t.
+  generalize dependent x.
+  induction t.
+  - intros x u.
+    case n.
+    + simpl.
+      destruct (x == x).
+      * reflexivity.
+      * apply False_ind.
+        apply n0.
+        reflexivity.
+    + intros n0.
+      unfold open.
+      reflexivity.
+  - Admitted.
+  
 (** ES terms are expressions without dangling deBruijn indexes. *)
 
 Inductive term : pterm -> Prop :=
@@ -884,7 +930,7 @@ Definition term_regular (R : Rel pterm) :=
 Definition red_rename (R : Rel pterm) :=
   forall x t t' y,
     x \notin (fv t) ->
-    x \notin (fv t') ->
+    y \notin (fv t') ->
   R (t ^ x) (t' ^ x) -> 
   R (t ^ y) (t' ^ y).
 
