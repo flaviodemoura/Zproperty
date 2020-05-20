@@ -217,7 +217,7 @@ Proof.
   - intros x u Hfv.
     Admitted.
 
-Lemma m_sb_intro: forall x t u, [x ~> u] (t ^ x)  = t ^^ u.
+Lemma m_sb_intro: forall x t u, x \notin (fv t) -> [x ~> u] (t ^ x)  = t ^^ u.
 Proof.
   intros x t.
   generalize dependent x.
@@ -927,10 +927,11 @@ Qed.
 Definition term_regular (R : Rel pterm) :=
   forall t t', R t t' -> term t /\ term t'.
 
+(** Check if y \notin (fv t') is necessary. *)
 Definition red_rename (R : Rel pterm) :=
   forall x t t' y,
     x \notin (fv t) ->
-    y \notin (fv t') ->
+    x \notin (fv t') ->
   R (t ^ x) (t' ^ x) -> 
   R (t ^ y) (t' ^ y).
 

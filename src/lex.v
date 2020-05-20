@@ -92,11 +92,11 @@ Proof.
   generalize dependent Hterm.
   induction Heqc.
   - intro Hterm.
-    apply term_sub with (fv t0).
+    apply term_sub with (fv t).
     + intros x Hfv.
       unfold open.
       simpl.
-      apply term_sub with (fv t0).
+      apply term_sub with (fv t).
       * intros x' Hfv'.
         unfold open.
         apply term_equiv_lc_at in Hterm.
@@ -163,7 +163,7 @@ Qed. *)
 Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
 Proof.
   intros t u H. induction H.
-  - replace t0 with (&(& t0)) at 2.
+  - replace t with (&(& t)) at 2.
     + apply eqc_def; assumption.
     + apply bswap_idemp.
   - apply eqc_app_left; assumption. 
@@ -507,10 +507,10 @@ Lemma open_close_redex: forall t t0 u x y, t^x = pterm_app (pterm_abs t0) u -> t
 Proof.
 Admitted.
 
-(** avaliar *)
+(** Este lema é falso: tome t como um b-redex contendo n solto. 
 Lemma red_out:  forall t t' x n, rule_b ({n ~> pterm_fvar x} t) ({n ~> pterm_fvar x} t') -> rule_b t t'.
 Proof.
-  induction t0.
+  induction t.
   - intros t' x n0 H.
     simpl in H.
     destruct (n0 === n); subst.
@@ -521,25 +521,54 @@ Proof.
   - admit.
   - intros t' x n H.
     simpl in H.
-    Admitted.
+    Admitted. *)
 
-(** Focar nesta prova *)
+Lemma red_out:  forall t t' x y, rule_b (t ^ x) (t' ^ x) -> rule_b ([x ~> pterm_fvar y] t ^ x) ([x ~> pterm_fvar y] t' ^ x).
+Proof.
+  Admitted.
+  
 Lemma red_rename_b: red_rename rule_b.
 Proof.
   unfold red_rename.
   intros x t t' y Hfv Hfv' Hb.
-  unfold open in *.
-  apply rule_b_compat_open.
-
-
-  inversion Hb; subst.
-  symmetry in H.
-  assert (Hy : t^y = pterm_app ((close (pterm_abs t0) x)^y) (close u x)^y).
+  assert (Hsb: t^y = [x ~> pterm_fvar y] t ^ x).
   {
-    apply open_close_redex; assumption.
+    symmetry.
+    apply m_sb_intro; assumption.
   }
+  rewrite Hsb.
+  assert (Hsb': t' ^ y = [x ~> pterm_fvar y] t' ^ x).
+  {
+    symmetry.
+    apply m_sb_intro; assumption.
+  }
+  rewrite Hsb'.
+  apply red_out; assumption.
+Qed.  
 
-  Admitted.
+  (* generalize dependent t'. *)
+  (* generalize dependent y. *)
+  (* generalize dependent x. *)
+  (* induction t. *)
+  (* - intros x Hfvx y t' Hfvt' Hbx. *)
+  (*   admit. *)
+  (* - admit. *)
+  (* - intros x Hfvx y t' Hfvt' Hbx. *)
+  (*   admit. *)
+  (* - intros x Hfvx y t' Hfvt' Hbx. *)
+    
+  (* unfold open in *. *)
+  (* apply rule_b_compat_open. *)
+
+
+  (* inversion Hb; subst. *)
+  (* symmetry in H. *)
+  (* assert (Hy : t^y = pterm_app ((close (pterm_abs t0) x)^y) (close u x)^y). *)
+  (* { *)
+  (*   apply open_close_redex; assumption. *)
+  (* } *)
+
+  (* Admitted. *)
 (*   rewrite open_close_term. *)
 (*   (* escrever o lema open_close_redex *) *)
 
@@ -642,14 +671,14 @@ Proof.
   intros t u Hsys.
   induction Hsys.
   - split.
-    + apply term_sub with (fv t0).
+    + apply term_sub with (fv t).
       * intros x Hfv.
         unfold open; simpl.
         apply term_var.
       * assumption.
     + assumption.
   - split.
-    + apply term_sub with (fv t0).
+    + apply term_sub with (fv t).
       * intros x Hfv.
         unfold open; simpl.
         rewrite open_rec_term; assumption.
@@ -672,14 +701,14 @@ Proof.
       * apply term_sub with x; assumption.
       * apply term_sub with x0; assumption.
   - split.
-    + apply term_sub with (fv (pterm_abs t0)).
+    + apply term_sub with (fv (pterm_abs t)).
       * intros x Hnot.
         apply body_to_term.
         **  assumption.
         **  apply body_lc_at.
             apply H.
       * assumption.
-    + apply term_abs with (fv (& t0[u])).
+    + apply term_abs with (fv (& t[u])).
       intros x Hnot.
       apply body_to_term.
       * assumption.
@@ -693,14 +722,14 @@ Proof.
             *** apply term_to_lc_at; assumption.
             *** auto with arith.
   - split.
-    + apply term_sub with (fv (t0[u])).
+    + apply term_sub with (fv (t[u])).
       * intros x Hnot.
         apply body_to_term.
         **  assumption.
         **  apply body_lc_at.
             split; assumption.
       * assumption.
-    + apply term_sub with (fv (& t0[v])).
+    + apply term_sub with (fv (& t[v])).
       * intros x Hnot.
         apply body_to_term.
         **  assumption.
