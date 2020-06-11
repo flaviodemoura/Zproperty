@@ -1,11 +1,11 @@
 (** * The Z property implies Confluence
 
   An ARS, say $(A,R)$, is defined as a pair composed of a set $A$ and
-  binary operation over this set $R:A\times A$. Let $a,b: A$, we write
-  $a\ R\ b$ or $a\to_R b$ to denote that $(a,b)\in R$, and we say that
-  $a$ $R$-reduces to $b$ in one step . The arrow notation will be
-  prefered because it is more convenient for expressing reductions, so
-  the reflexive transitive closure of a relation [R], written as
+  binary operation over this set $R:A\times A$. Let $a,b\in A$. We
+  write $a\ R\ b$ or $a\to_R b$ to denote that $(a,b)\in R$, and we
+  say that $a$ $R$-reduces to $b$ in one step. The arrow notation will
+  be prefered because it is more convenient for expressing reductions,
+  so the reflexive transitive closure of a relation [R], written as
   $\tto_R$, is defined by the following inference rules:
   %\begin{mathpar} \inferrule*[Right={$(refl)$}]{~}{a \tto_R a} \and
   \inferrule*[Right={$(rtrans)$}]{a\to_R b \and b \tto_R c}{a \tto_R
@@ -85,90 +85,85 @@ relate English annotations with the proof steps. The corresponding
 lemma in Coq, named [refltrans_composition], is stated as follows: *)
 
 Lemma refltrans_composition {A} (R: Rel A): forall t u v, refltrans R t u -> refltrans R u v -> refltrans R t v.
+(* begin hide *)
+Proof.  
+ intros t u v.  
+ intros H1 H2.  
+ induction H1.
+ - assumption.  
+ - apply rtrans with b.  
+ + assumption.  
+ + apply IHrefltrans; assumption.  
+Qed. 
+(* end hide *)
+(**
+<<
+1. Proof.  
+2.  intros t u v.  
+3.  intros H1 H2.  
+4.  induction H1.
+5.  - assumption.  
+6.  - apply rtrans with b.  
+7.  + assumption.  
+8.  + apply IHrefltrans; assumption.  
+9. Qed. 
+>>
 
-(** This work is not a Coq tutorial, but our idea is that it should
+This work is not a Coq tutorial, but our idea is that it should
 also be readable for those unfamiliar with the Coq proof Assistant. In
 addition, this paper is built directly from a Coq proof script, which
 means that we are forced to present the ideas and the results in a
 more organized and systematic way that is not necessarily the more
-pedagogical one. Therefore, we decided to comment the proof steps
-giving the general idea of what they do. The uncommented proof of the
- lemma [refltrans_composition] is as follows:
+pedagogical one. Coq proofs are written between the reserved words
+[Proof] and [Qed] (lines 1 and 9), and each proof command finishes
+with a dot. Proofs can be structured with bullets (- in the first
+level, + in the second level, * in the third level, ** in the fourth
+level, and so on). The corresponding informal proof proceed as
+follows: *)
 
-[[
-Proof.  
- intros t u v. 
- intros H1 H2.  
- induction H1.  
- - assumption.
- - apply rtrans with b.  
-   + assumption. 
-   + apply IHrefltrans; assumption.  
-Qed.
-]]
+(** %{\bf Proof}.%
 
-%\noindent% Notice that proofs are written between
-the reserved words [Proof] and [Qed], each proof command finishes with
-a dot, and proofs can be structured with bullets. We now present the 
-commented proof of the lemma [refltrans_composition], by writing the 
-idea of the work done by each Coq command line. This will be the 
-approach followed in this paper. *)
-
-Proof.
-  intros t u v. (** Let [t,u] and [v] be elements of type [A]
-      (or be elements of the set [A]).*)
-
-  intros H1 H2. (** Assume that $t \tto_R u$
-      (name this assumption [H1]) and $u\tto_R v$ (name this assumption
-      [H2]). *)
-  
-  induction H1. (** The proof proceeds by induction on the hypothesis
-      [H1], i.e. by induction on $t \tto_R u$. The structure of the
-      proof context determines the shape of the induction hypothesis,
-      and this fact will be essential to understand the inductive
-      proof of the next theorem. As shown in Figure %\ref{fig:trans}%,
-      [H1] and [H2] are the only hypothesis (the other lines are just
-      declaration of variables), therefore the induction hypothesis
-      subsumes [H2].
+    Let [t,u] and [v] \in [A], i.e. they are elements of type [A], or
+    elements of the set [A] (line 2). Call [H1] (resp. [H2]) the
+    hypothesis that $t \tto_R u$ (resp. $u\tto_R v$) (line 3). The
+    proof proceeds by induction on the hypothesis [H1] (line 4),
+    i.e. by induction on $t \tto_R u$. The structure of the proof
+    context determines the shape of the induction hypothesis, and this
+    fact will be essential to understand the inductive proof of the
+    next theorem. As shown in Figure %\ref{fig:trans}%, [H1] and [H2]
+    are the only hypothesis (the other lines are just declaration of
+    variables), therefore the induction hypothesis subsumes [H2].
 
       %\begin{figure}[h] \centering
         \includegraphics[scale=0.6]{fig1.png} \caption{Transitivity of
-        $\tto_R$}\label{fig:trans} \end{figure}% *)
-  
-  - assumption. (** The first case is when $t \tto_R u$ is generated
-      by the constructor [refl], which is an axiom and hence we are
-      done. *)
+        $\tto_R$}\label{fig:trans} \end{figure}%
 
-  - apply rtrans with b. (** The second case, i.e. the recursive case
-      is more interesting because $t \tto_R u$ is now generated by
-      [rtrans]. This means that there exists an element, say $b$, such
-      that $t \to_R b$ and $b \tto_R u$. Therefore, in order to prove
-      that $t \tto_R u$, we can apply the rule [rtrans] taking [b] as
-      the intermediary term. The proof of the recursive case can be
-      better visualized by the corresponding deduction tree:
-      %{\scriptsize \begin{mathpar}
-      \inferrule*[Right=MP]{\inferrule*[Right=MP]{\inferrule*[Right={
-      $rtrans$}]{~}{\inferrule*[Right={$(\forall_e)$}]{\forall x\ y\
-      z, x\to_R y \to y\tto_R z \to x\tto_R z}{t\to_R b \to b\tto_R u
-      \to t\tto_R u}} \and \inferrule*[Right={H}]{~}{t\to_R b}}{
-      b\tto_R u \to t\tto_R u} \and
-      \inferrule*[Right=MP]{\inferrule*[Right={ $IH$}]{~}{u\tto_R v
-      \to b\tto_R u} \and \inferrule*[Right={H2}]{~}{u\tto_R
-      v}}{b\tto_R u}}{t\tto_R u} \end{mathpar}}%
+    The first case is when $t \tto_R u$ is generated by the
+    constructor [refl], which is an axiom and hence we are done (line
+    5).  The second case, i.e. the recursive case is more interesting
+    because $t \tto_R u$ is now generated by [rtrans] (line 6). This
+    means that there exists an element, say $b$, such that $t \to_R b$
+    and $b \tto_R u$. Therefore, in order to prove that $t \tto_R u$,
+    we can apply the rule [rtrans] taking [b] as the intermediary
+    term. The proof of the recursive case can be better visualized by
+    the corresponding deduction tree: %{\scriptsize \begin{mathpar}
+    \inferrule*[Right=MP]{\inferrule*[Right=MP]{\inferrule*[Right={
+    $rtrans$}]{~}{\inferrule*[Right={$(\forall_e)$}]{\forall x\ y\ z,
+    x\to_R y \to y\tto_R z \to x\tto_R z}{t\to_R b \to b\tto_R u \to
+    t\tto_R u}} \and \inferrule*[Right={H}]{~}{t\to_R b}}{ b\tto_R u
+    \to t\tto_R u} \and \inferrule*[Right=MP]{\inferrule*[Right={
+    $IH$}]{~}{u\tto_R v \to b\tto_R u} \and
+    \inferrule*[Right={H2}]{~}{u\tto_R v}}{b\tto_R u}}{t\tto_R u}
+    \end{mathpar}}%
 
-      Each branch of the above tree corresponds to a new goal in the
-      Coq proof. Therefore, we have two subcases (or subgoals) to
-      prove: *)
-    
-    + assumption. (** In this subgoal we need to prove that $t \to_R
-    b$, which we have as hypothesis. *)
-      
-    + apply IHrefltrans; assumption. (** In the second subgoal, we
-    need to prove that $b \tto_R u$. To do so, we apply the induction
+    Each branch of the above tree corresponds to a new goal in the Coq
+    proof. Therefore, we have two subcases (or subgoals) to prove: In
+    this subgoal we need to prove that $t \to_R b$, which we have as
+    hypothesis (line 7). In the second subgoal (line 8), we need to
+    prove that $b \tto_R u$. To do so, we apply the induction
     hypothesis [IHrefltrans]: $u \tto_R v \to b \tto_R u$, where
-    $u\tto_R v$ is the hypothesis [H2]. *)
-Qed.
-
+    $u\tto_R v$ is the hypothesis [H2]. $\hfill\Box$ *)
+ 
 (** This example is interesting because it shows how Coq works, how
 each command line (also known as tactics or tacticals depending on its
 structure) corresponds, in general, to several steps of natural
