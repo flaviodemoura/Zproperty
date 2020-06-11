@@ -212,29 +212,35 @@ Proof.
     simpl.
     destruct (v == x); subst.
     + simpl in *.
-      admit.
+      unfold not in Hfv.
+      destruct Hfv.
+      apply singleton_spec; reflexivity.
     + reflexivity.
   - intros x u Hfv.
-    Admitted.
+    simpl.
+Admitted.
 
-Lemma m_sb_intro: forall x t u, x \notin (fv t) -> [x ~> u] (t ^ x)  = t ^^ u.
+Lemma m_sb_intro: forall t u x n, x \notin (fv t) -> [x ~> u] (open_rec n (pterm_fvar x) t)  = open_rec n u t.
 Proof.
-  intros x t.
-  generalize dependent x.
-  induction t.
-  - intros x u.
-    case n.
-    + simpl.
-      destruct (x == x).
-      * reflexivity.
-      * apply False_ind.
-        apply n0.
-        reflexivity.
-    + intros n0.
-      unfold open.
-      reflexivity.
+  intro t; induction t.
+  - intros u x n'.
+    admit.
+  - admit.
+  - admit.
+  - intros u x n Hfv.
+    unfold open.
+   simpl.
+   f_equal.
+   apply IHt.
+   assumption.
   - Admitted.
-  
+
+Corollary m_sb_intro_open: forall x t u, x \notin (fv t) -> [x ~> u] (t ^ x)  = t ^^ u.
+Proof.
+  intros x t u Hfv.
+  apply m_sb_intro; assumption.
+Qed.
+
 (** ES terms are expressions without dangling deBruijn indexes. *)
 
 Inductive term : pterm -> Prop :=
