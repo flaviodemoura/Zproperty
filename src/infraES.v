@@ -217,23 +217,86 @@ Proof.
       apply singleton_spec; reflexivity.
     + reflexivity.
   - intros x u Hfv.
-    simpl.
-Admitted.
+    simpl in *.
+    apply notin_union in Hfv.
+    destruct Hfv as [Hfv1 Hfv2].
+    specialize (IHt1 x u).
+    apply IHt1 in Hfv1.
+    rewrite Hfv1.
+    specialize (IHt2 x u).
+    apply IHt2 in Hfv2.
+    rewrite Hfv2.
+    reflexivity.
+  - intros x u Hfv.
+    simpl in *.
+    specialize (IHt x u).
+    apply IHt in Hfv.
+    rewrite Hfv.
+    reflexivity.
+  - intros x u Hfv.
+    simpl in *.
+    apply notin_union in Hfv.
+    destruct Hfv as [Hfv1 Hfv2].
+    specialize (IHt1 x u).
+    apply IHt1 in Hfv1.
+    rewrite Hfv1.
+    specialize (IHt2 x u).
+    apply IHt2 in Hfv2.
+    rewrite Hfv2.
+    reflexivity.
+Qed.
 
 Lemma m_sb_intro: forall t u x n, x \notin (fv t) -> [x ~> u] (open_rec n (pterm_fvar x) t)  = open_rec n u t.
 Proof.
   intro t; induction t.
-  - intros u x n'.
-    admit.
-  - admit.
-  - admit.
+  - intros u x n' Hfv.
+    assert (H1 := subst_fresh).
+    specialize (H1 x (pterm_bvar n) u).
+    apply H1 in Hfv.
+    simpl.
+    rewrite <- Hfv.
+    destruct (n' === n).
+    + simpl.
+      destruct (x == x).
+      * reflexivity.
+      * contradiction.
+    + reflexivity.
+  - intros u x n' Hfv.
+    simpl.
+    destruct (v == x).
+    + rewrite e in Hfv.
+      destruct Hfv.
+      apply singleton_spec; reflexivity.
+    + reflexivity.
+  - intros u x n Hfv.
+    simpl in *.
+    apply notin_union in Hfv.
+    destruct Hfv as [Hfv1 Hfv2].
+    specialize (IHt1 u x n).
+    apply IHt1 in Hfv1.
+    rewrite Hfv1.
+    specialize (IHt2 u x n).
+    apply IHt2 in Hfv2.
+    rewrite Hfv2.
+    reflexivity.
   - intros u x n Hfv.
     unfold open.
-   simpl.
-   f_equal.
-   apply IHt.
-   assumption.
-  - Admitted.
+    simpl.
+    f_equal.
+    apply IHt.
+    assumption.
+  - intros u x n Hfv.
+    simpl in *.
+    apply notin_union in Hfv.
+    destruct Hfv as [Hfv1 Hfv2].
+    specialize (IHt1 u x (S n)).
+    apply IHt1 in Hfv1.
+    rewrite Hfv1.
+    specialize (IHt2 u x n).
+    apply IHt2 in Hfv2.
+    rewrite Hfv2.
+    reflexivity.
+Qed.
 
 Corollary m_sb_intro_open: forall x t u, x \notin (fv t) -> [x ~> u] (t ^ x)  = t ^^ u.
 Proof.
