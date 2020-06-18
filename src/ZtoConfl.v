@@ -123,7 +123,7 @@ follows: *)
 
 (** %{\bf Proof}.%
 
-    Let [t,u] and [v] \in [A], i.e. they are elements of type [A], or
+    Let $t, u, v \in A$, i.e. they are elements of type [A], or
     elements of the set [A] (line 2). Call [H1] (resp. [H2]) the
     hypothesis that $t \tto_R u$ (resp. $u\tto_R v$) (line 3). The
     proof proceeds by induction on the hypothesis [H1] (line 4),
@@ -209,7 +209,7 @@ Qed.
 
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
-(** In %\cite{ZPropertyDraft}%, V. van Oostrom gives a sufficient
+(** In %\cite{dehornoy2008z}%, V. van Oostrom gives a sufficient
     condition for an ARS to be confluent, known as the _Z Property_:
 
     %\begin{definition} Let $(A,\to_R)$ be an ARS. Then $(A,\to_R)$
@@ -230,7 +230,7 @@ Definition f_is_Z {A:Type} (R: Rel A) (f: A -> A) := forall a b, R a b -> ((refl
 (** The first contribution of this work is a constructive proof of the
     fact that the Z property implies confluence. Our proof uses nested
     induction, and hence it differs from the one in %\cite{kes09}%
-    (that follows %\cite{ZPropertyDraft}%) in the sense that it does
+    (that follows %\cite{dehornoy2008z}%) in the sense that it does
     not rely on the law of the excluded middle. As a result, we have
     an elegant inductive proof of the fact that if a binary relation
     has the Z property then it is confluent. In addition, we
