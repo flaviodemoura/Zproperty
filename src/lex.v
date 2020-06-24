@@ -523,7 +523,7 @@ Proof.
     simpl in H.
     Admitted. *)
 
-Lemma red_out:  forall t t' x y, y \notin (fv t \u fv t') -> rule_b (t ^ x) (t' ^ x) -> rule_b ([x ~> pterm_fvar y] t ^ x) ([x ~> pterm_fvar y] t' ^ x).
+Lemma red_out:  forall t t' x y, rule_b t t' -> rule_b ([x ~> pterm_fvar y] t) ([x ~> pterm_fvar y] t').
 Proof.
   intros t t' x y Hfv H.
   repeat rewrite m_sb_intro_open.
@@ -545,7 +545,8 @@ Proof.
     apply m_sb_intro_open; assumption.
   }
   rewrite Hsb'.
-  apply red_out; assumption.
+  apply red_out. assumption.
+
 Qed.  
 
   (* generalize dependent t'. *)
