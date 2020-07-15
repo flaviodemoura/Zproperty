@@ -2282,11 +2282,11 @@ Proof.
   generalize dependent Hterm.
   induction Heqc.
   - intro Hterm.
-    apply term_sub with (fv t).
+    apply term_sub with (fv t0).
     + intros x Hfv.
       unfold open.
       simpl.
-      apply term_sub with (fv t).
+      apply term_sub with (fv t0).
       * intros x' Hfv'.
         unfold open.
         apply term_equiv_lc_at in Hterm.
@@ -2713,33 +2713,71 @@ Proof.
     simpl in H.
     Admitted. *)
 
+Lemma open_rec_msb: forall t k x y x0, x <> x0 -> [x ~> pterm_fvar y] (open_rec k (pterm_fvar x0) t) = (open_rec k (pterm_fvar x0) ([x ~> pterm_fvar y] t)).
+Proof.
+  intro t; induction t using pterm_size_induction.
+  intros k x y x0 Hdiff.
+  generalize dependent t0.
+  intro t; case t.
+  - intros n IH.
+    admit.
+  - intros v IH.
+    admit.
+  - intros t1 t2 IH.
+    admit.
+  - intros t1 IH.
+    simpl in *.
+    rewrite IH.
+    + reflexivity.
+    + admit.
+    + assumption.
+Admitted.
+
+Corollary open_msb: forall t x y x0, x <> x0 -> [x ~> pterm_fvar y] t ^ x0 = ([x ~> pterm_fvar y] t) ^ x0.
+Proof.
+  intros t x y x0 Hdiff.
+  apply open_rec_msb; assumption.
+Qed.
+  
+Lemma term_rename: forall t x y, term t -> term ([x ~> pterm_fvar y] t).
+Proof.
+  intros t x y H; induction H.
+  - admit.
+  - admit.
+  - simpl.
+    apply term_abs with L.
+    intros x0 Hnot.
+    replace (([x ~> pterm_fvar y] t1) ^ x0) with ([x ~> pterm_fvar y] (t1 ^ x0)).
+    + apply H0; assumption.
+    + assert (Hdiff: x <> x0).
+      {
+        admit.
+      }
+      apply open_msb; assumption.
+  - Admitted.
+
+Lemma body_rename: forall t x y, body t -> body ([x ~> pterm_fvar y] t).
+Proof.
+  intros t x y Hbody.
+  unfold body in *.
+  destruct Hbody.
+  exists x0.
+  pick_fresh z.
+  intros x1 Hnot. 
+  replace (([x ~> pterm_fvar y] t) ^ x1) with ([x ~> (pterm_fvar y)^ x1] (t ^ x1)).
+  - apply term_rename.
+    apply H in Hnot; assumption.
+  - Admitted.
+ 
 Lemma red_out:  forall t t' x y, rule_b t t' -> rule_b ([x ~> pterm_fvar y] t) ([x ~> pterm_fvar y] t').
 Proof.
   intros t t' x y H.
   inversion H; subst.
-  - simpl.
-    apply reg_rule_b.
-    + inversion H0; subst.
-      unfold body.
-      exists x0.
-      intros.
-      apply H2 in H3.
-      apply term_equiv_lc_at.
-      apply term_equiv_lc_at in H3.
-      admit.
-    + clear H.
-      induction H1.
-      * admit.
-      * simpl in *.
-        apply term_app; assumption.
-      * simpl.
-        apply term_abs with L.
-        admit.
-      * simpl.
-        apply term_sub with L.
-        ** admit.
-        ** assumption.
-  Admitted.
+  simpl.
+  apply reg_rule_b.
+  - apply body_rename; assumption.
+  - apply term_rename; assumption.
+Qed.    
   
 Lemma red_rename_b: red_rename rule_b.
 Proof.
