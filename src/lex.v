@@ -92,11 +92,11 @@ Proof.
   generalize dependent Hterm.
   induction Heqc.
   - intro Hterm.
-    apply term_sub with (fv t0).
+    apply term_sub with (fv t).
     + intros x Hfv.
       unfold open.
       simpl.
-      apply term_sub with (fv t0).
+      apply term_sub with (fv t).
       * intros x' Hfv'.
         unfold open.
         apply term_equiv_lc_at in Hterm.
@@ -163,7 +163,7 @@ Qed. *)
 Lemma eqc_ctx_sym : forall t u, t =c u -> u =c t.
 Proof.
   intros t0 u H. induction H.
-  - replace t0 with (&(& t0)) at 2.
+  - replace t with (&(& t)) at 2.
     + apply eqc_def; assumption.
     + apply bswap_idemp.
   - apply eqc_app_left; assumption. 
@@ -522,12 +522,12 @@ Proof.
   - intros t' x n H.
     simpl in H.
     Admitted. *)
-
+(* x <> x0 ou x0 \notin {{ x }} *)
 Lemma open_rec_msb: forall t k x y x0, x <> x0 -> [x ~> pterm_fvar y] (open_rec k (pterm_fvar x0) t) = (open_rec k (pterm_fvar x0) ([x ~> pterm_fvar y] t)).
 Proof.
   intro t; induction t using pterm_size_induction.
   intros k x y x0 Hdiff.
-  generalize dependent t0.
+  generalize dependent t.
   intro t; case t.
   - intros n IH.
     simpl.
@@ -570,63 +570,64 @@ Qed.
 
 Corollary open_msb: forall t x y x0, x <> x0 -> [x ~> pterm_fvar y] t ^ x0 = ([x ~> pterm_fvar y] t) ^ x0.
 Proof.
-  intros t x y x0 Hdiff.
+  intros t x y x0.
   apply open_rec_msb; assumption.
 Qed.
-  
+
 Lemma term_rename: forall t x y, term t -> term ([x ~> pterm_fvar y] t).
 Proof.
   intros t x y H; induction H.
   - simpl.
     case (x0 == x); intro; apply term_var.
   - simpl; apply term_app; assumption.
-  - simpl.
-    apply term_abs with L.
+  - specialize (H x).
+    apply term_abs with (L \u {{x}} \u {{y}} \u fv t1); fold m_sb.
     intros x0 Hnot.
-    (* aqui, já estamos supondo que x <> x0? *)
-    (* caso t1 = pterm_bvar 0, x = pterm_bvar 0 *)
     replace (([x ~> pterm_fvar y] t1) ^ x0) with ([x ~> pterm_fvar y] (t1 ^ x0)).
-    * apply H0; assumption.
-    * assert (Hdiff: x <> x0).
+    + admit.
+(*      apply H0; assumption. *)
+    + assert (Hdiff: x <> x0).
       {
-        apply H0 in Hnot.
-        case (x == x0).
+        
+       (* case (x == x0).
         - intro Heq.
-          rewrite Heq in Hnot.
-          clear Heq H H0.
-          unfold open in Hnot.
-          Print open_rec.
-          Print m_sb.
-          unfold m_sb in Hnot.
-
-          + unfold open in Hnot.
-            induction t1.
-            * simpl in Hnot.
-              case (0 == n).
-              **  intro Heq'.
-                  rewrite <- Heq' in Hnot.
-                  admit.
-              **  admit.
-            * admit.  
-            * admit.
-            * admit.
-          + assumption.
-        - tauto.
+          subst.
+          assert (Hnot':=Hnot).
+          rewrite <- Heq in Hnot'.
+          rewrite <- Heq in Hnot.
+          apply H in Hnot'.
+          apply H0 in Hnot.
+          clear Heq H0 H.
+          unfold open in *. *)
+          admit.
+ (*       - tauto. 
       }
       apply open_msb; assumption.
-  - Admitted.
+  - simpl.
+    apply term_sub with L.
+    + intros x0 Hnot.
+      replace (([x ~> pterm_fvar y] t1) ^ x0) with ([x ~> pterm_fvar y] (t1 ^ x0)).
+      * apply H0; assumption.
+      * assert (Hdiff: x <> x0).
+        {
+          admit.
+        }
+        apply open_msb; assumption. 
+    + assumption.*)
+Admitted.
 
 Lemma body_rename: forall t x y, body t -> body ([x ~> pterm_fvar y] t).
 Proof.
   intros t x y Hbody.
   unfold body in *.
   destruct Hbody.
-  exists x0.
+  exists (x0 \u {{ x }} \u {{ y }}).
   pick_fresh z.
   intros x1 Hnot. 
   replace (([x ~> pterm_fvar y] t) ^ x1) with ([x ~> (pterm_fvar y)^ x1] (t ^ x1)).
   - apply term_rename.
-    apply H in Hnot; assumption.
+    admit.
+(*    apply H in Hnot; assumption. *)
   - Admitted.
  
 Lemma red_out:  forall t t' x y, rule_b t t' -> rule_b ([x ~> pterm_fvar y] t) ([x ~> pterm_fvar y] t').
