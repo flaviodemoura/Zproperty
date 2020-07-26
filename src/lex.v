@@ -583,38 +583,43 @@ Proof.
   - specialize (H x).
     apply term_abs with (L \u {{x}} \u {{y}} \u fv t1); fold m_sb.
     intros x0 Hnot.
+    apply notin_union in Hnot.
+    destruct Hnot as [Hnot Hnot1].
+    apply notin_union in Hnot.
+    destruct Hnot as [Hnot Hnoty].
+    apply notin_union in Hnot.
+    destruct Hnot as [Hnot Hnotx].
     replace (([x ~> pterm_fvar y] t1) ^ x0) with ([x ~> pterm_fvar y] (t1 ^ x0)).
-    + admit.
-(*      apply H0; assumption. *)
+    + apply H0; assumption.
     + assert (Hdiff: x <> x0).
-      {
-        
-       (* case (x == x0).
-        - intro Heq.
-          subst.
-          assert (Hnot':=Hnot).
-          rewrite <- Heq in Hnot'.
-          rewrite <- Heq in Hnot.
-          apply H in Hnot'.
-          apply H0 in Hnot.
-          clear Heq H0 H.
-          unfold open in *. *)
-          admit.
- (*       - tauto. 
+      { unfold not; intro Heq.
+        apply symmetry in Heq.
+        unfold not in Hnotx.
+        apply Hnotx.
+        apply singleton_spec; assumption.
       }
       apply open_msb; assumption.
   - simpl.
-    apply term_sub with L.
-    + intros x0 Hnot.
-      replace (([x ~> pterm_fvar y] t1) ^ x0) with ([x ~> pterm_fvar y] (t1 ^ x0)).
-      * apply H0; assumption.
-      * assert (Hdiff: x <> x0).
-        {
-          admit.
-        }
-        apply open_msb; assumption. 
-    + assumption.*)
-Admitted.
+    apply term_sub with (L \u {{x}} \u {{y}} \u fv t1); fold m_sb.
+    intros x0 Hnot.
+    apply notin_union in Hnot.
+    destruct Hnot as [Hnot Hnot1].
+    apply notin_union in Hnot.
+    destruct Hnot as [Hnot Hnoty].
+    apply notin_union in Hnot.
+    destruct Hnot as [Hnot Hnotx].
+    replace (([x ~> pterm_fvar y] t1) ^ x0) with ([x ~> pterm_fvar y] (t1 ^ x0)).
+    + apply H0; assumption.
+    + assert (Hdiff: x <> x0).
+      { unfold not; intro Heq.
+        apply symmetry in Heq.
+        unfold not in Hnotx.
+        apply Hnotx.
+        apply singleton_spec; assumption.
+      }
+      apply open_msb; assumption.
+    + assumption.
+Qed.
 
 Lemma body_rename: forall t x y, body t -> body ([x ~> pterm_fvar y] t).
 Proof.
@@ -623,12 +628,24 @@ Proof.
   destruct Hbody.
   exists (x0 \u {{ x }} \u {{ y }}).
   pick_fresh z.
-  intros x1 Hnot. 
+  intros x1 Hnot.
+  apply notin_union in Hnot.
+  destruct Hnot as [Hnot Hnoty].
+  apply notin_union in Hnot.
+  destruct Hnot as [Hnot Hnotx].
   replace (([x ~> pterm_fvar y] t) ^ x1) with ([x ~> (pterm_fvar y)^ x1] (t ^ x1)).
   - apply term_rename.
-    admit.
-(*    apply H in Hnot; assumption. *)
-  - Admitted.
+    apply H; assumption.
+  - assert (Hdiff: x <> x1).
+    {
+      unfold not; intro Heq.
+      apply symmetry in Heq.
+      unfold not in Hnotx.
+      apply Hnotx.
+      apply singleton_spec; assumption.
+    }
+    apply open_msb; assumption.
+Qed.
  
 Lemma red_out:  forall t t' x y, rule_b t t' -> rule_b ([x ~> pterm_fvar y] t) ([x ~> pterm_fvar y] t').
 Proof.
