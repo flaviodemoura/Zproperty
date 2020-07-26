@@ -31,6 +31,7 @@ Proof.
     + apply IHtrans; assumption.
 Qed.
 
+(**
 Lemma transit' {A:Type} (R: Rel A):
   forall t u v, trans R t u -> R u v -> trans R t v.
 Proof.
@@ -63,7 +64,7 @@ Proof.
        ** assumption.
        ** apply H1.
      * apply H1.
-Qed.
+Qed. *)
 (* end hide *)
 
 Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
@@ -170,7 +171,7 @@ structure) corresponds, in general, to several steps of natural
 deduction rules. *)
 
 (* begin hide *)
-Lemma rtrans' {A} (R: Rel A): forall t u v, refltrans R t u -> R u v -> refltrans R t v.
+Lemma refltrans_composition2 {A} (R: Rel A): forall t u v, refltrans R t u -> R u v -> refltrans R t v.
 Proof.
   intros t u v H1 H2. induction H1.
   - apply rtrans with v.
@@ -223,7 +224,7 @@ The corresponding Coq definition is given as: *)
 
 Definition Z_prop {A:Type} (R: Rel A) := exists f:A -> A, forall a b, R a b -> ((refltrans R) b (f a) /\ (refltrans R) (f a) (f b)).
 
-(** Alternatively, when [f] satisfies the Z property, one says that [f] is Z: *)
+(** Alternatively, for a given function [f], one can say that [f] satisfies the Z property, or that [f] is Z, if the above conditions hold for [f]: *)
 
 Definition f_is_Z {A:Type} (R: Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R)  b (f a) /\ (refltrans R) (f a) (f b)). 
 
@@ -429,6 +430,62 @@ Proof.
         
 Qed.
 
+(** Another proof *)
+
+Lemma refltrans_f_is_Z_refltrans {A:Type}: forall (R: Rel A) a b f, f_is_Z R f -> (refltrans R) a b -> (refltrans R) (f a) (f b).
+Proof.
+  intros R a b f H Hab.
+  unfold f_is_Z in H.
+  induction Hab.
+  - apply refl.
+  - apply H in H0.
+    destruct H0 as [H1 H2].
+    apply refltrans_composition with (f b); assumption.
+Qed.
+
+Lemma refltrans_f_is_Z {A:Type}: forall (R: Rel A) a f, f_is_Z R f -> (refltrans R) a (f a).
+Proof.
+  intros R a f H.
+  unfold f_is_Z in H.
+Admitted.
+
+  Theorem Z_prop_implies_Confl2 {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
+  Proof.
+    intros R H.
+    unfold Z_prop in H.
+    destruct H as [g H].
+    unfold Confl.
+    intros a b c H1 H2.
+    generalize dependent c.
+    induction H1.
+    - intros c H1.
+      exists c; split.
+      + assumption.
+      + apply refl.
+    - intros c0 H2.
+      apply H in H0.
+      destruct H0 as [Hga Hgb].
+      assert (refltrans R (g a) (g c0)).
+      {
+        apply  refltrans_f_is_Z_refltrans.
+        - assumption.
+        - assumption.
+      }
+      assert (refltrans R c0 (g c0)).
+      {
+        apply refltrans_f_is_Z; assumption.
+      }
+      assert (refltrans R b (g c0)).
+      {
+        apply refltrans_composition with (g a); assumption.
+      }
+      apply IHrefltrans in H4.
+      destruct H4 as [d [H4 H5]].
+      exists d; split.
+      +  assumption.
+      + apply refltrans_composition with (g c0); assumption.     
+Qed.
+      
 (** An alternative proof that Z implies confluence is possible via the
     notion of semiconfluence, which is equivalent to confluence, as
     done in %\cite{zproperty}%. Unlike the proof in %\cite{zproperty}% and 
