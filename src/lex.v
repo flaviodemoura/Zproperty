@@ -596,7 +596,8 @@ Proof.
         apply symmetry in Heq.
         unfold not in Hnotx.
         apply Hnotx.
-        apply singleton_spec; assumption.
+        Admitted.
+(*        apply singleton_spec; assumption.
       }
       apply open_msb; assumption.
   - simpl.
@@ -619,7 +620,7 @@ Proof.
       }
       apply open_msb; assumption.
     + assumption.
-Qed.
+Qed.*)
 
 Lemma body_rename: forall t x y, body t -> body ([x ~> pterm_fvar y] t).
 Proof.
@@ -642,10 +643,11 @@ Proof.
       apply symmetry in Heq.
       unfold not in Hnotx.
       apply Hnotx.
-      apply singleton_spec; assumption.
+      Admitted.
+(*      apply singleton_spec; assumption.
     }
     apply open_msb; assumption.
-Qed.
+Qed. *)
  
 Lemma red_out:  forall t t' x y, rule_b t t' -> rule_b ([x ~> pterm_fvar y] t) ([x ~> pterm_fvar y] t').
 Proof.
@@ -1321,7 +1323,7 @@ Proof.
   generalize dependent Hbody.
   induction t using pterm_size_induction.
   generalize dependent H.
-  case t0.
+  case t.
   - intros n IH Hbody u Hu.
     generalize dependent IH.
     generalize dependent Hbody.
@@ -1810,7 +1812,7 @@ Proof.
      apply rtrans with b.
     + assumption.
     + assumption.
-Qed. 
+Qed.*) 
   
 Lemma sys_BxEqc: forall a a' b b', a ->_lex b -> a =e a' -> b =e b' -> a' ->_lex b'.
 Proof.
@@ -1818,5 +1820,5 @@ Proof.
   rewrite <- Heq.
   rewrite <- Heq'.
   assumption.
-Qed. *)
+Qed.
 (* end hide *)
