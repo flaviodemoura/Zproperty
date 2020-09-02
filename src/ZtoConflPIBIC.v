@@ -1,16 +1,18 @@
-(** * The Z property implies Confluence
+(** * A propriedade Z implica na confluência
 
-  An ARS, say $(A,R)$, is defined as a pair composed of a set $A$ and
-  binary relation over this set $R:A\times A$. Let $a,b\in A$. We
-  write $a\ R\ b$ or $a\to_R b$ to denote that $(a,b)\in R$, and we
-  say that $a$ $R$-reduces to $b$ in one step. The arrow notation will
-  be prefered because it is more convenient for expressing reductions,
-  so the reflexive transitive closure of a relation [R], written as
-  $\tto_R$, is defined by the following inference rules:
+
+  Um ARS, digamos, $(A,R)$, é definido como um conjunto $A$, munido de 
+  uma relação binária sobre esse conjunto, $R:A\times A$. Sejam 
+  $a,b\in A$. Denotamos que $a$ reduz para $b$ através de $R$ em um 
+  passo por $a\ R\ b$ ou $a\to_R b$. Isso também pode ser escrito como 
+  $(a,b)\in R$. Usaremos a notação de flechas, porque ela é mais 
+  para expressar reduções, de forma que o fecho transitivo reflexivo de uma 
+  relação [R], escrito como $\tto_R$, é definido pelas seguintes regras de inferência: 
   %\begin{mathpar} \inferrule*[Right={$(refl)$}]{~}{a \tto_R a} \and
   \inferrule*[Right={$(rtrans)$}]{a\to_R b \and b \tto_R c}{a \tto_R
-  c} \end{mathpar}% %\noindent% where $a,b$ and $c$ are universally
-  quantified variables as one makes explicit in the corresponding Coq
+  c} \end{mathpar}% %\noindent% em que $a,b$ and $c$ são variáveis 
+  quantificadas universalmente, como explicitado pela definição correspondente 
+  em Coq:
   definition: *)
 (* begin hide *)
 Definition Rel (A:Type) := A -> A -> Prop.
@@ -71,19 +73,19 @@ Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
 | refl: forall a, (refltrans R) a a
 | rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c.
 
-(** The rules named ([refl]) and ([rtrans]) are called _constructors_
-in the Coq definition. The first constructor states the reflexivity
-axiom for $\tto_R$, while [rtrans] extends the reflexive transitive
-closure of [R], if one has at least a one-step reduction. As a first
-example, let's have a look at the proof of transitivity of $\tto_R$:
+(** As regras ([refl]) e ([rtrans]) são chamadas _construtores_
+na definição de Coq. O primeiro construtor dita o axioma da reflexividade 
+de $\tto_R$, enquanto [rtrans] extende o fecho reflexivo transitivo de [R], 
+caso este tenha pelo menos uma redução em um passo. Como um exemplo, vamos 
+analisar a prova da transitividade de $\tto_R$:
 
-%\begin{lemma} Let $\to_R$ be a binary relation over a set $A$. If $t
-\tto_R u$ and $u \tto_R v$ then $t \tto_R v$, for all t,u,v \in A$.
+%\begin{lemma} Seja $\to_R$ uma relação binária sobre um conjunto $A$. 
+Se $t \tto_R u$ e $u \tto_R v$, então $t \tto_R v$, para todo t,u,v \in A$.
 \end{lemma}%
 
- Although its proof is simple, it will help us explain the way in which we will
-relate English annotations with the proof steps. The corresponding
-lemma in Coq, named [refltrans_composition], is stated as follows: *)
+ Apesar de sua prova ser simples, esse teorema irá nos ajudar a explicar 
+como nós vamos relacionar os comentários em português com os passos da prova. 
+O lema correspondente em Coq, [refltrans_composition], é estabelecido a seguir: *)
 
 Lemma refltrans_composition {A} (R: Rel A): forall t u v, refltrans R t u -> refltrans R u v -> refltrans R t v.
 (* begin hide *)
