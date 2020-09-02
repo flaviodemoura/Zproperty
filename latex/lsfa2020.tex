@@ -1,5 +1,6 @@
-\documentclass{entcs} 
-\usepackage{prentcsmacro}
+% \documentclass{entcs} 
+%\usepackage{prentcsmacro}
+\documentclass{llncs}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
@@ -11,19 +12,27 @@
 \usepackage{amssymb}
 \usepackage{pdfsync}
 \usepackage{coqdoc}
+\usepackage{fullpage}
 
 \newcommand{\tto}{\twoheadrightarrow}
 
 \def\lastname{de Moura {\it et. al.}}
 
+\title{Confluence via the Z Property in Coq}
+\author{Flávio L. C. de Moura \and Leandro O. Rezende}
+
+\institute{Departamento de Ciência da Computação, Universidade de Brasília, Brazil\\
+\email{flaviomoura@unb.br,l-ordo.ab.chao@hotmail.com}}
+
 \begin{document}
-\begin{frontmatter}
-  \title{Confluence via the Z Property in Coq}
-  \author{Flávio L. C. de Moura\thanksref{flaviomoura}}
-  \author{Leandro O. Rezende\thanksref{leandro}}
-  \address{Departamento de Ciência da Computação, Universidade de Brasília, Brasília, Brazil}
-  \thanks[flaviomoura]{Email:\href{flaviomoura@unb.br}{\texttt{\normalshape flaviomoura@unb.br}}} 
-  \thanks[leandro]{Email:\href{l-ordo.ab.chao@hotmail.com}{\texttt{\normalshape l-ordo.ab.chao@hotmail.com}}}
+\maketitle
+% \begin{frontmatter}
+%   \title{Confluence via the Z Property in Coq}
+%   \author{Flávio L. C. de Moura\thanksref{flaviomoura}}
+%   \author{Leandro O. Rezende\thanksref{leandro}}
+%   \address{Departamento de Ciência da Computação, Universidade de Brasília, Brasília, Brazil}
+%   \thanks[flaviomoura]{Email:\href{flaviomoura@unb.br}{\texttt{\normalshape flaviomoura@unb.br}}} 
+%   \thanks[leandro]{Email:\href{l-ordo.ab.chao@hotmail.com}{\texttt{\normalshape l-ordo.ab.chao@hotmail.com}}}
   
 \begin{abstract}
   Rewriting theory is a well established model of computation
@@ -46,10 +55,10 @@
   property, known as the Compositional Z, in the Coq proof assistant.
 \end{abstract}
 
-\begin{keyword}
-  Rewriting systems, Confluence, Interactive theorem proving, Coq
-\end{keyword}
-\end{frontmatter}
+% \begin{keyword}
+%   Rewriting systems, Confluence, Interactive theorem proving, Coq
+% \end{keyword}
+% \end{frontmatter}
 
 \section{Introduction}
 

@@ -78,7 +78,7 @@ closure of [R], if one has at least a one-step reduction. As a first
 example, let's have a look at the proof of transitivity of $\tto_R$:
 
 %\begin{lemma} Let $\to_R$ be a binary relation over a set $A$. If $t
-\tto_R u$ and $u \tto_R v$ then $t \tto_R v$, for all t,u,v \in A$.
+\tto_R u$ and $u \tto_R v$ then $t \tto_R v$, for all $t,u,v \in A$.
 \end{lemma}%
 
  Although its proof is simple, it will help us explain the way in which we will

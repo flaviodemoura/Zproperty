@@ -1,14 +1,9 @@
-\section{The Z property implies Confluence}
-
-
-
-
   An ARS, say $(A,R)$, is defined as a pair composed of a set $A$ and
-  binary operation over this set $R:A\times A$. Let $a,b: A$, we write
-  $a\ R\ b$ or $a\to_R b$ to denote that $(a,b)\in R$, and we say that
-  $a$ $R$-reduces to $b$ in one step . The arrow notation will be
-  prefered because it is more convenient for expressing reductions, so
-  the reflexive transitive closure of a relation \coqdocvar{R}, written as
+  binary relation over this set $R:A\times A$. Let $a,b\in A$. We
+  write $a\ R\ b$ or $a\to_R b$ to denote that $(a,b)\in R$, and we
+  say that $a$ $R$-reduces to $b$ in one step. The arrow notation will
+  be prefered because it is more convenient for expressing reductions,
+  so the reflexive transitive closure of a relation \coqdocvar{R}, written as
   $\tto_R$, is defined by the following inference rules:
   \begin{mathpar} \inferrule*[Right={$(refl)$}]{~}{a \tto_R a} \and
   \inferrule*[Right={$(rtrans)$}]{a\to_R b \and b \tto_R c}{a \tto_R
@@ -32,134 +27,90 @@ example, let's have a look at the proof of transitivity of $\tto_R$:
 
 
 \begin{lemma} Let $\to_R$ be a binary relation over a set $A$. If $t
-\tto_R u$ and $u \tto_R v$ then $t \tto_R v$, $\forall t,u,v \in A$.
+\tto_R u$ and $u \tto_R v$ then $t \tto_R v$, for all $t,u,v \in A$.
 \end{lemma}
 
 
- Although its simplicity, it will help us to explain the way we will
+ Although its proof is simple, it will help us explain the way in which we will
 relate English annotations with the proof steps. The corresponding
 lemma in Coq, named \coqdocvar{refltrans\_composition}, is stated as follows: \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Lemma} \coqdocvar{refltrans\_composition} \{\coqdocvar{A}\} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}): \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{u} \coqdocvar{v}, \coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{t} \coqdocvar{u} \ensuremath{\rightarrow} \coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{u} \coqdocvar{v} \ensuremath{\rightarrow} \coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{t} \coqdocvar{v}.\coqdoceol
-\coqdocemptyline
 \end{coqdoccode}
+\begin{verbatim}
+1. Proof.  
+2.  intros t u v.  
+3.  intros H1 H2.  
+4.  induction H1.
+5.  - assumption.  
+6.  - apply rtrans with b.  
+7.  + assumption.  
+8.  + apply IHrefltrans; assumption.  
+9. Qed. 
+\end{verbatim}
+
+
 This work is not a Coq tutorial, but our idea is that it should
 also be readable for those unfamiliar with the Coq proof Assistant. In
 addition, this paper is built directly from a Coq proof script, which
 means that we are forced to present the ideas and the results in a
 more organized and systematic way that is not necessarily the more
-pedagogical one. Therefore, we decided to comment the proof steps
-giving the general idea of what they do. The uncommented proof of the
- lemma \coqdocvar{refltrans\_composition} is as follows:
+pedagogical one. Coq proofs are written between the reserved words
+\coqdockw{Proof} and \coqdockw{Qed} (lines 1 and 9), and each proof command finishes
+with a dot. Proofs can be structured with bullets (- in the first
+level, + in the second level, * in the third level, ** in the fourth
+level, and so on). The corresponding informal proof proceed as
+follows: 
+
+ {\bf Proof}.
 
 
-\coqdoceol
-\coqdocemptyline
-\coqdocnoindent
-\coqdockw{Proof}.\coqdoceol
-\coqdocindent{0.50em}
-\coqdoctac{intros} \coqdocvar{t} \coqdocvar{u} \coqdocvar{v}.\coqdoceol
-\coqdocindent{0.50em}
-\coqdoctac{intros} \coqdocvar{H1} \coqdocvar{H2}.\coqdoceol
-\coqdocindent{0.50em}
-\coqdoctac{induction} \coqdocvar{H1}.\coqdoceol
-\coqdocindent{0.50em}
-- \coqdoctac{assumption}.\coqdoceol
-\coqdocindent{0.50em}
-- \coqdoctac{apply} \coqdocvar{rtrans} \coqdockw{with} \coqdocvar{b}.\coqdoceol
-\coqdocindent{1.50em}
-+ \coqdoctac{assumption}.\coqdoceol
-\coqdocindent{1.50em}
-+ \coqdoctac{apply} \coqdocvar{IHrefltrans}; \coqdoctac{assumption}.\coqdoceol
-\coqdocnoindent
-\coqdockw{Qed}.
-
-\coqdocemptyline
-
-
-\noindent Notice that proofs are written between
-the reserved words \coqdockw{Proof} and \coqdockw{Qed}, each proof command finishes with
-a dot, and proofs can be structured with bullets. We now present the 
-commented proof of the lemma \coqdocvar{refltrans\_composition}, by writing the 
-idea of the work done by each Coq command line. This will be the 
-approach followed in this paper. \begin{coqdoccode}
-\coqdocemptyline
-\coqdocnoindent
-\coqdockw{Proof}.\coqdoceol
-\coqdocindent{1.00em}
-\coqdoctac{intros} \coqdocvar{t} \coqdocvar{u} \coqdocvar{v}. \end{coqdoccode}
-Let \coqdocvar{t},\coqdocvar{u} and \coqdocvar{v} be elements of type \coqdocvar{A}
-      (or be elements of the set \coqdocvar{A}).\begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{1.00em}
-\coqdoctac{intros} \coqdocvar{H1} \coqdocvar{H2}. \end{coqdoccode}
-Assume that $t \tto_R u$
-      (name this assumption \coqdocvar{H1}) and $u\tto_R v$ (name this assumption
-      \coqdocvar{H2}). \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{1.00em}
-\coqdoctac{induction} \coqdocvar{H1}. \end{coqdoccode}
-The proof proceeds by induction on the hypothesis
-      \coqdocvar{H1}, i.e. by induction on $t \tto_R u$. The structure of the
-      proof context determines the shape of the induction hypothesis,
-      and this fact will be essential to understand the inductive
-      proof of the next theorem. As shown in Figure \ref{fig:trans},
-      \coqdocvar{H1} and \coqdocvar{H2} are the only hypothesis (the other lines are just
-      declaration of variables), therefore the induction hypothesis
-      subsumes \coqdocvar{H2}.
+    Let $t, u, v \in A$, i.e. they are elements of type \coqdocvar{A}, or
+    elements of the set \coqdocvar{A} (line 2). Call \coqdocvar{H1} (resp. \coqdocvar{H2}) the
+    hypothesis that $t \tto_R u$ (resp. $u\tto_R v$) (line 3). The
+    proof proceeds by induction on the hypothesis \coqdocvar{H1} (line 4),
+    i.e. by induction on $t \tto_R u$. The structure of the proof
+    context determines the shape of the induction hypothesis, and this
+    fact will be essential to understand the inductive proof of the
+    next theorem. As shown in Figure \ref{fig:trans}, \coqdocvar{H1} and \coqdocvar{H2}
+    are the only hypothesis (the other lines are just declaration of
+    variables), therefore the induction hypothesis subsumes \coqdocvar{H2}.
 
 
       \begin{figure}[h] \centering
         \includegraphics[scale=0.6]{fig1.png} \caption{Transitivity of
-        $\tto_R$}\label{fig:trans} \end{figure} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{1.00em}
-- \coqdoctac{assumption}. \end{coqdoccode}
-The first case is when $t \tto_R u$ is generated
-      by the constructor \coqdocvar{refl}, which is an axiom and hence we are
-      done. \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{1.00em}
-- \coqdoctac{apply} \coqdocvar{rtrans} \coqdockw{with} \coqdocvar{b}. \end{coqdoccode}
-The second case, i.e. the recursive case
-      is more interesting because $t \tto_R u$ is now generated by
-      \coqdocvar{rtrans}. This means that there exists an element, say $b$, such
-      that $t \to_R b$ and $b \tto_R u$. Therefore, in order to prove
-      that $t \tto_R u$, we can apply the rule \coqdocvar{rtrans} taking \coqdocvar{b} as
-      the intermediary term. The proof of the recursive case can be
-      better visualized by the corresponding deduction tree:
-      {\scriptsize \begin{mathpar}
-      \inferrule*[Right=MP]{\inferrule*[Right=MP]{\inferrule*[Right={
-      $rtrans$}]{~}{\inferrule*[Right={$(\forall_e)$}]{\forall x\ y\
-      z, x\to_R y \to y\tto_R z \to x\tto_R z}{t\to_R b \to b\tto_R u
-      \to t\tto_R u}} \and \inferrule*[Right={H}]{~}{t\to_R b}}{
-      b\tto_R u \to t\tto_R u} \and
-      \inferrule*[Right=MP]{\inferrule*[Right={ $IH$}]{~}{u\tto_R v
-      \to b\tto_R u} \and \inferrule*[Right={H2}]{~}{u\tto_R
-      v}}{b\tto_R u}}{t\tto_R u} \end{mathpar}}
+        $\tto_R$}\label{fig:trans} \end{figure}
 
 
-      Each branch of the above tree corresponds to a new goal in the
-      Coq proof. Therefore, we have two subcases (or subgoals) to
-      prove: \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{2.00em}
-+ \coqdoctac{assumption}. \end{coqdoccode}
-In this subgoal we need to prove that $t \to_R
-    b$, which we have as hypothesis. \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{2.00em}
-+ \coqdoctac{apply} \coqdocvar{IHrefltrans}; \coqdoctac{assumption}. \end{coqdoccode}
-In the second subgoal, we
-    need to prove that $b \tto_R u$. To do so, we apply the induction
+    The first case is when $t \tto_R u$ is generated by the
+    constructor \coqdocvar{refl}, which is an axiom and hence we are done (line
+    5).  The second case, i.e. the recursive case is more interesting
+    because $t \tto_R u$ is now generated by \coqdocvar{rtrans} (line 6). This
+    means that there exists an element, say $b$, such that $t \to_R b$
+    and $b \tto_R u$. Therefore, in order to prove that $t \tto_R u$,
+    we can apply the rule \coqdocvar{rtrans} taking \coqdocvar{b} as the intermediary
+    term. The proof of the recursive case can be better visualized by
+    the corresponding deduction tree: {\scriptsize \begin{mathpar}
+    \inferrule*[Right=MP]{\inferrule*[Right=MP]{\inferrule*[Right={
+    $rtrans$}]{~}{\inferrule*[Right={$(\forall_e)$}]{\forall x\ y\ z,
+    x\to_R y \to y\tto_R z \to x\tto_R z}{t\to_R b \to b\tto_R u \to
+    t\tto_R u}} \and \inferrule*[Right={H}]{~}{t\to_R b}}{ b\tto_R u
+    \to t\tto_R u} \and \inferrule*[Right=MP]{\inferrule*[Right={
+    $IH$}]{~}{u\tto_R v \to b\tto_R u} \and
+    \inferrule*[Right={H2}]{~}{u\tto_R v}}{b\tto_R u}}{t\tto_R u}
+    \end{mathpar}}
+
+
+    Each branch of the above tree corresponds to a new goal in the Coq
+    proof. Therefore, we have two subcases (or subgoals) to prove: In
+    this subgoal we need to prove that $t \to_R b$, which we have as
+    hypothesis (line 7). In the second subgoal (line 8), we need to
+    prove that $b \tto_R u$. To do so, we apply the induction
     hypothesis \coqdocvar{IHrefltrans}: $u \tto_R v \to b \tto_R u$, where
-    $u\tto_R v$ is the hypothesis \coqdocvar{H2}. \begin{coqdoccode}
-\coqdocnoindent
-\coqdockw{Qed}.\coqdoceol
-\coqdocemptyline
-\end{coqdoccode}
-This example is interesting because it shows how Coq works, how
+    $u\tto_R v$ is the hypothesis \coqdocvar{H2}. $\hfill\Box$ 
+
+ This example is interesting because it shows how Coq works, how
 each command line (also known as tactics or tacticals depending on its
 structure) corresponds, in general, to several steps of natural
 deduction rules. \begin{coqdoccode}
@@ -187,7 +138,7 @@ The reflexive transitive closure of a relation is used to define
 \coqdockw{Definition} \coqdocvar{Confl} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}) := \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b} \coqdocvar{c}, (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} \coqdocvar{c} \ensuremath{\rightarrow} (\coqdoctac{\ensuremath{\exists}} \coqdocvar{d}, (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{b} \coqdocvar{d} \ensuremath{\land} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{c} \coqdocvar{d}).\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
-In \cite{ZPropertyDraft}, V. van Oostrom gives a suficient
+In \cite{dehornoy2008z}, V. van Oostrom gives a sufficient
     condition for an ARS to be confluent, known as the \textit{Z Property}:
 
 
@@ -205,7 +156,7 @@ The corresponding Coq definition is given as: \begin{coqdoccode}
 \coqdockw{Definition} \coqdocvar{Z\_prop} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}) := \coqdoctac{\ensuremath{\exists}} \coqdocvar{f}:\coqdocvar{A} \ensuremath{\rightarrow} \coqdocvar{A}, \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvar{R} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} ((\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{b} (\coqdocvar{f} \coqdocvar{a}) \ensuremath{\land} (\coqdocvar{refltrans} \coqdocvar{R}) (\coqdocvar{f} \coqdocvar{a}) (\coqdocvar{f} \coqdocvar{b})).\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
-Alternatively, when \coqdocvar{f} satisfies the Z property, one says that \coqdocvar{f} is Z: \begin{coqdoccode}
+Alternatively, for a given function \coqdocvar{f}, one can say that \coqdocvar{f} satisfies the Z property, or that \coqdocvar{f} is Z, if the above conditions hold for \coqdocvar{f}: \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Definition} \coqdocvar{f\_is\_Z} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}) (\coqdocvar{f}: \coqdocvar{A} \ensuremath{\rightarrow} \coqdocvar{A}) := \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvar{R} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} ((\coqdocvar{refltrans} \coqdocvar{R})  \coqdocvar{b} (\coqdocvar{f} \coqdocvar{a}) \ensuremath{\land} (\coqdocvar{refltrans} \coqdocvar{R}) (\coqdocvar{f} \coqdocvar{a}) (\coqdocvar{f} \coqdocvar{b})).\coqdoceol
@@ -214,13 +165,16 @@ Alternatively, when \coqdocvar{f} satisfies the Z property, one says that \coqdo
 The first contribution of this work is a constructive proof of the
     fact that the Z property implies confluence. Our proof uses nested
     induction, and hence it differs from the one in \cite{kes09}
-    (that follows \cite{ZPropertyDraft}) in the sense that it does
-    not rely on the law of the excluded middle. As a result, we have
+    (that follows \cite{dehornoy2008z}) and the one in \cite{zproperty} 
+    in the sense that it does not rely on analyzing whether 
+    a term is in normal form or not, avoiding necessity of 
+    the law of the excluded middle . As a result, we have 
     an elegant inductive proof of the fact that if a binary relation
     has the Z property then it is confluent. In addition, we
     formalized this proof in the Coq proof assistant. In
-    \cite{zproperty}, B. Felgenhauer et.al. formalized the Z
-    property in Isabelle/HOL. In what follows, we present the theorem
+    \cite{zproperty}, B. Felgenhauer et.al. formalized in Isabelle/HOL 
+    the Z property and its relation to confluence. 
+    In what follows, we present the theorem
     and its proof interleaving Coq code and the corresponding
     comments. \begin{coqdoccode}
 \coqdocemptyline
@@ -315,22 +269,19 @@ $c \tto_R c$ corresponds to an application of
         
 
         The induction hypothesis states that every divergence from
-        $a'$, that reduces to $b$ from one side, converges: \coqdocvar{IHHrefl1}
+        $a'$ that reduces to $b$ from one side converges: \coqdocvar{IHHrefl1}
         : $\forall c_0 : A, a'\tto_R c_0 \to (\exists d : A, b\tto_R d
-        \land c_0\tto_R d$). The idea is to apply induction on the
-        hypothesis \coqdocvar{Hrefl2}, but the current proof context has the
+        \land c_0\tto_R d$). Now, we'd like apply induction on the
+        hypothesis \coqdocvar{Hrefl2} (a\symbol{92}tto\_R c), but the current proof context has the
         hypothesis \coqdocvar{H}: $a\to_R a'$ (\coqdocvar{a} reduces to \coqdocvar{a'} in one step),
         and hence it is the sole hypothesis depending on \coqdocvar{a} in the
-        current proof context. Therefore, suppose that $a\tto_R c$ is
-        built as $a \to_R a'' \tto_R c$ in the case of the constructor
-        \coqdocvar{rtrans}. The induction step in this case will assume that
-        $a''$ reduces in one step to $a'$, which is not true in
-        general. Note that all hypothesis, that do not have $a$ as
-        parameter, do not contribute to the shape of the induction
-        hypothesis. In order to circumvent this problem, we need to
-        remove the hypothesis \coqdocvar{H}, and replace it by another relevant
-        information derived from the Z property as shown in what
-        follows. \begin{coqdoccode}
+        current proof context. If we were to apply induction on \coqdocvar{Hrefl2} now, 
+        the generated induction hypothesis \coqdocvar{IHrefl2} would assume that there is 
+        a term $a''$ such that $a \to_R a'' \tto_R c$ and would require that 
+        $a'' \to_R a'$, which is generally false. In order to circumvent 
+        this problem, we need to discard the hypothesis \coqdocvar{H} from our proof 
+        context, and replace it by another relevant information derived from 
+        the Z property as shown in what follows. \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 - \coqdoctac{intros} \coqdocvar{c0} \coqdocvar{Hrefl2}. \end{coqdoccode}
@@ -345,10 +296,9 @@ Let $c_0$ be a reduct of $a$, and \coqdocvar{Hrefl2}
     \includegraphics[scale=0.6]{fig5-1.png}
 
 
-    Before applying induction to \coqdocvar{Hrefl2}: $a \tto_R c_0$, we will be
-    replace the hypothesis \coqdocvar{H}: $a\to_R b$ by two other properties
-    that are proved from the Z property: $b\tto_R (g\ a)$ and $a\tto_R
-    (g\ a)$. \begin{coqdoccode}
+    Before applying induction to \coqdocvar{Hrefl2}: $a \tto_R c_0$, we will derive 
+    $b\tto_R (g\ a)$ and $a\tto_R (g\ a)$ from the proof context so we can
+    discard the hypothesis \coqdocvar{H}: $a\to_R. $\begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 \coqdoctac{assert} (\coqdocvar{Hbga}: \coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{b} (\coqdocvar{g} \coqdocvar{a})).\coqdoceol
@@ -382,9 +332,13 @@ Call \coqdocvar{Haga} the
 \coqdocnoindent
 \coqdoceol
 \coqdocindent{2.00em}
-\coqdoctac{clear} \coqdocvar{H}; \coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{b}. \end{coqdoccode}
+\coqdoctac{clear} \coqdocvar{H}. \coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{b}. \end{coqdoccode}
 At this point we can remove
-      the hypothesis \coqdocvar{H} from the context, and generalize \coqdocvar{b}. \begin{coqdoccode}
+      the hypothesis \coqdocvar{H} from the context, and generalize \coqdocvar{b}. Doing so, 
+      we generalize \coqdocvar{IHHrefl1}, which, in conjunction with the hypotheses 
+      that depend on a (namely, \coqdocvar{Hrefl2}, \coqdocvar{Hbga}, and \coqdocvar{Haga}), will form 
+      the four necessary conditions for use of the second inductive 
+      hypothesis, \coqdocvar{IHHrefl2}\begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 \coqdoctac{induction} \coqdocvar{Hrefl2}. \end{coqdoccode}
@@ -426,7 +380,7 @@ Note that $c\tto_R x$ is already an hypothesis,
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{g} \coqdocvar{a}); [\coqdoctac{assumption} \ensuremath{|} \coqdoctac{apply} \coqdocvar{H}]. \end{coqdoccode}
       The proof of $a \tto_R x$ is done by the transitivity of
-      $\tto_R$ taking $(g\ a)$ as the intermediary step. \begin{coqdoccode}
+      $\tto_R$ taking $(g\ a)$ as the intermediate step. \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 + \coqdoctac{intros} \coqdocvar{b0} \coqdocvar{Hrefl1} \coqdocvar{IHHrefl1} \coqdocvar{Hb0ga}. \end{coqdoccode}
@@ -444,10 +398,10 @@ The second subgoal corresponds
 \coqdocemptyline
 \coqdocindent{3.00em}
 \coqdoctac{apply} \coqdocvar{IHHrefl2} \coqdockw{with} \coqdocvar{b0}. \end{coqdoccode}
-The second goal, i.e. the inductive
-        case can be proved by the second induction hypothesis
-        \coqdocvar{IHHrefl2}, and each of the 4 conditions generated by this
-        hypothesis is solved as follows: \begin{coqdoccode}
+The second goal, i.e. the inductive case is 
+      the consequent on IHHrefl2, so we can apply IHHrefl2 to prove it. Doing so, 
+      we must prove the antecedent of IHHrefl2, which consists of four separate 
+      hypotheses that we must prove. Those hypotheses are as follows: \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{g} \coqdocvar{a}); \coqdoctac{apply} \coqdocvar{HZ\_prop}; \coqdoctac{assumption}. \end{coqdoccode}
@@ -480,9 +434,119 @@ The second goal, i.e. the inductive
 \coqdockw{Qed}.\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
+Another proof \begin{coqdoccode}
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Lemma} \coqdocvar{refltrans\_f\_is\_Z\_refltrans} \{\coqdocvar{A}:\coqdockw{Type}\}: \coqdockw{\ensuremath{\forall}} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}) \coqdocvar{a} \coqdocvar{b} \coqdocvar{f}, \coqdocvar{f\_is\_Z} \coqdocvar{R} \coqdocvar{f} \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R}) (\coqdocvar{f} \coqdocvar{a}) (\coqdocvar{f} \coqdocvar{b}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{intros} \coqdocvar{R} \coqdocvar{a} \coqdocvar{b} \coqdocvar{f} \coqdocvar{H} \coqdocvar{Hab}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{unfold} \coqdocvar{f\_is\_Z} \coqdoctac{in} \coqdocvar{H}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{induction} \coqdocvar{Hab}.\coqdoceol
+\coqdocindent{1.00em}
+- \coqdoctac{apply} \coqdocvar{refl}.\coqdoceol
+\coqdocindent{1.00em}
+- \coqdoctac{apply} \coqdocvar{H} \coqdoctac{in} \coqdocvar{H0}.\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{destruct} \coqdocvar{H0} \coqdockw{as} [\coqdocvar{H1} \coqdocvar{H2}].\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{f} \coqdocvar{b}); \coqdoctac{assumption}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\coqdocnoindent
+\coqdockw{Lemma} \coqdocvar{refltrans\_f\_is\_Z} \{\coqdocvar{A}:\coqdockw{Type}\}: \coqdockw{\ensuremath{\forall}} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}) \coqdocvar{a} \coqdocvar{f}, \coqdocvar{f\_is\_Z} \coqdocvar{R} \coqdocvar{f} \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} (\coqdocvar{f} \coqdocvar{a}).\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{intros} \coqdocvar{R} \coqdocvar{a} \coqdocvar{f} \coqdocvar{H}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{unfold} \coqdocvar{f\_is\_Z} \coqdoctac{in} \coqdocvar{H}.\coqdoceol
+\coqdocnoindent
+\coqdocvar{Admitted}.\coqdoceol
+\coqdocemptyline
+\coqdocindent{1.00em}
+\coqdockw{Theorem} \coqdocvar{Z\_prop\_implies\_Confl2} \{\coqdocvar{A}:\coqdockw{Type}\}: \coqdockw{\ensuremath{\forall}} \coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}, \coqdocvar{Z\_prop} \coqdocvar{R} \ensuremath{\rightarrow} \coqdocvar{Confl} \coqdocvar{R}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdockw{Proof}.\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{intros} \coqdocvar{R} \coqdocvar{H}.\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{unfold} \coqdocvar{Z\_prop} \coqdoctac{in} \coqdocvar{H}.\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{destruct} \coqdocvar{H} \coqdockw{as} [\coqdocvar{g} \coqdocvar{H}].\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{unfold} \coqdocvar{Confl}.\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{intros} \coqdocvar{a} \coqdocvar{b} \coqdocvar{c} \coqdocvar{H1} \coqdocvar{H2}.\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{c}.\coqdoceol
+\coqdocindent{2.00em}
+\coqdoctac{induction} \coqdocvar{H1}.\coqdoceol
+\coqdocindent{2.00em}
+- \coqdoctac{intros} \coqdocvar{c} \coqdocvar{H1}.\coqdoceol
+\coqdocindent{3.00em}
+\coqdoctac{\ensuremath{\exists}} \coqdocvar{c}; \coqdoctac{split}.\coqdoceol
+\coqdocindent{3.00em}
++ \coqdoctac{assumption}.\coqdoceol
+\coqdocindent{3.00em}
++ \coqdoctac{apply} \coqdocvar{refl}.\coqdoceol
+\coqdocindent{2.00em}
+- \coqdoctac{intros} \coqdocvar{c0} \coqdocvar{H2}.\coqdoceol
+\coqdocindent{3.00em}
+\coqdoctac{apply} \coqdocvar{H} \coqdoctac{in} \coqdocvar{H0}.\coqdoceol
+\coqdocindent{3.00em}
+\coqdoctac{destruct} \coqdocvar{H0} \coqdockw{as} [\coqdocvar{Hga} \coqdocvar{Hgb}].\coqdoceol
+\coqdocindent{3.00em}
+\coqdoctac{assert} (\coqdocvar{refltrans} \coqdocvar{R} (\coqdocvar{g} \coqdocvar{a}) (\coqdocvar{g} \coqdocvar{c0})).\coqdoceol
+\coqdocindent{3.00em}
+\{\coqdoceol
+\coqdocindent{4.00em}
+\coqdoctac{apply}  \coqdocvar{refltrans\_f\_is\_Z\_refltrans}.\coqdoceol
+\coqdocindent{4.00em}
+- \coqdoctac{assumption}.\coqdoceol
+\coqdocindent{4.00em}
+- \coqdoctac{assumption}.\coqdoceol
+\coqdocindent{3.00em}
+\}\coqdoceol
+\coqdocindent{3.00em}
+\coqdoctac{assert} (\coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{c0} (\coqdocvar{g} \coqdocvar{c0})).\coqdoceol
+\coqdocindent{3.00em}
+\{\coqdoceol
+\coqdocindent{4.00em}
+\coqdoctac{apply} \coqdocvar{refltrans\_f\_is\_Z}; \coqdoctac{assumption}.\coqdoceol
+\coqdocindent{3.00em}
+\}\coqdoceol
+\coqdocindent{3.00em}
+\coqdoctac{assert} (\coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{b} (\coqdocvar{g} \coqdocvar{c0})).\coqdoceol
+\coqdocindent{3.00em}
+\{\coqdoceol
+\coqdocindent{4.00em}
+\coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{g} \coqdocvar{a}); \coqdoctac{assumption}.\coqdoceol
+\coqdocindent{3.00em}
+\}\coqdoceol
+\coqdocindent{3.00em}
+\coqdoctac{apply} \coqdocvar{IHrefltrans} \coqdoctac{in} \coqdocvar{H4}.\coqdoceol
+\coqdocindent{3.00em}
+\coqdoctac{destruct} \coqdocvar{H4} \coqdockw{as} [\coqdocvar{d} [\coqdocvar{H4} \coqdocvar{H5}]].\coqdoceol
+\coqdocindent{3.00em}
+\coqdoctac{\ensuremath{\exists}} \coqdocvar{d}; \coqdoctac{split}.\coqdoceol
+\coqdocindent{3.00em}
++  \coqdoctac{assumption}.\coqdoceol
+\coqdocindent{3.00em}
++ \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{g} \coqdocvar{c0}); \coqdoctac{assumption}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
+\end{coqdoccode}
 An alternative proof that Z implies confluence is possible via the
     notion of semiconfluence, which is equivalent to confluence, as
-    done in \cite{zproperty}. Our proof is also constructive, but we
+    done in \cite{zproperty}. Unlike the proof in \cite{zproperty} and 
+    similarly to our previous proof, our proof of the Theorem that 
+    Z implies semiconfluence is constructive, but we
     will not explain it here due to lack of space; any
     interested reader can find it in the Coq file in our GitHub
     repository. \begin{coqdoccode}
@@ -530,7 +594,7 @@ An alternative proof that Z implies confluence is possible via the
     with $\beta\eta$-reduction\cite{Ba84}, extensions of the
     $\lambda$-calculus with explicit substitutions\cite{accl91}, the
     $\lambda\mu$-calculus\cite{Parigot92}, etc. But before
-    presenting the complete definition of the Compositional Z, we need
+    presenting the full definition of the Compositional Z, we need
     to define the \textit{weak Z property}:
 
 
@@ -539,10 +603,10 @@ An alternative proof that Z implies confluence is possible via the
         \caption{The weak Z property}\label{fig:weakZ} \end{figure}
 
 
-    \begin{definition} Let $(A,\to_R)$ be an ARS and $\to_x$ a
+    \begin{definition} Let $(A,\to_R)$ be an ARS and $\to_R'$ a
      relation on $A$. A mapping $f$ satisfies the {\it weak Z
-     property} for $\to_R$ by $\to_x$ if $a\to_R b$ implies $b \tto_x
-     f(a)$ and $f(a) \tto_x f(b)$ (cf. Figure
+     property} for $\to_R$ by $\to_R'$ if $a\to_R b$ implies $b \tto_R'
+     f(a)$ and $f(a) \tto_R' f(b)$ (cf. Figure
      \ref{fig:weakZ}). Therefore, a mapping $f$ satisfies the Z
      property for $\to_R$ if it satisfies the weak Z property by
      itself.  \end{definition}
@@ -763,22 +827,23 @@ Rewriting Systems with equations is another interesting and
     modulo~\cite{AK12b}.
 
 
-    \begin{corollary}\cite{Nakazawa-Fujita2016}\label{cor:zcomp} Let
+    \begin{theorem}\label{cor:zcomp} Let
      $(A,\to_R)$ be an ARS such that $\to_R = \to_1 \cup \to_2$. If
      there exist mappings $f_1,f_2: A \to A$ such that
      \begin{enumerate} \item $a \to_1 b$ implies $f_1(a) = f_1(b)$
-     \item $a \tto_1 f_1(a), \forall a$ \item $a \tto_R f_2(a)$ holds
+     \item $a \tto_1 f_1(a), for all a$ \item $a \tto_R f_2(a)$ holds
      for any $a\in Im(f_1)$ \item $f_2 \circ f_1$ is weakly Z for
      $\to_2$ by $\to_R$ \end{enumerate} then $f_2 \circ f_1$ is Z for
-     $(A,\to_R)$, and hence $(A,\to_R)$ is confluent. \end{corollary}
+     $(A,\to_R)$, and hence $(A,\to_R)$ is confluent. \end{theorem}
 
 
     We define the predicate \coqdocvar{Z\_comp\_eq} corresponding to the
-    hypothesis of Corollary \ref{cor:zcomp}, and then we prove
+    hypothesis of Theorem \ref{cor:zcomp}, and then we prove
     directly that if \coqdocvar{Z\_comp\_eq} holds for a relation \coqdocvar{R} then \coqdocvar{Zprop}
     \coqdocvar{R} also holds. This approach differs from
-    \cite{Nakazawa-Fujita2016} that proves Corollary
-    \ref{cor:zcomp} directly from Theorem \ref{thm:zcomp} \begin{coqdoccode}
+    \cite{Nakazawa-Fujita2016} that proves Theorem
+    \ref{cor:zcomp}, which is a Corollary in \cite{Nakazawa-Fujita2016}, 
+    directly from Theorem \ref{thm:zcomp} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Definition} \coqdocvar{Z\_comp\_eq} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R} :\coqdocvar{Rel} \coqdocvar{A}) := \coqdoctac{\ensuremath{\exists}} (\coqdocvar{R1} \coqdocvar{R2}: \coqdocvar{Rel} \coqdocvar{A}) (\coqdocvar{f1} \coqdocvar{f2}: \coqdocvar{A} \ensuremath{\rightarrow} \coqdocvar{A}), \coqdocvar{R} = (\coqdocvar{R1} !\coqdocvar{\_}! \coqdocvar{R2}) \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvar{R1} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{f1} \coqdocvar{a}) = (\coqdocvar{f1} \coqdocvar{b})) \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a}, (\coqdocvar{refltrans} \coqdocvar{R1}) \coqdocvar{a} (\coqdocvar{f1} \coqdocvar{a})) \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{b} \coqdocvar{a}, \coqdocvar{a} = \coqdocvar{f1} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} (\coqdocvar{f2} \coqdocvar{a})) \ensuremath{\land} (\coqdocvar{f\_is\_weak\_Z} \coqdocvar{R2} \coqdocvar{R} (\coqdocvar{f2} \# \coqdocvar{f1})).\coqdoceol
