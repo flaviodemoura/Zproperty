@@ -1,11 +1,15 @@
+\section{The Z property implies Confluence}
+
+
+
+
   An ARS, say $(A,R)$, is defined as a pair composed of a set $A$ and
   binary relation over this set $R:A\times A$. Let $a,b\in A$. We
-  write $a\ R\ b$ or $a\to_R b$ to denote that $(a,b)\in R$, and we
-  say that $a$ $R$-reduces to $b$ in one step. The arrow notation will
-  be prefered because it is more convenient for expressing reductions,
-  so the reflexive transitive closure of a relation \coqdocvar{R}, written as
-  $\tto_R$, is defined by the following inference rules:
-  \begin{mathpar} \inferrule*[Right={$(refl)$}]{~}{a \tto_R a} \and
+  write $a\to_R b$ (or $R\ a\ b$ in Coq) to denote that $(a,b)\in R$,
+  and we say that $a$ $R$-reduces to $b$ in one step. The reflexive
+  transitive closure of a relation \coqdocvar{R}, written as $\tto_R$, is
+  defined by the following inference rules: \begin{mathpar}
+  \inferrule*[Right={$(refl)$}]{~}{a \tto_R a} \and
   \inferrule*[Right={$(rtrans)$}]{a\to_R b \and b \tto_R c}{a \tto_R
   c} \end{mathpar} \noindent where $a,b$ and $c$ are universally
   quantified variables as one makes explicit in the corresponding Coq
@@ -20,97 +24,69 @@
 \coqdocemptyline
 \end{coqdoccode}
 The rules named (\coqdocvar{refl}) and (\coqdocvar{rtrans}) are called \textit{constructors}
-in the Coq definition. The first constructor states the reflexivity
-axiom for $\tto_R$, while \coqdocvar{rtrans} extends the reflexive transitive
-closure of \coqdocvar{R}, if one has at least a one-step reduction. As a first
-example, let's have a look at the proof of transitivity of $\tto_R$:
+in the Coq definition. The first constructor, namely \coqdocvar{refl}, states
+the reflexivity axiom for $\tto_R$, while \coqdocvar{rtrans} extends the
+reflexive transitive closure of \coqdocvar{R}, if one has at least a one-step
+reduction. As a first example, let's have a look at the proof of
+transitivity of $\tto_R$:
 
 
-\begin{lemma} Let $\to_R$ be a binary relation over a set $A$. If $t
-\tto_R u$ and $u \tto_R v$ then $t \tto_R v$, for all $t,u,v \in A$.
-\end{lemma}
+\begin{lemma} Let $\to_R$ be a binary relation over a set $A$. For
+all $t, u, v \in A$, if $t \tto_R u$ and $u \tto_R v$ then $t \tto_R
+v$.  \end{lemma}
 
 
- Although its proof is simple, it will help us explain the way in which we will
-relate English annotations with the proof steps. The corresponding
-lemma in Coq, named \coqdocvar{refltrans\_composition}, is stated as follows: \begin{coqdoccode}
+ Despite its simplicity, the proof of this lemma will help us explain
+the way in which we will relate English annotations with the proof
+steps. Coq proofs are written between the reserved words \coqdockw{Proof} and
+\coqdockw{Qed} (lines 1 and 9), and each proof command finishes with a
+dot. Proofs can be structured with bullets (- in the first level, + in
+the second level, * in the third level, ** in the fourth level, and so
+on). The corresponding informal proof proceed as follows: The
+corresponding lemma in Coq, named \coqdocvar{refltrans\_composition}, is stated
+as follows: \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Lemma} \coqdocvar{refltrans\_composition} \{\coqdocvar{A}\} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}): \coqdockw{\ensuremath{\forall}} \coqdocvar{t} \coqdocvar{u} \coqdocvar{v}, \coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{t} \coqdocvar{u} \ensuremath{\rightarrow} \coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{u} \coqdocvar{v} \ensuremath{\rightarrow} \coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{t} \coqdocvar{v}.\coqdoceol
+\coqdocnoindent
+\coqdockw{Proof}.\coqdoceol
+\coqdocindent{1.00em}
+\coqdoctac{intros} \coqdocvar{t} \coqdocvar{u} \coqdocvar{v}. \end{coqdoccode}
+\comm{Let $t,u,v$ be elements of $A$.} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{1.00em}
+\coqdoctac{intros} \coqdocvar{H1} \coqdocvar{H2}. \end{coqdoccode}
+\comm{Let $H1$ (respectively, $H2$) be the hipothesis that $t \tto_R   u$ (respectively, $u \tto_R v$).} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{1.00em}
+\coqdoctac{induction} \coqdocvar{H1}. \end{coqdoccode}
+\comm{The proof procceds by induction on the hipothesis $H1$. Therefore there is one case for each constructor of the reflexive transitive closure of $R$.} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{1.00em}
+- \coqdoctac{assumption}. \end{coqdoccode}
+\comm{For the base case, $t$ and $u$ are the same element and hence the goal coincides with the hipothesis $H2$.} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{1.00em}
+- \coqdoctac{apply} \coqdocvar{rtrans} \coqdockw{with} \coqdocvar{b}. \end{coqdoccode}
+\comm{For the inductive case, $t \tto_R u$ is build from $t \to_R b$ and $b \tto_R u$, for some $b$, and as induction hipothesis one has that $b \tto_R v$. Therefore, one can prove that $t \tto_R v$ by applying the rule ($rtrans$) with $b$ as the intermediary term:
+
+\begin{mathpar} \inferrule*[Right={$(rtrans)$}]{t\to_R b \and b \tto_R u}{t \tto_R
+  u} \end{mathpar}
+
+ We have then two subproofs:} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{2.00em}
++ \coqdoctac{assumption}. \end{coqdoccode}
+\comm{The proof that $t\to_R b$ is one of the hipothesis, and we are done.} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{2.00em}
++ \coqdoctac{apply} \coqdocvar{IHrefltrans}; \coqdoctac{assumption}. \end{coqdoccode}
+\comm{The proof that $b\to_R v$ is obtained from the induction hipothesis.} \begin{coqdoccode}
+\coqdocnoindent
+\coqdockw{Qed}.\coqdoceol
+\coqdocemptyline
 \end{coqdoccode}
-\begin{verbatim}
-1. Proof.  
-2.  intros t u v.  
-3.  intros H1 H2.  
-4.  induction H1.
-5.  - assumption.  
-6.  - apply rtrans with b.  
-7.  + assumption.  
-8.  + apply IHrefltrans; assumption.  
-9. Qed. 
-\end{verbatim}
-
-
-This work is not a Coq tutorial, but our idea is that it should
-also be readable for those unfamiliar with the Coq proof Assistant. In
-addition, this paper is built directly from a Coq proof script, which
-means that we are forced to present the ideas and the results in a
-more organized and systematic way that is not necessarily the more
-pedagogical one. Coq proofs are written between the reserved words
-\coqdockw{Proof} and \coqdockw{Qed} (lines 1 and 9), and each proof command finishes
-with a dot. Proofs can be structured with bullets (- in the first
-level, + in the second level, * in the third level, ** in the fourth
-level, and so on). The corresponding informal proof proceed as
-follows: 
-
- {\bf Proof}.
-
-
-    Let $t, u, v \in A$, i.e. they are elements of type \coqdocvar{A}, or
-    elements of the set \coqdocvar{A} (line 2). Call \coqdocvar{H1} (resp. \coqdocvar{H2}) the
-    hypothesis that $t \tto_R u$ (resp. $u\tto_R v$) (line 3). The
-    proof proceeds by induction on the hypothesis \coqdocvar{H1} (line 4),
-    i.e. by induction on $t \tto_R u$. The structure of the proof
-    context determines the shape of the induction hypothesis, and this
-    fact will be essential to understand the inductive proof of the
-    next theorem. As shown in Figure \ref{fig:trans}, \coqdocvar{H1} and \coqdocvar{H2}
-    are the only hypothesis (the other lines are just declaration of
-    variables), therefore the induction hypothesis subsumes \coqdocvar{H2}.
-
-
-      \begin{figure}[h] \centering
-        \includegraphics[scale=0.6]{fig1.png} \caption{Transitivity of
-        $\tto_R$}\label{fig:trans} \end{figure}
-
-
-    The first case is when $t \tto_R u$ is generated by the
-    constructor \coqdocvar{refl}, which is an axiom and hence we are done (line
-    5).  The second case, i.e. the recursive case is more interesting
-    because $t \tto_R u$ is now generated by \coqdocvar{rtrans} (line 6). This
-    means that there exists an element, say $b$, such that $t \to_R b$
-    and $b \tto_R u$. Therefore, in order to prove that $t \tto_R u$,
-    we can apply the rule \coqdocvar{rtrans} taking \coqdocvar{b} as the intermediary
-    term. The proof of the recursive case can be better visualized by
-    the corresponding deduction tree: {\scriptsize \begin{mathpar}
-    \inferrule*[Right=MP]{\inferrule*[Right=MP]{\inferrule*[Right={
-    $rtrans$}]{~}{\inferrule*[Right={$(\forall_e)$}]{\forall x\ y\ z,
-    x\to_R y \to y\tto_R z \to x\tto_R z}{t\to_R b \to b\tto_R u \to
-    t\tto_R u}} \and \inferrule*[Right={H}]{~}{t\to_R b}}{ b\tto_R u
-    \to t\tto_R u} \and \inferrule*[Right=MP]{\inferrule*[Right={
-    $IH$}]{~}{u\tto_R v \to b\tto_R u} \and
-    \inferrule*[Right={H2}]{~}{u\tto_R v}}{b\tto_R u}}{t\tto_R u}
-    \end{mathpar}}
-
-
-    Each branch of the above tree corresponds to a new goal in the Coq
-    proof. Therefore, we have two subcases (or subgoals) to prove: In
-    this subgoal we need to prove that $t \to_R b$, which we have as
-    hypothesis (line 7). In the second subgoal (line 8), we need to
-    prove that $b \tto_R u$. To do so, we apply the induction
-    hypothesis \coqdocvar{IHrefltrans}: $u \tto_R v \to b \tto_R u$, where
-    $u\tto_R v$ is the hypothesis \coqdocvar{H2}. $\hfill\Box$ 
-
- This example is interesting because it shows how Coq works, how
+This example is interesting because it shows how Coq works, how
 each command line (also known as tactics or tacticals depending on its
 structure) corresponds, in general, to several steps of natural
 deduction rules. \begin{coqdoccode}

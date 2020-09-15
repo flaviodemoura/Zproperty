@@ -2,12 +2,11 @@
 
   An ARS, say $(A,R)$, is defined as a pair composed of a set $A$ and
   binary relation over this set $R:A\times A$. Let $a,b\in A$. We
-  write $a\ R\ b$ or $a\to_R b$ to denote that $(a,b)\in R$, and we
-  say that $a$ $R$-reduces to $b$ in one step. The arrow notation will
-  be prefered because it is more convenient for expressing reductions,
-  so the reflexive transitive closure of a relation [R], written as
-  $\tto_R$, is defined by the following inference rules:
-  %\begin{mathpar} \inferrule*[Right={$(refl)$}]{~}{a \tto_R a} \and
+  write $a\to_R b$ (or $R\ a\ b$ in Coq) to denote that $(a,b)\in R$,
+  and we say that $a$ $R$-reduces to $b$ in one step. The reflexive
+  transitive closure of a relation [R], written as $\tto_R$, is
+  defined by the following inference rules: %\begin{mathpar}
+  \inferrule*[Right={$(refl)$}]{~}{a \tto_R a} \and
   \inferrule*[Right={$(rtrans)$}]{a\to_R b \and b \tto_R c}{a \tto_R
   c} \end{mathpar}% %\noindent% where $a,b$ and $c$ are universally
   quantified variables as one makes explicit in the corresponding Coq
@@ -72,31 +71,48 @@ Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
 | rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c.
 
 (** The rules named ([refl]) and ([rtrans]) are called _constructors_
-in the Coq definition. The first constructor states the reflexivity
-axiom for $\tto_R$, while [rtrans] extends the reflexive transitive
-closure of [R], if one has at least a one-step reduction. As a first
-example, let's have a look at the proof of transitivity of $\tto_R$:
+in the Coq definition. The first constructor, namely [refl], states
+the reflexivity axiom for $\tto_R$, while [rtrans] extends the
+reflexive transitive closure of [R], if one has at least a one-step
+reduction. As a first example, let's have a look at the proof of
+transitivity of $\tto_R$:
 
-%\begin{lemma} Let $\to_R$ be a binary relation over a set $A$. If $t
-\tto_R u$ and $u \tto_R v$ then $t \tto_R v$, for all $t,u,v \in A$.
-\end{lemma}%
+%\begin{lemma} Let $\to_R$ be a binary relation over a set $A$. For
+all $t, u, v \in A$, if $t \tto_R u$ and $u \tto_R v$ then $t \tto_R
+v$.  \end{lemma}%
 
- Although its proof is simple, it will help us explain the way in which we will
-relate English annotations with the proof steps. The corresponding
-lemma in Coq, named [refltrans_composition], is stated as follows: *)
+ Despite its simplicity, the proof of this lemma will help us explain
+the way in which we will relate English annotations with the proof
+steps. Coq proofs are written between the reserved words [Proof] and
+[Qed] (lines 1 and 9), and each proof command finishes with a
+dot. Proofs can be structured with bullets (- in the first level, + in
+the second level, * in the third level, ** in the fourth level, and so
+on). The corresponding informal proof proceed as follows: The
+corresponding lemma in Coq, named [refltrans_composition], is stated
+as follows: *)
 
 Lemma refltrans_composition {A} (R: Rel A): forall t u v, refltrans R t u -> refltrans R u v -> refltrans R t v.
-(* begin hide *)
 Proof.  
- intros t u v.  
- intros H1 H2.  
- induction H1.
- - assumption.  
- - apply rtrans with b.  
- + assumption.  
- + apply IHrefltrans; assumption.  
+  intros t u v. (** %\comm{Let $t,u,v$ be elements of $A$.}% *)
+  
+  intros H1 H2. (** %\comm{Let $H1$ (respectively, $H2$) be the hipothesis that $t \tto_R   u$ (respectively, $u \tto_R v$).}% *)
+  
+  induction H1. (** %\comm{The proof procceds by induction on the hipothesis $H1$. Therefore there is one case for each constructor of the reflexive transitive closure of $R$.}% *)
+  
+  - assumption. (** %\comm{For the base case, $t$ and $u$ are the same element and hence the goal coincides with the hipothesis $H2$.}% *)
+    
+  - apply rtrans with b. (** %\comm{For the inductive case, $t \tto_R u$ is build from $t \to_R b$ and $b \tto_R u$, for some $b$, and as induction hipothesis one has that $b \tto_R v$. Therefore, one can prove that $t \tto_R v$ by applying the rule ($rtrans$) with $b$ as the intermediary term:
+
+\begin{mathpar} \inferrule*[Right={$(rtrans)$}]{t\to_R b \and b \tto_R u}{t \tto_R
+  u} \end{mathpar}
+
+ We have then two subproofs:}% *)
+    
+    + assumption. (** %\comm{The proof that $t\to_R b$ is one of the hipothesis, and we are done.}% *)
+      
+    + apply IHrefltrans; assumption.  (** %\comm{The proof that $b\to_R v$ is obtained from the induction hipothesis.}% *)
 Qed. 
-(* end hide *)
+(* begin hide *)
 (**
 <<
 1. Proof.  
@@ -115,12 +131,7 @@ also be readable for those unfamiliar with the Coq proof Assistant. In
 addition, this paper is built directly from a Coq proof script, which
 means that we are forced to present the ideas and the results in a
 more organized and systematic way that is not necessarily the more
-pedagogical one. Coq proofs are written between the reserved words
-[Proof] and [Qed] (lines 1 and 9), and each proof command finishes
-with a dot. Proofs can be structured with bullets (- in the first
-level, + in the second level, * in the third level, ** in the fourth
-level, and so on). The corresponding informal proof proceed as
-follows: *)
+pedagogical one. *)
 
 (** %{\bf Proof}.%
 
@@ -164,7 +175,8 @@ follows: *)
     prove that $b \tto_R u$. To do so, we apply the induction
     hypothesis [IHrefltrans]: $u \tto_R v \to b \tto_R u$, where
     $u\tto_R v$ is the hypothesis [H2]. $\hfill\Box$ *)
- 
+(* end hide *)
+
 (** This example is interesting because it shows how Coq works, how
 each command line (also known as tactics or tacticals depending on its
 structure) corresponds, in general, to several steps of natural
