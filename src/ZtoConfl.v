@@ -97,20 +97,37 @@ Proof.
   
   intros H1 H2. (** %\comm{Let $H1$ (respectively, $H2$) be the hipothesis that $t \tto_R   u$ (respectively, $u \tto_R v$).}% *)
   
-  induction H1. (** %\comm{The proof procceds by induction on the hipothesis $H1$. Therefore there is one case for each constructor of the reflexive transitive closure of $R$.}% *)
+  induction H1. (** %\comm{The proof procceds by induction on the
+    hipothesis $H1$. Therefore there is one case for each constructor
+    of the reflexive transitive closure of $R$. The structure of the
+    proof context determines the shape of the induction hypothesis,
+    and this fact will be essential to understand the inductive proof
+    of the next theorem.} *)
   
-  - assumption. (** %\comm{For the base case, $t$ and $u$ are the same element and hence the goal coincides with the hipothesis $H2$.}% *)
+  - assumption. (** %\fbox{\minipage[r]{10cm}For the base case, which corresponds to the rule $refl$, $t$ and $u$ are the same element and hence the goal coincides with the hipothesis $H2$.\end{minipage}}% *)
     
-  - apply rtrans with b. (** %\comm{For the inductive case, $t \tto_R u$ is build from $t \to_R b$ and $b \tto_R u$, for some $b$, and as induction hipothesis one has that $b \tto_R v$. Therefore, one can prove that $t \tto_R v$ by applying the rule ($rtrans$) with $b$ as the intermediary term:
+  - apply rtrans with b. (** %\comm{For the inductive case, $t \tto_R
+    u$ is build from $t \to_R b$ and $b \tto_R u$, for some $b$, and
+    as induction hipothesis one has that $b \tto_R v$. Therefore, one
+    can prove that $t \tto_R v$ by applying the rule ($rtrans$) with
+    $b$ as the intermediary term:
 
-\begin{mathpar} \inferrule*[Right={$(rtrans)$}]{t\to_R b \and b \tto_R u}{t \tto_R
-  u} \end{mathpar}
+\begin{mathpar} \inferrule*[Right={$(rtrans)$}]{t\to_R b \and b \tto_R
+  v}{t \tto_R v} \end{mathpar}
 
  We have then two subproofs:}% *)
     
     + assumption. (** %\comm{The proof that $t\to_R b$ is one of the hipothesis, and we are done.}% *)
       
-    + apply IHrefltrans; assumption.  (** %\comm{The proof that $b\to_R v$ is obtained from the induction hipothesis.}% *)
+    + apply IHrefltrans; assumption.  (** %\comm{The proof that
+$b\tto_R v$ is obtained from the induction hipothesis, and this proof
+can be better visualized by the corresponding deduction tree:
+
+\begin{mathpar}
+\inferrule*[Right={$MP$}]{
+\inferrule*[Right={$IH$}]{~}{b\tto_R u \to b\tto_R v} \and
+\inferrule*[Right={H2}]{~}{b\tto_R u}}{b\tto_R v}
+\end{mathpar} }% *)
 Qed. 
 (* begin hide *)
 (**
