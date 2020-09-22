@@ -12,9 +12,30 @@ Introdução: A Teoria de Reescrita é um modelo computacional
  etc. Apresentamos nesse artigo uma prova construtiva de que a
  propriedade Z implica na confluência.
 
-Metodologia:
+Metodologia: O trabalho desenvolvido se deu através de uma revião inicial 
+da literatura acerca de cálculo-lambda com substituições explícitas, em 
+especial das contribuições de Delia Kesner e Arthur Charguéraud, como 
+motivação para a formalização desse cálculo no assistente de provas Coq. 
+A partir disso, montamos um framework de estruturas e provas auxiliares necessárias 
+para implementar esse cálculo em Coq. Segundo esse framework, os teoremas 
+foram divididos em quatro arquivos de script Coq, sendo estes: ZtoConfl.v 
+(em que a confluência é provada para qualquer sistema de reescrita que tem 
+a propriedade Z), infraES.v (em que a gramática de termos e seus detalhes 
+são definidos), lex.v (em que o cálculo-lambda com substituições explícitas 
+é definido), e confl_lex.v (em que se prova que o cálculo-lambda anterior é 
+confluente). Houve reuniões semanais presenciais 
+para discutir no que seria necessário focar, e, a partir de março de 2020, 
+essas reuniões passaram a ocorrer à distância, ainda semanais.
 
-Resultados:
+Resultados: Conseguimos demonstrar em Coq que a propriedade Z e uma extensão 
+da propriedade Z, conhecida como propriedade Z composicional e descrita 
+originalmente por Koji Nakazawa e Ken-etsu Fujita, implicam na confluência 
+para qualquer sistema de reescrita de termos. Além disso, formalizamos um 
+framework que acreditamos ser apropriado para a continuação do trabalho 
+desenvolvido, que atualmente está focado no renomeamento de variáveis e 
+na composição completa, que serão usados por fim para provar a confluência 
+do cálculo-lambda descrito no trabalho através de uma função chamada 
+função de superdesenvolvimento, que foi descrita em confl_lex.v.
 
 Conclusão: A propriedade Z foi apresentada inicialmente por Vincent
 van Oostrom como condição suficiente para um sistema de reescrita de
@@ -23,8 +44,6 @@ em diversos contextos envolvendo variações do cálculo-lambda, como
 proposto por Alonzo Church na década de 1930.  As provas em Coq dos
 resultados principais foram comentadas linha a linha, servindo tanto
 como uma apresentação informal das provas quanto como seu complemento
-formal. Além disso, nós formalizamos uma extensão da propriedade Z,
-conhecida como propriedade Z composicional, descrita originalmente por
-Koji Nakazawa e Ken-etsu Fujita.
+formal. 
 
 Palavras-chave: confluência, Coq, cálculo lambda, verificação formal
