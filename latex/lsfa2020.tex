@@ -13,10 +13,15 @@
 \usepackage{pdfsync}
 \usepackage{coqdoc}
 \usepackage{fullpage}
+%\usepackage{minibox}
+
 
 \newcommand{\tto}{\twoheadrightarrow}
 \newcommand{\flavio}[1]{{\color{red}#1}}
-\newcommand{\comm}[1]{{\color{blue}#1}}
+
+%\newcommand{\comm}[1]{\framebox{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{#1}}}
+
+\newcommand{\comm}[1]{\framebox{\parbox{\textwidth}{#1}}}
 
 \def\lastname{de Moura {\it et. al.}}
 

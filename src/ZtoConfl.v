@@ -102,9 +102,9 @@ Proof.
     of the reflexive transitive closure of $R$. The structure of the
     proof context determines the shape of the induction hypothesis,
     and this fact will be essential to understand the inductive proof
-    of the next theorem.} *)
+    of the next theorem.}% *)
   
-  - assumption. (** %\fbox{\minipage[r]{10cm}For the base case, which corresponds to the rule $refl$, $t$ and $u$ are the same element and hence the goal coincides with the hipothesis $H2$.\end{minipage}}% *)
+  - assumption. (** %\comm{For the base case, which corresponds to the rule $refl$, $t$ and $u$ are the same element and hence the goal coincides with the hipothesis $H2$.}% *)
     
   - apply rtrans with b. (** %\comm{For the inductive case, $t \tto_R
     u$ is build from $t \to_R b$ and $b \tto_R u$, for some $b$, and
