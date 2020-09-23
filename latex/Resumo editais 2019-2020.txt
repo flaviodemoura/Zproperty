@@ -9,23 +9,26 @@ Introdução: A Teoria de Reescrita é um modelo computacional
  Z, que foi usada para provar confluência de diversos sistemas de
  reescrita, como o cálculo-lambda com beta-eta-redução, extensões do
  cálculo-lambda com substituições explícitas, o cálculo-lambda-mi,
- etc. Apresentamos nesse artigo uma prova construtiva de que a
+ etc. Apresentamos nesse trabalho uma prova construtiva de que a
  propriedade Z implica na confluência.
 
-Metodologia: O trabalho desenvolvido se deu através de uma revião inicial 
-da literatura acerca de cálculo-lambda com substituições explícitas, em 
-especial das contribuições de Delia Kesner e Arthur Charguéraud, como 
-motivação para a formalização desse cálculo no assistente de provas Coq. 
-A partir disso, montamos um framework de estruturas e provas auxiliares necessárias 
-para implementar esse cálculo em Coq. Segundo esse framework, os teoremas 
-foram divididos em quatro arquivos de script Coq, sendo estes: ZtoConfl.v 
-(em que a confluência é provada para qualquer sistema de reescrita que tem 
-a propriedade Z), infraES.v (em que a gramática de termos e seus detalhes 
-são definidos), lex.v (em que o cálculo-lambda com substituições explícitas 
-é definido), e confl_lex.v (em que se prova que o cálculo-lambda anterior é 
-confluente). Houve reuniões semanais presenciais 
-para discutir no que seria necessário focar, e, a partir de março de 2020, 
-essas reuniões passaram a ocorrer à distância, ainda semanais.
+Metodologia: O trabalho desenvolvido se deu através de uma revisão
+inicial da literatura acerca de cálculo-lambda com substituições
+explícitas, em especial das contribuições de Delia Kesner e Arthur
+Charguéraud, como motivação para a formalização desse cálculo no
+assistente de provas Coq.  A partir disso, montamos um framework a
+partir da formalização feita por Charguéraud (denominada Locally
+Nameless Representation), de estruturas e provas auxiliares necessárias
+para implementar esse cálculo em Coq. Segundo esse framework, os
+teoremas foram divididos em quatro arquivos de script Coq, sendo
+estes: ZtoConfl.v (em que a confluência é provada para qualquer
+sistema de reescrita que tem a propriedade Z), infraES.v (em que a
+gramática de termos e seus detalhes são definidos), lex.v (em que o
+cálculo-lambda com substituições explícitas é definido), e confl_lex.v
+(em que se prova que o cálculo-lambda anterior é confluente). Houve
+reuniões semanais presenciais para discutir no que seria necessário
+focar, e, a partir de março de 2020, essas reuniões passaram a ocorrer
+à distância, ainda semanais.
 
 Resultados: Conseguimos demonstrar em Coq que a propriedade Z e uma extensão 
 da propriedade Z, conhecida como propriedade Z composicional e descrita 
