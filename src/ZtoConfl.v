@@ -128,6 +128,7 @@ can be better visualized by the corresponding deduction tree:
 \inferrule*[Right={$IH$}]{~}{b\tto_R u \to b\tto_R v} \and
 \inferrule*[Right={H2}]{~}{b\tto_R u}}{b\tto_R v}
 \end{mathpar} }% *)
+      
 Qed. 
 (* begin hide *)
 (**
