@@ -13,17 +13,16 @@
 \usepackage{pdfsync}
 \usepackage{coqdoc}
 \usepackage{fullpage}
-%\usepackage{minibox}
+\usepackage{minibox}
+\usepackage{tabto,calc}
 
 
 \newcommand{\tto}{\twoheadrightarrow}
 \newcommand{\flavio}[1]{{\color{red}#1}}
 
-%\newcommand{\comm}[1]{\framebox{\parbox{\dimexpr\textwidth-2\fboxsep-2\fboxrule}{#1}}}
+\newcommand{\comm}[1]{\tabto{\CurrentLineWidth}\fbox{\begin{minipage}[t]{\linewidth-\TabPrevPos} #1 \end{minipage}}}
 
-\newcommand{\comm}[1]{\framebox{\parbox{\textwidth}{#1}}}
-
-\def\lastname{de Moura {\it et. al.}}
+%\Def\lastname{de Moura {\it et. al.}}
 
 \title{Confluence via the Z Property in Coq}
 \author{Flávio L. C. de Moura \and Leandro O. Rezende}
