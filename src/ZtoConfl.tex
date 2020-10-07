@@ -178,77 +178,73 @@ The first contribution of this work is a constructive proof of the
 \coqdockw{Proof}.\coqdoceol
 \coqdocindent{1.00em}
 \coqdoctac{intros} \coqdocvar{R} \coqdocvar{HZ\_prop}. \end{coqdoccode}
-Let \coqdocvar{R} be a relation over \coqdocvar{A} that satisfies
-    the Z property, which will be denoted by \coqdocvar{HZ\_prop} for future
-    reference. \begin{coqdoccode}
+\comm{Let $R$ be a relation over $A$ that satisfies
+    the Z property, which will be denoted by $HZ\_prop$ for future
+    reference.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{unfold} \coqdocvar{Z\_prop}, \coqdocvar{Confl} \coqdoctac{in} *. \end{coqdoccode}
-Unfolding both definitions of
-  \coqdocvar{Z\_prop} and \coqdocvar{Confl}, we get the following proof context:
+\comm{Unfolding both definitions of
+  $Z\_prop$ and $Confl$, we get the following proof context:
 
-
-      \includegraphics[scale=0.6]{fig3.png} \begin{coqdoccode}
+     \includegraphics[scale=0.5]{fig3.png} } \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{intros} \coqdocvar{a} \coqdocvar{b} \coqdocvar{c} \coqdocvar{Hrefl1} \coqdocvar{Hrefl2}. \end{coqdoccode}
-Let \coqdocvar{a}, \coqdocvar{b} and \coqdocvar{c} be elements of
-     the set \coqdocvar{A}, \coqdocvar{Hrefl1} the hypothesis that $a \tto_R b$, and
-     \coqdocvar{Hrefl2} the hypothesis that $a\tto_R c$. We need to prove that
-     there exists \coqdocvar{d} such that $b\tto_R d$ and $c\tto_R d$ \begin{coqdoccode}
+\comm{Let $a, b$ and $c$ be elements of
+     the set $A$, $Hrefl1$ the hypothesis that $a \tto_R b$, and
+     $Hrefl2$ the hypothesis that $a\tto_R c$. We need to prove that
+     there exists $d$ such that $b\tto_R d$ and $c\tto_R d$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{destruct} \coqdocvar{HZ\_prop} \coqdockw{as} [\coqdocvar{g} \coqdocvar{HZ\_prop}]. \end{coqdoccode}
-We know from the hypothesis
-     \coqdocvar{HZ\_prop} that there exists a mapping \coqdocvar{f} that is Z. Let's call
-     \coqdocvar{g} this mapping, and we get following proof context:
+\comm{We know from the hypothesis
+     $HZ\_prop$ that there exists a mapping $f$ that is Z. Let's call
+     $g$ this mapping, and we get following proof context:
 
-
-      \includegraphics[scale=0.6]{fig4.png}
-
+      \symbol{92}includegraphics\coqdocvar{scale}=0.6\{fig4.png\}
 
       The proof proceeds by nested induction, firstly on the length of
-      the reduction from \coqdocvar{a} to \coqdocvar{b}, and then on the length of the
-      reduction from \coqdocvar{a} to \coqdocvar{c}. \begin{coqdoccode}
+      the reduction from $a$ to $b$, and then on the length of the
+      reduction from $a$ to $c$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{c}. \end{coqdoccode}
-Before the first induction,
-      i.e. induction on \coqdocvar{Hrefl1}, the element \coqdocvar{c} needs to be
+\comm{Before the first induction,
+      i.e. induction on $Hrefl1$, the element $c$ needs to be
       generalized so that it can be afterwards instantiated with any
-      reduct of \coqdocvar{a}. \begin{coqdoccode}
+      reduct of $a$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{induction} \coqdocvar{Hrefl1}. \end{coqdoccode}
-The induction on \coqdocvar{Hrefl1} corresponds to
+\comm{The induction on $Hrefl1$ corresponds to
        induction on the reflexive transitive closure of the relation
-       \coqdocvar{R}, and since \coqdocvar{refltrans} has two rules, the goal splits in
+       $R$, and since $refltrans$ has two rules, the goal splits in
        two subgoals, one for each possible way of constructing $a
-       \tto_R b$. \begin{coqdoccode}
+       \tto_R b$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 - \coqdoctac{intros} \coqdocvar{c} \coqdocvar{Hrefl2}. \end{coqdoccode}
-In the first case, we have that $b = a$ since
+\comm{In the first case, we have that $b = a$ since
     we are in the reflexive case. This means that we have to prove
-    that there exists \coqdocvar{d}, such that $a \tto_R d$ and $c \tto_R d$. \begin{coqdoccode}
+    that there exists $d$, such that $a \tto_R d$ and $c \tto_R d$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 \coqdoctac{\ensuremath{\exists}} \coqdocvar{c}; \coqdoctac{split}. \end{coqdoccode}
-Taking \coqdocvar{d} as \coqdocvar{c}, the proof is simplified to $a
-    \tto_R c$ and $c \tto_R c$. \begin{coqdoccode}
+\comm{Taking $d$ as $c$, the proof is simplified to $a
+    \tto_R c$ and $c \tto_R c$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 + \coqdoctac{assumption}. \end{coqdoccode}
-The first component is exactly the hypothesis
-        \coqdocvar{Hrefl2} and, \begin{coqdoccode}
+\comm{The first component is exactly the hypothesis
+        $Hrefl2$ and } \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 + \coqdoctac{apply} \coqdocvar{refl}. \end{coqdoccode}
-$c \tto_R c$ corresponds to an application of
-        the \coqdocvar{refl} axiom. \newline
+\comm{$c \tto_R c$ corresponds to an application of
+        the $refl$ axiom.} 
 
-
-        The interesting part of the proof is then given by the
+ The interesting part of the proof is then given by the
         inductive case, i.e. when $a\tto_R b$ is generated by the rule
         (\coqdocvar{rtrans}). In this case, the reduction from \coqdocvar{a} to \coqdocvar{b} is
         done in at least one step, therefore there must exists an
@@ -257,7 +253,7 @@ $c \tto_R c$ corresponds to an application of
 
          \[\xymatrix{ & & a \ar@{->}[dl] \ar@{->>}[dr] & \\ & a'
         \ar@{->>}[dl] & & c \ar@{.>>}[ddll] \\ b \ar@{.>>}[dr] & & &
-        \\ & d & & }\] 
+        \\ & d & & }\]  
 
 
         
@@ -279,150 +275,142 @@ $c \tto_R c$ corresponds to an application of
 \coqdocemptyline
 \coqdocindent{1.00em}
 - \coqdoctac{intros} \coqdocvar{c0} \coqdocvar{Hrefl2}. \end{coqdoccode}
-Let $c_0$ be a reduct of $a$, and \coqdocvar{Hrefl2}
+\comm{Let $c_0$ be a reduct of $a$, and $Hrefl2$
     be the hypothesis $a \tto_R c_0$. So the reduction $a\tto_R c$ in
     the above diagram is now $a\tto_R c_0$ due to a renaming of
     variables automatically done by the Coq system. In addition, the
     reduction $a \to_R a' \tto_R b$ is now $a\to_R b \tto_R c$, as
     shown below:
 
+    \includegraphics[scale=0.5]{fig5-1.png}
 
-    \includegraphics[scale=0.6]{fig5-1.png}
-
-
-    Before applying induction to \coqdocvar{Hrefl2}: $a \tto_R c_0$, we will derive 
+    Before applying induction to $Hrefl2$: $a \tto_R c_0$, we will derive 
     $b\tto_R (g\ a)$ and $a\tto_R (g\ a)$ from the proof context so we can
-    discard the hypothesis \coqdocvar{H}: $a\to_R. $\begin{coqdoccode}
+    discard the hypothesis $H$: $a\to_R$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 \coqdoctac{assert} (\coqdocvar{Hbga}: \coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{b} (\coqdocvar{g} \coqdocvar{a})).\coqdoceol
 \coqdocindent{2.00em}
 \{ \coqdoctac{apply} \coqdocvar{HZ\_prop}; \coqdoctac{assumption}. \} \end{coqdoccode}
-We call \coqdocvar{Hbga} the reduction
-    $b\tto_R (g\ a)$ that is directly obtained from the Z property. \begin{coqdoccode}
+\comm{We call $Hbga$ the reduction
+    $b\tto_R (g\ a)$ that is directly obtained from the Z property.} \begin{coqdoccode}
 \coqdocnoindent
 \coqdoceol
 \coqdocindent{2.00em}
 \coqdoctac{assert} (\coqdocvar{Haga}: \coqdocvar{refltrans} \coqdocvar{R} \coqdocvar{a} (\coqdocvar{g} \coqdocvar{a})).\coqdoceol
 \coqdocindent{2.00em}
 \{ \coqdoctac{apply} \coqdocvar{rtrans} \coqdockw{with} \coqdocvar{b}; \coqdoctac{assumption}. \} \end{coqdoccode}
-Call \coqdocvar{Haga} the
+\comm{Call $Haga$ the
         reduction $a\tto_R (g\ a)$, and prove it using the
         transitivity of $\tto_R$, since $a \to_R b$ and $b \tto_R (g\
-        a)$.
+        a)$. Diagrammatically, we change from the situation on the
+        top to the bottomone on the right:
 
+        \xymatrix{ & & a \ar@{->>}[ddrr]_R \ar@{->}[dl]^R & & \\ & b
+        \ar@{->>}[dl]^R & & & \\ c \ar@{.>>}[ddrr]_R & & & & c_0
+        \ar@{.>>}[ddll]^R \\ & & & & \\ & & d & & } 
 
-        Diagrammatically, we change from the situation on the left to
-        the one on the right:
-
-
-        \begin{tabular}{c@{\hskip 0.5cm}c} $\xymatrix{ & & a
-        \ar@{->>}[ddrr]_R \ar@{->}[dl]^R & & \\ & b \ar@{->>}[dl]^R &
-        & & \\ c \ar@{.>>}[ddrr]_R & & & & c_0 \ar@{.>>}[ddll]^R \\ &
-        & & & \\ & & d & & }$ & $\xymatrix{ & & a \ar@{->>}[ddrr]_R
-        \ar@{->>}[dd]_R & & \\ & b \ar@{->>}[dl]^R \ar@{->>}[dr]_R & &
-        & \\ c \ar@{.>>}[ddrr]_R & & (g \; a) & & c_0
-        \ar@{.>>}[ddll]^R \\ & & & & \\ & & d & & }$ \end{tabular} \begin{coqdoccode}
+        \xymatrix{ & & a \ar@{->>}[ddrr]_R \ar@{->>}[dd]_R & & \\ & b
+        \ar@{->>}[dl]^R \ar@{->>}[dr]_R & & & \\ c \ar@{.>>}[ddrr]_R &
+        & (g \; a) & & c_0 \ar@{.>>}[ddll]^R \\ & & & & \\ & & d & &} } \begin{coqdoccode}
 \coqdocnoindent
 \coqdoceol
 \coqdocindent{2.00em}
 \coqdoctac{clear} \coqdocvar{H}. \coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{b}. \end{coqdoccode}
-At this point we can remove
-      the hypothesis \coqdocvar{H} from the context, and generalize \coqdocvar{b}. Doing so, 
-      we generalize \coqdocvar{IHHrefl1}, which, in conjunction with the hypotheses 
-      that depend on a (namely, \coqdocvar{Hrefl2}, \coqdocvar{Hbga}, and \coqdocvar{Haga}), will form 
+\comm{At this point we can remove
+      the hypothesis $H$ from the context, and generalize $b$. Doing so, 
+      we generalize $IHHrefl1$, which, in conjunction with the hypotheses 
+      that depend on a (namely, $Hrefl2$, $Hbga$, and $Haga$), will form 
       the four necessary conditions for use of the second inductive 
-      hypothesis, \coqdocvar{IHHrefl2}\begin{coqdoccode}
+      hypothesis, $IHHrefl2$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 \coqdoctac{induction} \coqdocvar{Hrefl2}. \end{coqdoccode}
-Now we are ready to start the induction on
-    the reduction $a\tto_R c_0$, and we have two subgoals. \begin{coqdoccode}
+\comm{Now we are ready to start the induction on
+    the reduction $a\tto_R c_0$, and we have two subgoals.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 + \coqdoctac{intros} \coqdocvar{b} \coqdocvar{Hrefl1} \coqdocvar{IHHrefl1} \coqdocvar{Hbga}. \end{coqdoccode}
-The first subgoal corresponds
+\comm{The first subgoal corresponds
         to the reflexive case that is closed by the induction
-        hypothesis \coqdocvar{IHHrefl1}:
-
+        hypothesis $IHHrefl1$:
 
         \[\xymatrix{ & & a \ar@{->>}[dd]^{H2} & & \\ & b
         \ar@{->>}[dl]_{Hrefl1} \ar@{->>}[dr]^{H1} & & & \\ c
         \ar@{.>>}[dr] & IHHrefl1 & (g \; a) \ar@{.>>}[dl] & & \\ & d &
-        &&}\] \begin{coqdoccode}
+        &&}\] } \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \coqdoctac{assert} (\coqdocvar{IHHrefl1\_ga} := \coqdocvar{IHHrefl1} (\coqdocvar{g} \coqdocvar{a})); \coqdoctac{apply} \coqdocvar{IHHrefl1\_ga} \coqdoctac{in} \coqdocvar{Hbga}. \end{coqdoccode}
-      In order to apply \coqdocvar{IHHrefl1}, we instantiate $c_0$ with $(g\
-      a)$. \begin{coqdoccode}
+      \comm{In order to apply $IHHrefl1$, we instantiate $c_0$ with $(g\
+      a)$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \coqdoctac{destruct} \coqdocvar{Hbga}. \end{coqdoccode}
-Therefore, there exists an element, say $x$,
-      such that both $c\tto_R x$ and $(g\ a) \tto_R x$. \begin{coqdoccode}
+\comm{Therefore, there exists an element, say $x$,
+      such that both $c\tto_R x$ and $(g\ a) \tto_R x$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \coqdoctac{\ensuremath{\exists}} \coqdocvar{x}; \coqdoctac{split}. \end{coqdoccode}
-We then take $x$ to show that $c\tto_R x$ and $a
-      \tto_R x$. \begin{coqdoccode}
+\comm{We then take $x$ to show that $c\tto_R x$ and $a
+      \tto_R x$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{H}. \end{coqdoccode}
-Note that $c\tto_R x$ is already an hypothesis,
-        and we are done. \begin{coqdoccode}
+\comm{Note that $c\tto_R x$ is already an hypothesis,
+        and we are done.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{g} \coqdocvar{a}); [\coqdoctac{assumption} \ensuremath{|} \coqdoctac{apply} \coqdocvar{H}]. \end{coqdoccode}
-      The proof of $a \tto_R x$ is done by the transitivity of
-      $\tto_R$ taking $(g\ a)$ as the intermediate step. \begin{coqdoccode}
+      \comm{The proof of $a \tto_R x$ is done by the transitivity of
+      $\tto_R$ taking $(g\ a)$ as the intermediate step.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 + \coqdoctac{intros} \coqdocvar{b0} \coqdocvar{Hrefl1} \coqdocvar{IHHrefl1} \coqdocvar{Hb0ga}. \end{coqdoccode}
-The second subgoal corresponds
+\comm{The second subgoal corresponds
         to the case in which $a\tto_R c_0$ is generated by the rule
         $(rtrans)$. Therefore, there exists a term $b$ such that
         $a\to_R b$ and $b \tto_R c_0$. The corresponding proof context
-        after introducing the universally quantified variable \coqdocvar{b0},
-        the hypothesis \coqdocvar{Hrefl1} and the induction hypothesis
-        \coqdocvar{IHHrefl1} generated by the first outer induction and the fact
+        after introducing the universally quantified variable $b0$,
+        the hypothesis $Hrefl1$ and the induction hypothesis
+        $IHHrefl1$ generated by the first outer induction and the fact
         that $b0 \tto_R (g\ a)$ is given by:
 
-
-        \includegraphics[scale=0.6]{fig7.png} \begin{coqdoccode}
+        \includegraphics[scale=0.6]{fig7.png} } \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \coqdoctac{apply} \coqdocvar{IHHrefl2} \coqdockw{with} \coqdocvar{b0}. \end{coqdoccode}
-The second goal, i.e. the inductive case is 
-      the consequent on IHHrefl2, so we can apply IHHrefl2 to prove it. Doing so, 
-      we must prove the antecedent of IHHrefl2, which consists of four separate 
-      hypotheses that we must prove. Those hypotheses are as follows: \begin{coqdoccode}
+\comm{The second goal, i.e. the inductive case is 
+      the consequent on $IHHrefl2$, so we can apply $IHHrefl2$ to prove it. Doing so, 
+      we must prove the antecedent of $IHHrefl2$, which consists of four separate 
+      hypotheses that we must prove. Those hypotheses are as follows:} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{g} \coqdocvar{a}); \coqdoctac{apply} \coqdocvar{HZ\_prop}; \coqdoctac{assumption}. \end{coqdoccode}
-      1. $b \tto_R (g\ b)$: This is proved by the transitivity of the
-      reflexive transitive closure of \coqdocvar{R} using the
-      hypothesis (H: $a\to_R b$) and \coqdocvar{HZ\_prop}: $\forall a\
-      b: a \to_R b \to (b \tto_R (g\ a) \land (g\ a) \tto_R (g\ b))$. \begin{coqdoccode}
+      \comm{1. $b \tto_R (g\ b)$: This is proved by the transitivity of the
+      reflexive transitive closure of $R$ using the
+      hypothesis (H: $a\to_R b$) and $HZ\_prop$: $\forall a\
+      b: a \to_R b \to (b \tto_R (g\ a) \land (g\ a) \tto_R (g\ b))$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{assumption}. \end{coqdoccode}
-2. $b0 \tto_R c$: This is exactly the
-          hypothesis \coqdocvar{Hrefl1}. \begin{coqdoccode}
+\comm{2. $b0 \tto_R c$: This is exactly the
+          hypothesis $Hrefl1$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{assumption}. \end{coqdoccode}
-3. $\forall c0: b0 \tto_R c0 \to (\exists d:
+\comm{3. $\forall c0: b0 \tto_R c0 \to (\exists d:
             c \tto_R d \land c0 \tto_R d)$: This is exactly the
-            induction hypothesis \coqdocvar{IHHrefl1}. \begin{coqdoccode}
+            induction hypothesis $IHHrefl1$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{g} \coqdocvar{a}); [ \coqdoctac{assumption} \ensuremath{|} \coqdoctac{apply} \coqdocvar{HZ\_prop}; \coqdoctac{assumption}]. \end{coqdoccode}
-      4. $b0 \tto_R (g\ b)$: This is proved by the transitivity of
-      the reflexive transitive closure of \coqdocvar{R} using the
-      hypothesis (\coqdocvar{H'}: $b0 \tto_R (g\ a)$ and the fact that
+\comm{4. $b0 \tto_R (g\ b)$: This is proved by the transitivity of
+      the reflexive transitive closure of $R$ using the
+      hypothesis $H'$: $b0 \tto_R (g\ a)$ and the fact that
       $(g\ a) \tto_R (g\ b)$ that is obtained from the fact that
-      \coqdocvar{R} satisfies the Z property (hypothesis
-      \coqdocvar{HZ\_prop}). \begin{coqdoccode}
+      $R$ satisfies the Z property (hypothesis
+      $HZ\_prop$).} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Qed}.\coqdoceol
@@ -684,114 +672,112 @@ As stated by Theorem \ref{thm:zcomp}, the compositional Z gives
 \coqdockw{Proof}.\coqdoceol
 \coqdocindent{1.00em}
 \coqdoctac{intros} \coqdocvar{R} \coqdocvar{H}. \end{coqdoccode}
-Let \coqdocvar{R} be a relation over \coqdocvar{A}, and \coqdocvar{H} the
-      hypothesis that \coqdocvar{R} satisfies the compositional Z. \begin{coqdoccode}
+\comm{Let $R$ be a relation over $A$, and $H$ the
+      hypothesis that $R$ satisfies the compositional Z.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{unfold} \coqdocvar{Z\_prop}. \coqdoctac{unfold} \coqdocvar{Z\_comp} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{H} \coqdockw{as} [ \coqdocvar{R1} [ \coqdocvar{R2} [\coqdocvar{f1} [\coqdocvar{f2} [\coqdocvar{Hunion} [\coqdocvar{H1} [\coqdocvar{H2} [\coqdocvar{H3} \coqdocvar{H4}]]]]]]]]. \end{coqdoccode}
-      Now unfold the definitions of \coqdocvar{Z\_prop} and \coqdocvar{Z\_comp} as presented
+\comm{Now
+      unfold the definitions of $Z\_prop$ and $Z\_comp$ as presented
       before, and name the hypothesis of the compositional Z as in
       Theorem \ref{thm:zcomp}. We need to prove that there exists a
-      map, say \coqdocvar{f}, that is Z as shown by the current proof context:
+      map, say $f$, that is Z as shown by the current proof context:
       \newline
 
-
-      \includegraphics[scale=0.6]{fig8.png} \begin{coqdoccode}
+      \includegraphics[scale=0.6]{fig8.png} } \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{\ensuremath{\exists}} (\coqdocvar{f2} \# \coqdocvar{f1}). \end{coqdoccode}
-We will prove that the composition $f_2 \circ f_1$
-  is Z. \begin{coqdoccode}
+\comm{We will prove that the composition $f_2 \circ f_1$
+  is Z.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{intros} \coqdocvar{a} \coqdocvar{b} \coqdocvar{HR}. \end{coqdoccode}
-Let \coqdocvar{a} and \coqdocvar{b} be elements of \coqdocvar{A}, and suppose
-  that \coqdocvar{a} \coqdocvar{R}-reduces to \coqdocvar{b} in one step, i.e. that $a \to_R b$ and
-  call \coqdocvar{HR} this hypothesis. \begin{coqdoccode}
+\comm{Let $a$ and $b$ be elements of $A$, and suppose
+  that $a$ $R$-reduces to $b$ in one step, i.e. that $a \to_R b$ and
+  call $HR$ this hypothesis.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{inversion} \coqdocvar{Hunion}; \coqdoctac{subst}. \coqdoctac{clear} \coqdocvar{H}. \coqdoctac{inversion} \coqdocvar{HR}; \coqdoctac{subst}. \end{coqdoccode}
-Since
-  \coqdocvar{R} is the union of \coqdocvar{R1} and \coqdocvar{R2}, one has that \coqdocvar{a} reduces to \coqdocvar{b}
-  in one step via either \coqdocvar{R1} or \coqdocvar{R2}. Therefore, there are two cases
-  to consider: \begin{coqdoccode}
+\comm{Since
+  $R$ is the union of $R1$ and $R2$, one has that $a$ reduces to $b$
+  in one step via either $R1$ or $R2$. Therefore, there are two cases
+  to consider:} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 - \coqdoctac{split}. \end{coqdoccode}
-Firstly, suppose that \coqdocvar{a} \coqdocvar{R1}-reduces in one step to
-    \coqdocvar{b}, i.e. $a \to_{R1} b$. \begin{coqdoccode}
+\comm{Firstly, suppose that $a$ $R1$-reduces in one step to
+    $b$, i.e. $a \to_{R1} b$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 + \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{f1} \coqdocvar{a}). \end{coqdoccode}
-In order to prove
+\comm{In order to prove
     that $b \tto_R (f_2 (f_1\ a))$, we first need to show that $b
     \tto_{R1} (f_1\ a)$, and then that $(f_1\ a) \tto_R (f_2 (f_1\ a))$ as
-    shown in Figure \ref{fig:zcomp}. \begin{coqdoccode}
+    shown in Figure \ref{fig:zcomp}.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{refltrans\_union}; \coqdoctac{assumption}. \end{coqdoccode}
-    The proof of $b \tto_{R1} (f_1\ a)$ is done from the fact that $f_1$
-    is Z for \coqdocvar{R1}. \begin{coqdoccode}
+    \comm{The proof of $b \tto_{R1} (f_1\ a)$ is done from the fact that $f_1$
+    is Z for $R1$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{H3} \coqdockw{with} \coqdocvar{a}; \coqdoctac{reflexivity}. \end{coqdoccode}
-The proof that $(f_1\ a)
+\comm{The proof that $(f_1\ a)
     \tto_R (f_2 (f_1\ a))$ is a direct consequence of the hypothesis
-    \coqdocvar{H3}. \begin{coqdoccode}
+    $H3$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 + \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{H}. \coqdoctac{clear} \coqdocvar{H} \coqdocvar{HR}. \coqdoctac{unfold} \coqdocvar{comp}. \end{coqdoccode}
-The
-    proof that $(f_2 (f_1\ a))$ \coqdocvar{R}-reduces to $(f_2 (f_1\ b))$ is
+\comm{The
+    proof that $(f_2 (f_1\ a))$ $R$-reduces to $(f_2 (f_1\ b))$ is
     more tricky. Initially, note that, since $a \to_{R1} b$ then we
-    get that $(f_1\ a) \tto_{R1} (f_1\ b)$ by the Z property. \begin{coqdoccode}
+    get that $(f_1\ a) \tto_{R1} (f_1\ b)$ by the Z property.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \coqdoctac{induction} \coqdocvar{H0}. \end{coqdoccode}
-Now, the goal can be obtained from \coqdocvar{H2} as
+\comm{Now, the goal can be obtained from $H2$ as
       long as $(f_1\ a) \to_{R1} (f_1\ b)$, but from the hypothesis
-      \coqdocvar{H0} we have that $(f_1\ a) \tto_{R1} (f_1\ b)$. Therefore, we
-      proceed by induction on \coqdocvar{H0}. \begin{coqdoccode}
+      $H0$ we have that $(f_1\ a) \tto_{R1} (f_1\ b)$. Therefore, we
+      proceed by induction on $H0$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{refl}. \end{coqdoccode}
-The reflexive case is trivial because \coqdocvar{a} and
-        \coqdocvar{b} are equal. \begin{coqdoccode}
+\comm{The reflexive case is trivial because $a$ and
+        $b$ are equal.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{f2} \coqdocvar{b0}). \end{coqdoccode}
-In the
-        transitive case, we have that $(f_1\ a)$ \coqdocvar{R1}-reduces to
+\comm{In the
+        transitive case, we have that $(f_1\ a)$ $R1$-reduces to
         $(f_1\ b)$ in at least one step. The current proof context is
         as follows, up to renaming of variables:
 
-
-      \includegraphics[scale=0.6]{fig9.png}
-
+        \includegraphics[scale=0.6]{fig9.png}
 
       Therefore, there exists some element $b0$ such that $a0\to_{R1}
       b0$ and $b0 \tto_{R1} c$ and we need to prove that $(f_2\ a0)
       \tto_{R1\cup R2} (f_2\ c)$. This can be done in two steps using
-      the transitivity of \coqdocvar{refltrans} taking $(f_2\ b0)$ as the
-      intermediary term. \begin{coqdoccode}
+      the transitivity of [refltrans] taking $(f_2\ b0)$ as the
+      intermediary term.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{4.00em}
 ** \coqdoctac{apply} \coqdocvar{H2}; \coqdoctac{assumption}. \end{coqdoccode}
-The first subgoal is then $(f_2\
+\comm{The first subgoal is then $(f_2\
            a0)\tto_{(R1 \cup R2)} (f_2\ b0)$ that is proved by
-           hypothesis \coqdocvar{H2}. \begin{coqdoccode}
+           hypothesis $H2$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{4.00em}
 ** \coqdoctac{assumption}. \end{coqdoccode}
-And the second subgoal $(f_2\ b0) \tto_{(R1
+\comm{And the second subgoal $(f_2\ b0) \tto_{(R1
            \cup R2)} (f_2\ c)$ is proved by the induction
-           hypothesis. \begin{coqdoccode}
+           hypothesis.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 - \coqdoctac{apply} \coqdocvar{H4}; \coqdoctac{assumption}. \end{coqdoccode}
-Finally, when \coqdocvar{a} \coqdocvar{R2}-reduces in one
-    step to \coqdocvar{b} one concludes the proof using the assumption that
-    $(f_2 \circ f_1)$ is weak Z. \begin{coqdoccode}
+\comm{Finally, when $a$ $R2$-reduces in one
+    step to $b$ one concludes the proof using the assumption that
+    $(f_2 \circ f_1)$ is weak Z.} \begin{coqdoccode}
 \coqdocnoindent
 \coqdockw{Qed}.\coqdoceol
 \coqdocemptyline
@@ -848,66 +834,66 @@ Rewriting Systems with equations is another interesting and
 \coqdockw{Proof}.\coqdoceol
 \coqdocindent{1.00em}
 \coqdoctac{intros} \coqdocvar{R} \coqdocvar{Heq}. \coqdoctac{unfold} \coqdocvar{Z\_comp\_eq} \coqdoctac{in} \coqdocvar{Heq}. \end{coqdoccode}
-Let \coqdocvar{R} be a relation
-  and suppose that \coqdocvar{R} satisfies the predicate \coqdocvar{Z\_comp\_eq}. \begin{coqdoccode}
+\comm{Let $R$ be a relation
+  and suppose that $R$ satisfies the predicate $Z\_comp\_eq$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{destruct} \coqdocvar{Heq} \coqdockw{as} [\coqdocvar{R1} [\coqdocvar{R2} [\coqdocvar{f1} [\coqdocvar{f2} [\coqdocvar{Hunion} [\coqdocvar{H1} [\coqdocvar{H2} [\coqdocvar{H3} \coqdocvar{H4}]]]]]]]]. \end{coqdoccode}
-  Call \coqdocvar{Hi} the \coqdocvar{i}th hypothesis as in \ref{cor:zcomp}. \begin{coqdoccode}
+  \comm{Call $Hi$ the $i$th hypothesis as in \ref{cor:zcomp}.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{unfold} \coqdocvar{Z\_prop}. \coqdoctac{\ensuremath{\exists}} (\coqdocvar{f2} \# \coqdocvar{f1}). \end{coqdoccode}
-From the definition of the
-  predicate \coqdocvar{Z\_prop}, we need to find a map, say \coqdocvar{f} that is Z. Let
-  $(f_2 \circ f_1)$ be such map.  \begin{coqdoccode}
+\comm{From the definition of the
+  predicate $Z\_prop$, we need to find a map, say $f$ that is Z. Let
+  $(f_2 \circ f_1)$ be such map.}  \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{intros} \coqdocvar{a} \coqdocvar{b} \coqdocvar{Hab}. \end{coqdoccode}
-In order to prove that $(f_2 \circ f_1)$ is Z,
-  let \coqdocvar{a} and \coqdocvar{b} be arbitrary elements of type \coqdocvar{A}, and \coqdocvar{Hab} be the
-  hypothesis that $a \to_{R} b$. \begin{coqdoccode}
+\comm{In order to prove that $(f_2 \circ f_1)$ is Z,
+  let $a$ and $b$ be arbitrary elements of type $A$, and $Hab$ be the
+  hypothesis that $a \to_{R} b$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{inversion} \coqdocvar{Hunion}; \coqdoctac{subst}; \coqdoctac{clear} \coqdocvar{H}. \coqdoctac{inversion} \coqdocvar{Hab}; \coqdoctac{subst}; \coqdoctac{clear} \coqdocvar{Hab}. \end{coqdoccode}
-  Since \coqdocvar{a} \coqdocvar{R}-reduces in one step to \coqdocvar{b} and \coqdocvar{R} is the union of the
-  relations \coqdocvar{R1} and \coqdocvar{R2} then we consider two cases: \begin{coqdoccode}
+  \comm{Since $a$ $R$-reduces in one step to $b$ and $R$ is the union of the
+  relations $R1$ and $R2$ then we consider two cases:} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 - \coqdoctac{unfold} \coqdocvar{comp}; \coqdoctac{split}. \end{coqdoccode}
-The first case is when $a \to_{R1}
+\comm{The first case is when $a \to_{R1}
     b$. This is equivalent to say that $f_2 \circ f_1$ is weak Z for
-    $R1$ by $R1 \cup R2$. \begin{coqdoccode}
+    $R1$ by $R1 \cup R2$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 + \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{f1} \coqdocvar{b}). \end{coqdoccode}
-Therefore, we first
+\comm{Therefore, we first
     prove that $b \tto_{(R1\cup R2)} (f_2 (f_1\ a))$, which can be
     reduced to $b \tto_{(R1\cup R2)} (f_1\ b)$ and $(f_1\ b)
     \tto_{(R1\cup R2)} (f_2 (f_1\ a))$ by the transitivity of
-    \coqdocvar{refltrans}. \begin{coqdoccode}
+    $refltrans$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_union}. \coqdoctac{apply} \coqdocvar{H2}. \end{coqdoccode}
-From hypothesis \coqdocvar{H2}, we
+\comm{From hypothesis $H2$, we
         know that $a \tto_{R1} (f_1\ a)$ for all $a$, and hence
-        $a\tto_{(R1\cup R2)} (f_1\ a)$ and we conclude. \begin{coqdoccode}
+        $a\tto_{(R1\cup R2)} (f_1\ a)$ and we conclude.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{H3} \coqdockw{with} \coqdocvar{b}; \coqdoctac{reflexivity}. \end{coqdoccode}
-        The proof that $(f_1\ b)\tto_{(R1\cup R2)} (f_2 (f_1\ a))$ is
-        exactly the hypothesis \coqdocvar{H3}. \begin{coqdoccode}
+        \comm{The proof that $(f_1\ b)\tto_{(R1\cup R2)} (f_2 (f_1\ a))$ is
+        exactly the hypothesis $H3$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
 + \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{refl}. \end{coqdoccode}
-The proof that $(f_2
+\comm{The proof that $(f_2
     (f_1\ a)) \tto_{(R1\cup R2)} (f_2 (f_1\ b))$ is done using the
-    reflexivity of \coqdocvar{refltrans} because $(f_2 (f_1\ a)) = (f_2 (f_1\
-    b))$ by hypothesis \coqdocvar{H1}. \begin{coqdoccode}
+    reflexivity of $refltrans$ because $(f_2 (f_1\ a)) = (f_2 (f_1\
+    b))$ by hypothesis $H1$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 - \coqdoctac{apply} \coqdocvar{H4}; \coqdoctac{assumption}. \end{coqdoccode}
-When $a \to_{R2} b$ then we are done by
-    hypothesis \coqdocvar{H4}. \begin{coqdoccode}
+\comm{When $a \to_{R2} b$ then we are done by
+    hypothesis $H4$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Qed}.\coqdoceol
