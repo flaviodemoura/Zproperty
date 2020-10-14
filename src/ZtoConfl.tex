@@ -341,8 +341,12 @@ The first contribution of this work is a constructive proof of the
         &&}\] } \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
-\coqdoctac{assert} (\coqdocvar{IHHrefl1\_ga} := \coqdocvar{IHHrefl1} (\coqdocvar{g} \coqdocvar{a})); \coqdoctac{apply} \coqdocvar{IHHrefl1\_ga} \coqdoctac{in} \coqdocvar{Hbga}. \end{coqdoccode}
-      \comm{In order to apply $IHHrefl1$, we instantiate $c_0$ with $(g\
+\coqdoctac{assert} (\coqdocvar{IHHrefl1\_ga} := \coqdocvar{IHHrefl1} (\coqdocvar{g} \coqdocvar{a}));\coqdoceol
+\coqdocindent{4.00em}
+\coqdoceol
+\coqdocindent{4.00em}
+\coqdoctac{apply} \coqdocvar{IHHrefl1\_ga} \coqdoctac{in} \coqdocvar{Hbga}. \end{coqdoccode}
+\comm{In order to apply $IHHrefl1$, we instantiate $c_0$ with $(g\
       a)$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
@@ -361,7 +365,11 @@ The first contribution of this work is a constructive proof of the
         and we are done.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
-\ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{g} \coqdocvar{a}); [\coqdoctac{assumption} \ensuremath{|} \coqdoctac{apply} \coqdocvar{H}]. \end{coqdoccode}
+\ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{g} \coqdocvar{a});\coqdoceol
+\coqdocnoindent
+\coqdoceol
+\coqdocindent{4.00em}
+[\coqdoctac{assumption} \ensuremath{|} \coqdoctac{apply} \coqdocvar{H}]. \end{coqdoccode}
       \comm{The proof of $a \tto_R x$ is done by the transitivity of
       $\tto_R$ taking $(g\ a)$ as the intermediate step.} \begin{coqdoccode}
 \coqdocemptyline
@@ -444,17 +452,9 @@ An alternative proof that Z implies confluence is possible via the
 \coqdocnoindent
 \coqdockw{Corollary} \coqdocvar{Zprop\_implies\_Confl\_via\_SemiConfl} \{\coqdocvar{A}:\coqdockw{Type}\}: \coqdockw{\ensuremath{\forall}} \coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}, \coqdocvar{Z\_prop} \coqdocvar{R} \ensuremath{\rightarrow} \coqdocvar{Confl} \coqdocvar{R}.\coqdoceol
 \coqdocnoindent
-\coqdockw{Proof}.\coqdoceol
-\coqdocindent{1.00em}
-\coqdoctac{intros} \coqdocvar{R} \coqdocvar{HZ\_prop}.\coqdoceol
-\coqdocindent{1.00em}
-\coqdoctac{apply} \coqdocvar{Semi\_equiv\_Confl}.\coqdoceol
-\coqdocindent{1.00em}
-\coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{HZ\_prop}.\coqdoceol
-\coqdocindent{1.00em}
-\coqdoctac{apply} \coqdocvar{Z\_prop\_implies\_SemiConfl}.\coqdoceol
-\coqdocnoindent
-\coqdockw{Qed}.\coqdoceol
+\coqdockw{Proof}. \coqdoctac{intros} \coqdocvar{R} \coqdocvar{HZ\_prop}. \coqdoctac{apply} \coqdocvar{Semi\_equiv\_Confl}. \coqdoctac{generalize} \coqdoctac{dependent} \coqdocvar{HZ\_prop}.\coqdoceol
+\coqdocindent{3.50em}
+\coqdoctac{apply} \coqdocvar{Z\_prop\_implies\_SemiConfl}. \coqdockw{Qed}.\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
 \section{An extension of the Z property: Compositional Z}
@@ -575,11 +575,9 @@ As stated by Theorem \ref{thm:zcomp}, the compositional Z gives
       hypothesis that $R$ satisfies the compositional Z.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
-\coqdoctac{unfold} \coqdocvar{Z\_prop}. \coqdoctac{unfold} \coqdocvar{Z\_comp} \coqdoctac{in} \coqdocvar{H}.\coqdoceol
+\coqdoctac{unfold} \coqdocvar{Z\_prop}. \coqdoctac{unfold} \coqdocvar{Z\_comp} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{H} \coqdockw{as}\coqdoceol
 \coqdocindent{1.00em}
-\coqdoctac{destruct} \coqdocvar{H} \coqdockw{as} [ \coqdocvar{R1} [ \coqdocvar{R2} [\coqdocvar{f1} [\coqdocvar{f2}\coqdoceol
-\coqdocindent{1.00em}
-[\coqdocvar{Hunion} [\coqdocvar{H1} [\coqdocvar{H2} [\coqdocvar{H3} \coqdocvar{H4}]]]]]]]]. \end{coqdoccode}
+[ \coqdocvar{R1} [ \coqdocvar{R2} [\coqdocvar{f1} [\coqdocvar{f2} [\coqdocvar{Hunion} [\coqdocvar{H1} [\coqdocvar{H2} [\coqdocvar{H3} \coqdocvar{H4}]]]]]]]]. \end{coqdoccode}
 \comm{Now
       unfold the definitions of $Z\_prop$ and $Z\_comp$ as presented
       before, and name the hypothesis of the compositional Z as in
@@ -587,7 +585,7 @@ As stated by Theorem \ref{thm:zcomp}, the compositional Z gives
       map, say $f$, that is Z as shown by the current proof context:
       \newline
 
-      \includegraphics[scale=0.5]{fig8.png} } \begin{coqdoccode}
+      \includegraphics[scale=0.4]{fig8.png} } \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{\ensuremath{\exists}} (\coqdocvar{f2} \# \coqdocvar{f1}). \end{coqdoccode}
@@ -651,6 +649,8 @@ As stated by Theorem \ref{thm:zcomp}, the compositional Z gives
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_composition}\coqdoceol
+\coqdocindent{7.00em}
+\coqdoceol
 \coqdocindent{4.00em}
 \coqdockw{with} (\coqdocvar{f2} \coqdocvar{b0}). \end{coqdoccode}
 \comm{In the transitive case, we have that $(f_1\ a)$ $R1$-reduces to

@@ -404,8 +404,9 @@ Proof.
         \ar@{.>>}[dr] & IHHrefl1 & (g \; a) \ar@{.>>}[dl] & & \\ & d &
         &&}\] }% *)
       
-      assert (IHHrefl1_ga := IHHrefl1 (g a)); apply IHHrefl1_ga in Hbga. (**
-      %\comm{In order to apply $IHHrefl1$, we instantiate $c_0$ with $(g\
+      assert (IHHrefl1_ga := IHHrefl1 (g a));
+        
+        apply IHHrefl1_ga in Hbga. (** %\comm{In order to apply $IHHrefl1$, we instantiate $c_0$ with $(g\
       a)$.}% *)
       
       destruct Hbga. (** %\comm{Therefore, there exists an element, say $x$,
@@ -417,7 +418,9 @@ Proof.
       * apply H. (** %\comm{Note that $c\tto_R x$ is already an hypothesis,
         and we are done.}% *)
         
-      * apply refltrans_composition with (g a); [assumption | apply H]. (**
+      * apply refltrans_composition with (g a);
+
+        [assumption | apply H]. (**
       %\comm{The proof of $a \tto_R x$ is done by the transitivity of
       $\tto_R$ taking $(g\ a)$ as the intermediate step.}% *)
            
@@ -600,12 +603,8 @@ Qed.
 (* end hide *)
 
 Corollary Zprop_implies_Confl_via_SemiConfl {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
-Proof.
-  intros R HZ_prop.
-  apply Semi_equiv_Confl.
-  generalize dependent HZ_prop.
-  apply Z_prop_implies_SemiConfl.
-Qed.
+Proof. intros R HZ_prop. apply Semi_equiv_Confl. generalize dependent HZ_prop.
+       apply Z_prop_implies_SemiConfl. Qed.
 
 (** * An extension of the Z property: Compositional Z
 
@@ -723,16 +722,15 @@ Proof.
   intros R H. (** %\comm{Let $R$ be a relation over $A$, and $H$ the
       hypothesis that $R$ satisfies the compositional Z.}% *)
 
-  unfold Z_prop. unfold Z_comp in H.
-  destruct H as [ R1 [ R2 [f1 [f2
-  [Hunion [H1 [H2 [H3 H4]]]]]]]]. (** %\comm{Now
+  unfold Z_prop. unfold Z_comp in H. destruct H as
+  [ R1 [ R2 [f1 [f2 [Hunion [H1 [H2 [H3 H4]]]]]]]]. (** %\comm{Now
       unfold the definitions of $Z\_prop$ and $Z\_comp$ as presented
       before, and name the hypothesis of the compositional Z as in
       Theorem \ref{thm:zcomp}. We need to prove that there exists a
       map, say $f$, that is Z as shown by the current proof context:
       \newline
 
-      \includegraphics[scale=0.5]{fig8.png} }% *)
+      \includegraphics[scale=0.4]{fig8.png} }% *)
   
   exists (f2 # f1). (** %\comm{We will prove that the composition $f_2 \circ f_1$
   is Z.}% *)
@@ -776,6 +774,7 @@ Proof.
         $b$ are equal.}% *)
         
       * apply refltrans_composition
+              
         with (f2 b0). (** %\comm{In the transitive case, we have that $(f_1\ a)$ $R1$-reduces to
         $(f_1\ b)$ in at least one step. The current proof context is
         as follows, up to renaming of variables:
