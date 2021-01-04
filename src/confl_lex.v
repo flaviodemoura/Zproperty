@@ -163,17 +163,21 @@ Admitted.
     
 Lemma sd_term: forall t, term t -> term (sd t).
 Proof.
-  intros.
+  intros t H.
   induction H.
   - apply term_var.
   - simpl.
-    induction (sd t1).
+    destruct (sd t1) eqn:Heq.
     + inversion IHterm1.
     + apply term_app; assumption.
     + apply term_app; assumption.
     + admit.
     + apply term_app; assumption.
-  - admit.
+  - simpl.
+    apply term_abs with L.
+    intros x HL.
+    rewrite <- sd_open.
+    apply H0; assumption.
   - admit.
   Admitted.
   (* intros t Hterm. *)

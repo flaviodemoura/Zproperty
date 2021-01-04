@@ -518,7 +518,7 @@ Proof.
     + apply IHt2 with x; assumption.
 Qed.
 
-Fixpoint pterm_size (t : pterm) {struct t} : nat :=
+Fixpoint pterm_size (t : pterm) :=
  match t with
  | pterm_bvar i    => 1
  | pterm_fvar x    => 1
@@ -1056,7 +1056,6 @@ Proof.
   apply H in Fr.
   apply term_open_rename with y; assumption.
 Qed.
-
 
 Fixpoint bswap_rec (k : nat) (t : pterm) : pterm :=
   match t with
