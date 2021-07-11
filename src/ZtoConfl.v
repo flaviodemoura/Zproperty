@@ -80,7 +80,6 @@ Proof.
     induction Hrefl2.
     + intros b Hrefl1 IHHrefl1 Hbga.
       assert (IHHrefl1_ga := IHHrefl1 (g a));
-
         apply IHHrefl1_ga in Hbga.
       destruct Hbga.
       exists x; split.
