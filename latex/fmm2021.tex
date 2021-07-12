@@ -65,16 +65,12 @@ The contributions of this work are as follows:
 \item We present a proof that the Z property implies confluence,
   which is direct and constructive.
 \item The proof that the Z property implies confluence is formalized
-  in the Coq proof assistant,\flavio{and the presentation is made
-  interleaving Coq code followed by an explanation in English of the
-  code. In this way, the annotations are done directly in the Coq
-  files using the coqdoc annotation style. We believe that this
-  approach is interesting for those that are not familiar with the Coq
-  proof assistant because the Coq code followed by English
-  explanations gives a good idea on how they relate to each
-  other. This discipline also forces a better organization of the
-  formalization and of the proofs so that the explanation in English
-  is comprehensible.}
+  in the Coq proof assistant, and the presentation is made
+  interleaving Coq code with annotations explaining the code, which 
+can be done directly in the Coq files using the coqdoc annotation style. 
+We believe that this approach is interesting for those that are not 
+familiar with the Coq proof assistant because relating the Coq code with 
+English explanations gives a good idea on how they relate to each other.
 \item We formalize an extension of the Z property, known as
   compositional Z property, as presented in
   \cite{Nakazawa-Fujita2016}.
@@ -207,7 +203,7 @@ One contribution of this work is the following proof:
 \begin{proof}
   Let $(A,\to)$ be an ARS, and $f: A \to A$ a function that is Z for
   $\to$. Let $b \ott a \tto c$ be an arbitrary divergence. The proof
-  proceed by induction on the reduction $a \tto b$, and according to
+  proceeds by induction on the reduction $a \tto b$, and according to
   the definition of the reflexive transitive closure of a relation, we
   have two cases: in the first case, $a=b$ and we are done. Otherwise,
   $a \to b' \tto b$ for some term $b'$. We now want to proceed by
@@ -304,7 +300,7 @@ reduction relation R1 with the reduction relation R2 is written as R1
   \coqdocemptyline
 \end{coqdoccode}
 
-The next theorem is proved by presenting the Coq proof interleaved with natural language explaining the corresponding Coq steps. As a immediate consequence of this theorem, we get the confluence of the reduction relation $R$.
+The next theorem is proved by presenting the Coq proof interleaved with natural language explaining the corresponding Coq steps. As an immediate consequence of this theorem, we get the confluence of the reduction relation $R$.
 
 \begin{coqdoccode}
 \coqdocemptyline
@@ -515,9 +511,8 @@ then \coqdocvar{Zprop} \coqdocvar{R} also holds.
 \section{Related Work, Future Work and Conclusion}
 
 In this work we presented a constructive proof that the Z property
-implies confluence, an important property for rewriting systems. In
-addition, we formally proved this result in the Coq proof
-assistant\footnote{The corresponding files are available at
+implies confluence. In addition, we formally proved this result in 
+the Coq proof assistant\footnote{The corresponding files are available at
  \url{https://github.com/flaviodemoura/Zproperty}.}
 
 The Z property was presented by V. van Oostrom as a sufficient
