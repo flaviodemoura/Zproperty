@@ -234,7 +234,7 @@ difficulties that are usually made invisible by graphical proofs. In
 the next section, we present the formalization of an extension of the
 Z property known as Compositional Z.
 
-\section{An extension of the Z property: Compositional Z}
+\section{An extension of the Z property: The Compositional Z property}
 
 In this section we present a formalization of the
 \textit{Compositional Z}, as presented in \cite{Nakazawa-Fujita2016},
@@ -283,12 +283,11 @@ The compositional Z is then defined as follows:
   Let $(A,\to)$ be an ARS such that $\to = \to_1 \cup \to_2$. The
   $(A,\to)$ satisfies the compositional Z if there exist mappings
   $f_1:A \to A$ and $f_2:A \to A$ such that:
-  \begin{enumerate}
-  \item $f_1$ is Z for $\to_1$;
-  \item $a \to_1 b$ implies $f_2\ a \tto f_2\ b$;
-  \item $a \tto f_2\ a$ holds for any $a \in Im(f_1)$, and
-  \item $f_2\circ f_1$ is weakly Z for $\to_2$ by $\to$.
-  \end{enumerate}
+  \begin{tabular}{lll}
+  1. $f_1$ is Z for $\to_1$ && 2. $a \to_1 b$ implies $f_2\ a \tto f_2\ b$ \\
+  3. $a \tto f_2\ a$ holds for any $a \in Im(f_1)$ &&
+  4. $f_2\circ f_1$ is weakly Z for $\to_2$ by $\to$.
+  \end{tabular}
 \end{definition}
 
 The corresponding definition in the Coq proof assistant is below,
@@ -319,7 +318,7 @@ written as R1 !\_! R2.
   \coqdocemptyline
 \end{coqdoccode}
 
-The next theorem is proved by presenting the Coq proof interleaved with natural language explaining the corresponding Coq steps. As an immediate consequence of this theorem, we get the confluence of the reduction relation $R$.
+The next theorem is proved by presenting the Coq proof interleaved with natural language explaining the corresponding Coq steps. An immediate consequence of this theorem is the confluence of the reduction relation $R$.
 
 \begin{coqdoccode}
 \coqdocemptyline
@@ -343,7 +342,7 @@ The next theorem is proved by presenting the Coq proof interleaved with natural 
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{\ensuremath{\exists}} (\coqdocvar{f2} \# \coqdocvar{f1}). \end{coqdoccode}
-\comm{We will prove that the composition of f2 with f1 is Z.} \begin{coqdoccode}
+\comm{We will prove that the composition (\coqdocvar{f2} \# \coqdocvar{f1})) is Z.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{intros} \coqdocvar{a} \coqdocvar{b} \coqdocvar{HR}. \end{coqdoccode}
@@ -460,12 +459,11 @@ then \coqdocvar{Zprop} \coqdocvar{R} also holds.
 \coqdockw{Proof}.\coqdoceol
 \coqdocindent{1.00em}
 \coqdoctac{intros} \coqdocvar{R} \coqdocvar{Heq}. \coqdoctac{unfold} \coqdocvar{Z\_comp\_eq} \coqdoctac{in} \coqdocvar{Heq}. \end{coqdoccode}
-\comm{Let $R$ be a relation
-  and suppose that $R$ satisfies the predicate $Z\_comp\_eq$.} \begin{coqdoccode}
+\comm{Let $R$ be a relation that satisfies the predicate $Z\_comp\_eq$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{destruct} \coqdocvar{Heq} \coqdockw{as} [\coqdocvar{R1} [\coqdocvar{R2} [\coqdocvar{f1} [\coqdocvar{f2} [\coqdocvar{Hunion} [\coqdocvar{H1} [\coqdocvar{H2} [\coqdocvar{H3} \coqdocvar{H4}]]]]]]]]. \end{coqdoccode}
-\comm{Call $Hi$ the $i$th hypothesis, $i\in\{1,2,3,4\}$.}
+\comm{Call $Hi$ the $i$th hypothesis ($1 \leq i\leq 4$) of the definition of the predicate $Z\_comp\_eq$.}
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
@@ -497,13 +495,13 @@ then \coqdocvar{Zprop} \coqdocvar{R} also holds.
     prove that $b \tto_{(R1\cup R2)} (f_2 (f_1\ a))$, which can be
     reduced to $b \tto_{(R1\cup R2)} (f_1\ b)$ and $(f_1\ b)
     \tto_{(R1\cup R2)} (f_2 (f_1\ a))$ by the transitivity of
-    $refltrans$.} \begin{coqdoccode}
+    $\tto_{(R1\cup R2)}$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_union}. \coqdoctac{apply} \coqdocvar{H2}. \end{coqdoccode}
 \comm{From hypothesis $H2$, we
         know that $a \tto_{R1} (f_1\ a)$ for all $a$, and hence
-        $a\tto_{(R1\cup R2)} (f_1\ a)$ and we conclude.} \begin{coqdoccode}
+        $a\tto_{(R1\cup R2)} (f_1\ a)$ and we are done.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{H3} \coqdockw{with} \coqdocvar{b}; \coqdoctac{reflexivity}. \end{coqdoccode}
@@ -513,13 +511,12 @@ then \coqdocvar{Zprop} \coqdocvar{R} also holds.
 \coqdocindent{2.00em}
 + \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{refl}. \end{coqdoccode}
 \comm{The proof that $(f_2
-    (f_1\ a)) \tto_{(R1\cup R2)} (f_2 (f_1\ b))$ is done using the
-    reflexivity of $refltrans$ because $(f_2 (f_1\ a)) = (f_2 (f_1\
+    (f_1\ a)) \tto_{(R1\cup R2)} (f_2 (f_1\ b))$ is straightforward because $(f_2 (f_1\ a)) = (f_2 (f_1\
     b))$ by hypothesis $H1$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 - \coqdoctac{apply} \coqdocvar{H4}; \coqdoctac{assumption}. \end{coqdoccode}
-\comm{When $a \to_{R2} b$ then we are done by
+\comm{The second case is when $a \to_{R2} b$, and we conclude by
     hypothesis $H4$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -543,21 +540,87 @@ $\lambda$-calculus with $\beta\eta$-reduction, extensions of the
 $\lambda$-calculus with explicit substitutions and the
 $\lambda\mu$-calculus. In \cite{zproperty}, B. Felgenhauer
 et.al. formalized the Z property in Isabelle/HOL via
-semiconfluence. In \cite{vanoostrom:LIPIcs.FSCD.2021.24}, the
-flexibility and applicability of the Z property is shown to prove
+semiconfluence. Recently, \cite{vanoostrom:LIPIcs.FSCD.2021.24} shows
+the flexibility and applicability of the Z property to prove
 confluence and normalisation based on a syntax-free version of the
-classical notion of development
+classical notion of development.
 
 As future work, this formalization will be used to prove the
 confluence property of calculi with explicit substitutions using
 different approaches such as nominal and locally nameless
 representations.
 
-\flavio{nominal and lnr for lx. checking missing biblio (oostrom 21)}
-
-\bibliographystyle{alpha} 
-\bibliography{references2}
+%\bibliographystyle{alpha} 
+%\bibliography{references}
 %inline the .bbl file directly for mailing to authors.
+\small
+\begin{thebibliography}{FNvOS16}
+
+\bibitem[ACCL91]{accl91}
+M.~Abadi, L.~Cardelli, P.-L. Curien, and J.-J. L{\'e}vy.
+\newblock {Explicit Substitutions}.
+\newblock {\em JFP}, 1(4):375--416, 1991.
+
+\bibitem[AK12]{AK12b}
+B.~Accattoli and D.~Kesner.
+\newblock The permutative lambda calculus.
+\newblock In Nikolaj Bj{\o}rner and Andrei Voronkov, editors, {\em LPAR},
+  volume 7180 of {\em Lecture Notes in Computer Science}, pages 23--36.
+  Springer, 2012.
+
+\bibitem[Bar84]{Ba84}
+H.~P. Barendregt.
+\newblock {\em {The Lambda Calculus : Its Syntax and Semantics (revised
+  edition)}}.
+\newblock North Holland, 1984.
+
+\bibitem[DvO08]{dehornoy2008z}
+P.~Dehornoy and V.~van Oostrom.
+\newblock Z, proving confluence by monotonic single-step upperbound functions.
+\newblock In {\em Logical Models of Reasoning and Computation (LMRC-08)}, 2008.
+
+\bibitem[FNvOS16]{zproperty}
+B.~Felgenhauer {\it et. al.}
+\newblock The {Z} property.
+\newblock {\em Archive of Formal Proofs}, 2016.
+
+\bibitem[Kes09]{kes09}
+D.~Kesner.
+\newblock {A Theory of Explicit Substitutions with Safe and Full Composition}.
+\newblock {\em Logical Methods in Computer Science}, 5(3:1):1--29, 2009.
+
+\bibitem[NF16]{Nakazawa-Fujita2016}
+K. Nakazawa and K. Fujita.
+\newblock Compositional {Z:} confluence proofs for permutative conversion.
+\newblock {\em Studia Logica}, 104(6):1205--1224, 2016.
+
+\bibitem[Par92]{Parigot92}
+M. Parigot.
+\newblock Lambda-mu-calculus: An algorithmic interpretation of classical
+  natural deduction.
+\newblock In Andrei Voronkov, editor, {\em Logic Programming and Automated
+  Reasoning,International Conference LPAR'92, St. Petersburg, Russia, July
+  15-20, 1992, Proceedings}, volume 624 of {\em LNCS}, pages 190--201. Springer, 1992.
+
+\bibitem[Ter03]{terese03}
+Terese.
+\newblock {\em Term Rewriting Systems}, volume~55 of {\em Cambridge Tracts in
+  Theoretical Computer Science}.
+\newblock Cambridge University Press, 2003.
+
+\bibitem[{van}21]{vanoostrom:LIPIcs.FSCD.2021.24}
+V. {van Oostrom}.
+\newblock Z; syntax-free developments.
+\newblock In Naoki Kobayashi, editor, {\em 6th International Conference on
+  Formal Structures for Computation and Deduction ({{FSCD}} 2021)}, volume 195 of {\em Leibniz International Proceedings in Informatics ({{LIPIcs}})}, pages 24:1--24:22, {Dagstuhl, Germany}, 2021. 
+
+\bibitem[Win89]{winkler89}
+F. Winkler.
+\newblock {\em Equational Theorem Proving and Rewrite Rule Systems}, pages
+  26--39.
+\newblock Informatik-Fachberichte. Springer Berlin Heidelberg, 1989.
+
+\end{thebibliography}
 
 \end{document}
 
