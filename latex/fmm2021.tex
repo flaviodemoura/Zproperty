@@ -351,7 +351,8 @@ The next theorem is proved by presenting the Coq proof interleaved with natural 
   call $HR$ this hypothesis.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
-\coqdoctac{inversion} \coqdocvar{Hunion}; \coqdoctac{subst}. \coqdoctac{clear} \coqdocvar{H}. \coqdoctac{inversion} \coqdocvar{HR}; \coqdoctac{subst}. \end{coqdoccode}
+\coqdoctac{apply} \coqdocvar{Hunion} \coqdoctac{in} \coqdocvar{HR}. \coqdoctac{inversion} \coqdocvar{HR}; \coqdoctac{subst}. \coqdoctac{clear} \coqdocvar{H}.
+\end{coqdoccode}
 \comm{Since
   $R$ is the union of $R1$ and $R2$, one has that $a$ reduces to $b$
   in one step via either $R1$ or $R2$. Therefore, there are two cases
@@ -369,9 +370,15 @@ The next theorem is proved by presenting the Coq proof interleaved with natural 
     \tto_{R1} (f_1\ a)$, and then that $(f_1\ a) \tto_R (f_2 (f_1\ a))$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
-\ensuremath{\times} \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{refltrans\_union}; \coqdoctac{assumption}. \end{coqdoccode}
+\ensuremath{\times} \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{H} \coqdockw{as} [\coqdocvar{Hb} \coqdocvar{Hf}]. \coqdoctac{apply} (\coqdocvar{refltrans\_union} \coqdocvar{R1} \coqdocvar{R2}) \coqdoctac{in} \coqdocvar{Hb}. \coqdoctac{apply} \coqdocvar{refltrans_union_equiv} \coqdockw{with} \coqdocvar{R1} \coqdocvar{R2}. 
+\coqdocemptyline
+\coqdocindent{4.00em}
+** \coqdoctac{apply} \coqdocvar{Hunion}. 
+\coqdocemptyline
+\coqdocindent{4.00em}
+** \coqdoctac{apply} \coqdocvar{Hb}. \end{coqdoccode}
     \comm{The proof of $b \tto_{R1} (f_1\ a)$ is done from the fact that $f_1$
-    is Z for $R1$.} \begin{coqdoccode}
+    is Z for $R1$. An ancillary lemma is used to allow for the reflexive closure of R to be used on Hunion} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{H3} \coqdockw{with} \coqdocvar{a}; \coqdoctac{reflexivity}. \end{coqdoccode}
@@ -380,53 +387,10 @@ The next theorem is proved by presenting the Coq proof interleaved with natural 
     $H3$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
-+ \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{H}. \coqdoctac{clear} \coqdocvar{H} \coqdocvar{HR}. \coqdoctac{unfold} \coqdocvar{comp}. \end{coqdoccode}
++ \coqdoctac{apply} \coqdocvar{H2}; \coqdoctac{assumption}. \end{coqdoccode}
 \comm{The
     proof that $(f_2 (f_1\ a))$ $R$-reduces to $(f_2 (f_1\ b))$ is
-    more tricky. Initially, note that, since $a \to_{R1} b$ then we
-    get that $(f_1\ a) \tto_{R1} (f_1\ b)$ by the Z property.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{3.00em}
-\coqdoctac{induction} \coqdocvar{H0}. \end{coqdoccode}
-\comm{Now, the goal can be obtained from $H2$ as
-      long as $(f_1\ a) \to_{R1} (f_1\ b)$, but from the hypothesis
-      $H0$ we have that $(f_1\ a) \tto_{R1} (f_1\ b)$. Therefore, we
-      proceed by induction on $H0$.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{3.00em}
-\ensuremath{\times} \coqdoctac{apply} \coqdocvar{refl}. \end{coqdoccode}
-\comm{The reflexive case is trivial because $a$ and
-        $b$ are equal.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{3.00em}
-\ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_composition}\coqdoceol
-\coqdocindent{7.00em}
-\coqdoceol
-\coqdocindent{4.00em}
-\coqdockw{with} (\coqdocvar{f2} \coqdocvar{b0}). \end{coqdoccode}
-\comm{In the transitive case, we have that $(f_1\ a)$ $R1$-reduces to
-        $(f_1\ b)$ in at least one step. The current proof context is
-        as follows, up to renaming of variables:
-
-        \includegraphics[scale=0.5]{figs/fig9.png}
-
-      Therefore, there exists some element $b0$ such that $a0\to_{R1}
-      b0$ and $b0 \tto_{R1} c$ and we need to prove that $(f_2\ a0)
-      \tto_{R1\cup R2} (f_2\ c)$. This can be done in two steps using
-      the transitivity of $\tto_{R1\cup R2}$ taking $(f_2\ b0)$ as the
-      intermediary term.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{4.00em}
-** \coqdoctac{apply} \coqdocvar{H2}; \coqdoctac{assumption}. \end{coqdoccode}
-\comm{The first subgoal is then $(f_2\
-           a0)\tto_{(R1 \cup R2)} (f_2\ b0)$ that is proved by
-           hypothesis $H2$.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{4.00em}
-** \coqdoctac{assumption}. \end{coqdoccode}
-\comm{And the second subgoal $(f_2\ b0) \tto_{(R1
-           \cup R2)} (f_2\ c)$ is proved by the induction
-           hypothesis.} \begin{coqdoccode}
+    a direct consequence of the hypothesis $H2$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 - \coqdoctac{apply} \coqdocvar{H4}; \coqdoctac{assumption}. \end{coqdoccode}

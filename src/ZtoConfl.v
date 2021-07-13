@@ -341,7 +341,7 @@ Proof.
   intros a b Hab.
   split.
   - apply Hunion in Hab.
-    inversion Hab. subst.
+    inversion Hab; subst.
     + unfold comp.
       apply H1 in H. rewrite H.
       apply refltrans_composition with (f1 b).
