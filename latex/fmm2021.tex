@@ -338,7 +338,7 @@ The next theorem is proved by presenting the Coq proof interleaved with natural 
 \comm{After unfolding the definitions $Z\_prop$ and $Z\_comp$, we need to prove the existence of a map, say $f$, that is Z as shown by the current proof context:
       \newline
 
-      \includegraphics[scale=0.4]{figs/fig8.png} } \begin{coqdoccode}
+      \includegraphics[scale=0.2]{figs/fig8.png} } \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{\ensuremath{\exists}} (\coqdocvar{f2} \# \coqdocvar{f1}). \end{coqdoccode}
@@ -370,7 +370,10 @@ The next theorem is proved by presenting the Coq proof interleaved with natural 
     \tto_{R1} (f_1\ a)$, and then that $(f_1\ a) \tto_R (f_2 (f_1\ a))$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
-\ensuremath{\times} \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{H} \coqdockw{as} [\coqdocvar{Hb} \coqdocvar{Hf}]. \coqdoctac{apply} (\coqdocvar{refltrans\_union} \coqdocvar{R1} \coqdocvar{R2}) \coqdoctac{in} \coqdocvar{Hb}. \coqdoctac{apply} \coqdocvar{refltrans_union_equiv} \coqdockw{with} \coqdocvar{R1} \coqdocvar{R2}. 
+\ensuremath{\times} \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{destruct} \coqdocvar{H} \coqdockw{as} [\coqdocvar{Hb} \coqdocvar{Hf}]. \coqdoctac{apply} (\coqdocvar{refltrans\_union} \coqdocvar{R1} \coqdocvar{R2}) \coqdoctac{in} \coqdocvar{Hb}. 
+\coqdocemptyline
+\coqdocindent{4.00em}
+\coqdoctac{apply} \coqdocvar{refltrans\_union\_equiv} \coqdockw{with} \coqdocvar{R1} \coqdocvar{R2}. 
 \coqdocemptyline
 \coqdocindent{4.00em}
 ** \coqdoctac{apply} \coqdocvar{Hunion}. 
