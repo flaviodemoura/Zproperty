@@ -55,9 +55,9 @@ Flávio L. C. de Moura and Leandro O. Rezende\\ Dept. de Ciência da Computaçã
 
 Confluence is an important and undecidable property concerning the
 determinism of the computational process. This means that
-independently of the choice of the evaluation path, result is always
-the same. In the particular case of Abstract Rewriting Systems (ARS),
-which are the focus of this work, confluence can be beautifully
+independently of the choice of the evaluation path, the result is
+always the same. In the particular case of Abstract Rewriting Systems
+(ARS), which are the focus of this work, confluence can be beautifully
 expressed by diagrams as we will see in the next section.
 
 The contributions of this work are as follows:
@@ -65,8 +65,11 @@ The contributions of this work are as follows:
 \item We present a proof that the Z property implies confluence,
   which is direct and constructive.
 \item The proof that the Z property implies confluence is formalized
-  in the Coq proof assistant,\flavio{and the presentation is made
-  interleaving Coq code followed by an explanation in English of the
+  in the Coq proof assistant. 
+\item We formalize an extension of the Z property, known as
+  compositional Z property, as presented in
+  \cite{Nakazawa-Fujita2016}. The proofs are presented by interleaving
+  Coq code followed by an explanation in English of the corresponding
   code. In this way, the annotations are done directly in the Coq
   files using the coqdoc annotation style. We believe that this
   approach is interesting for those that are not familiar with the Coq
@@ -74,26 +77,23 @@ The contributions of this work are as follows:
   explanations gives a good idea on how they relate to each
   other. This discipline also forces a better organization of the
   formalization and of the proofs so that the explanation in English
-  is comprehensible.}
-\item We formalize an extension of the Z property, known as
-  compositional Z property, as presented in
-  \cite{Nakazawa-Fujita2016}.
+  is comprehensible.
 \end{itemize}
 
 \section{The Z property implies Confluence}
 
 An ARS, say $(A,R)$, is a pair composed of a set $A$ and binary
 relation over this set $R:A\times A$. Let $a,b\in A$. We write
-$a\to_R b$ (or $R\ a\ b$ in Coq) to denote that $(a,b)\in R$, and in
-this case, we say that $a$ $R$-reduces to $b$ in one step. The
-reflexive transitive closure of a relation \coqdocvar{R}, written as
-$\tto_R$, is defined by the following inference rules: \begin{mathpar}
-  \inferrule*[Right={$(refl)$}]{~}{a \tto_R a} \and
-  \inferrule*[Right={$(rtrans)$}]{a\to_R b \and b \tto_R c}{a \tto_R
-    c} \end{mathpar} \noindent where $a,b$ and $c$ are universally
-quantified variables as explicitly stated in the corresponding Coq
-definition: \begin{coqdoccode} \coqdocemptyline \coqdocnoindent
-  \coqdockw{Inductive} \coqdocvar{refltrans}
+$a\to_R b$ (or $R\ a\ b$ in the Coq syntax below) to denote that
+$(a,b)\in R$, and in this case, we say that $a$ $R$-reduces to $b$ in
+one step. The reflexive transitive closure of a relation
+\coqdocvar{R}, written as $\tto_R$, is defined by the following
+inference rules: \begin{mathpar} \inferrule*[Right={$(refl)$}]{~}{a
+    \tto_R a} \and \inferrule*[Right={$(rtrans)$}]{a\to_R b \and b
+    \tto_R c}{a \tto_R c} \end{mathpar} \noindent where $a,b$ and $c$
+are universally quantified variables as explicitly stated in the
+corresponding Coq definition: \begin{coqdoccode} \coqdocemptyline
+  \coqdocnoindent \coqdockw{Inductive} \coqdocvar{refltrans}
   \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R}: \coqdocvar{Rel}
   \coqdocvar{A}) : \coqdocvar{A} \ensuremath{\rightarrow}
   \coqdocvar{A} \ensuremath{\rightarrow} \coqdockw{Prop} :=\coqdoceol
@@ -197,9 +197,8 @@ middle. As a result, we have an elegant inductive proof of the fact
 that if an ARS satisfies the Z property then it is confluent. This
 proof is formalized in the Coq proof assistant, and the whole
 formalization is available in a GitHub
-repository\footnote{\label{fn:github}\url{https://github.com/flaviodemoura/Zproperty}}.
-
-One contribution of this work is the following proof:
+repository\footnote{\label{fn:github}\url{https://github.com/flaviodemoura/Zproperty}}. The
+following proof is the first contribution of this work:
 \begin{theorem}\cite{dehornoy2008z}
   If there exists a mapping satisfying the Z property for an abstract
   rewriting system, then it is confluent.
@@ -215,23 +214,25 @@ One contribution of this work is the following proof:
   also trivial, but the other case cannot be proved using the last
   generated induction hypothesis. In fact, suppose that
   $a \to c' \tto c$, for some term $c'$. The induction hypothesis now
-  refers to $c'$ and the hypothesis $a \to b'$ will compose the
-  induction hypothesis as a condition of the form $c' \to b'$, which
-  is not provable, and we get stuck. The way to circumvent this
-  problem is by reorganizing the proof context before starting the
-  inner induction on $a \tto c$. The Z property will allow this
+  refers to $c'$ and the hypothesis $a \to b'$ is transformed in the
+  condition $c' \to b'$, which is not provable, therefore we get
+  stuck. The way to circumvent this problem is by reorganizing the
+  proof context by removing the hypothesis $a \to b$ before starting
+  the inner induction on $a \tto c$. The Z property will allow this
   reorganization because the hypothesis $a \to b$ will be replaced by
   $b \tto (f\ a)$ that is straightforward from the Z property, and by
-  $a \tto (f\ a)$ that is obtained from the transitivity of
-  $\tto$. The new context allows us to proceed by induction on the
-  reduction $a \tto c$, as expected because the hypothesis
-  $a \tto (f\ a)$ will compose the induction hypothesis as a condition
-  of the form $c' \tto (f\ c')$ which can be proved using the Z
-  property. The details of the whole proof can be found in the
-  technical report\textsuperscript{\ref{fn:github}}.
+  $a \tto (f\ a)$ that is obtained from the transitivity of $\to$. The
+  new context allows us to proceed by induction on the reduction
+  $a \tto c$, as expected because the hypothesis $a \tto (f\ a)$ is
+  transformed in the condition $c' \tto (f\ c')$ which can be proved
+  using the Z property. The details of the whole proof can be found in
+  the technical report\textsuperscript{\ref{fn:github}}.
 \end{proof}
   
-The interesting point of the above proof is that it reveals the difficulties that are usually made invisible by graphical proofs. In the next section, we present the formalization of an extension of the Z property known as Compositional Z.
+The interesting point of the above proof is that it reveals the
+difficulties that are usually made invisible by graphical proofs. In
+the next section, we present the formalization of an extension of the
+Z property known as Compositional Z.
 
 \section{An extension of the Z property: Compositional Z}
 
@@ -254,13 +255,12 @@ we need to define the \textit{weak Z property}:
   \caption{The weak Z property}\label{fig:weakZ}
 \end{figure}
 
-\begin{definition} Let $(A,\to_R)$ be an ARS and $\to_R'$ a
-  relation on $A$. A mapping $f$ satisfies the {\it weak Z
-    property} for $\to_R$ by $\to_R'$ if $a\to_R b$ implies $b \tto_R'
-  f(a)$ and $f(a) \tto_R' f(b)$ (cf. Figure
-  \ref{fig:weakZ}). Therefore, a mapping $f$ satisfies the Z
-  property for $\to_R$ if it satisfies the weak Z property by
-  itself.
+\begin{definition} Let $(A,\to_R)$ be an ARS and $\to_R'$ be another
+  relation on $A$. A mapping $f$ satisfies the {\it weak Z property}
+  for $\to_R$ by $\to_R'$ if $a\to_R b$ implies $b \tto_R' f(a)$ and
+  $f(a) \tto_R' f(b)$ (cf. Figure \ref{fig:weakZ}). Therefore, a
+  mapping $f$ satisfies the Z property for $\to_R$ if it satisfies the
+  weak Z property by itself.
 \end{definition}
 
 When $f$ satisfies the weak Z property, we also say that $f$ is weakly
@@ -277,10 +277,25 @@ follows: \begin{coqdoccode} \coqdocemptyline \coqdocnoindent
   (\coqdocvar{f} \coqdocvar{b})).\coqdoceol \coqdocemptyline
 \end{coqdoccode}
 
-In the Coq code that follows, we write the composition of f1 and f2 as
-f1 \# f2, i.e. (f1 \# f2)$x$ = f1(f2\ $x$), and the union of the
-reduction relation R1 with the reduction relation R2 is written as R1
-!\_! R2. The compositional Z is then defined as follows:
+The compositional Z is then defined as follows:
+
+\begin{definition}\cite{Nakazawa-Fujita2016}
+  Let $(A,\to)$ be an ARS such that $\to = \to_1 \cup \to_2$. The
+  $(A,\to)$ satisfies the compositional Z if there exist mappings
+  $f_1:A \to A$ and $f_2:A \to A$ such that:
+  \begin{enumerate}
+  \item $f_1$ is Z for $\to_1$;
+  \item $a \to_1 b$ implies $f_2\ a \tto f_2\ b$;
+  \item $a \tto f_2\ a$ holds for any $a \in Im(f_1)$, and
+  \item $f_2\circ f_1$ is weakly Z for $\to_2$ by $\to$.
+  \end{enumerate}
+\end{definition}
+
+The corresponding definition in the Coq proof assistant is below,
+where the composition of $f_2\circ f_1$ is written as \coqdocvar{f2}
+\# \coqdocvar{f1}, i.e. (\coqdocvar{f2} \# \coqdocvar{f1})$x$ =
+\coqdocvar{f2}(\coqdocvar{f1}\ $x$), and the union $\to_1 \cup \to_2$
+written as R1 !\_! R2.
 
 \begin{coqdoccode}
   \coqdocemptyline \coqdocnoindent \coqdockw{Definition}
@@ -512,31 +527,31 @@ then \coqdocvar{Zprop} \coqdocvar{R} also holds.
 \coqdocemptyline
 \end{coqdoccode}
 
-\section{Related Work, Future Work and Conclusion}
+\section{Conclusion, Related Work and Future Work}
 
 In this work we presented a constructive proof that the Z property
-implies confluence, an important property for rewriting systems. In
-addition, we formally proved this result in the Coq proof
+implies confluence, and this proof was formalized in the Coq proof
 assistant\footnote{The corresponding files are available at
- \url{https://github.com/flaviodemoura/Zproperty}.}
+  \url{https://github.com/flaviodemoura/Zproperty}}.  Moreover, our
+formalization includes an extension of the Z property, known as
+compositional Z property, as presented in \cite{Nakazawa-Fujita2016}.
 
 The Z property was presented by V. van Oostrom as a sufficient
-condition for an ARS to be confluent~\cite{zproperty}, and since
-then has been used to prove confluence in different contexts such as
-the $\lambda$-calculus with $\beta\eta$-reduction, extensions of the
+condition for an ARS to be confluent~\cite{zproperty}, and since then
+has been used to prove confluence in different contexts such as the
+$\lambda$-calculus with $\beta\eta$-reduction, extensions of the
 $\lambda$-calculus with explicit substitutions and the
-$\lambda\mu$-calculus. The Coq proofs of the main results are
-commented line by line which serve both as an informal presentation of
-the proofs (i.e. proofs explained in natural language) and as its
-formal counterpart. Moreover, we formalize an extension of the Z
-property, known as compositional Z property, as presented in
-\cite{Nakazawa-Fujita2016}
+$\lambda\mu$-calculus. In \cite{zproperty}, B. Felgenhauer
+et.al. formalized the Z property in Isabelle/HOL via
+semiconfluence. In \cite{vanoostrom:LIPIcs.FSCD.2021.24}, the
+flexibility and applicability of the Z property is shown to prove
+confluence and normalisation based on a syntax-free version of the
+classical notion of development
 
 As future work, this formalization will be used to prove the
-confluence property of a calculus with explicit substitution based on
-the $\lambda_{ex}$-calculus (cf. ~\cite{kes09}). In addition, we hope
-that our formalization can be used as a framework for proving
-confluence of others rewriting systems.
+confluence property of calculi with explicit substitutions using
+different approaches such as nominal and locally nameless
+representations.
 
 \flavio{nominal and lnr for lx. checking missing biblio (oostrom 21)}
 
