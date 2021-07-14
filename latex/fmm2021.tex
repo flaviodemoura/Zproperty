@@ -283,18 +283,19 @@ The compositional Z is then defined as follows:
   Let $(A,\to)$ be an ARS such that $\to = \to_1 \cup \to_2$. The
   $(A,\to)$ satisfies the compositional Z if there exist mappings
   $f_1:A \to A$ and $f_2:A \to A$ such that:
-  \begin{tabular}{lll}
-  1. $f_1$ is Z for $\to_1$ && 2. $a \to_1 b$ implies $f_2\ a \tto f_2\ b$ \\
-  3. $a \tto f_2\ a$ holds for any $a \in Im(f_1)$ &&
-  4. $f_2\circ f_1$ is weakly Z for $\to_2$ by $\to$.
-  \end{tabular}
+  \begin{enumerate}
+  \item $f_1$ is Z for $\to_1$ 
+  \item $a \to_1 b$ implies $f_2\ a \tto f_2\ b$ 
+  \item $a \tto f_2\ a$ holds for any $a \in Im(f_1)$ 
+  \item $f_2\circ f_1$ is weakly Z for $\to_2$ by $\to$.
+  \end{enumerate}
 \end{definition}
 
 The corresponding definition in the Coq proof assistant is below,
 where the composition of $f_2\circ f_1$ is written as \coqdocvar{f2}
 \# \coqdocvar{f1}, i.e. (\coqdocvar{f2} \# \coqdocvar{f1})$x$ =
 \coqdocvar{f2}(\coqdocvar{f1}\ $x$), and the union $\to_1 \cup \to_2$
-written as R1 !\_! R2.
+written as \coqdocvar{R1} !\_! \coqdocvar{R2}.
 
 \begin{coqdoccode}
   \coqdocemptyline \coqdocnoindent \coqdockw{Definition}
@@ -302,12 +303,16 @@ written as R1 !\_! R2.
   :\coqdocvar{Rel} \coqdocvar{A}) := \coqdoctac{\ensuremath{\exists}}
   (\coqdocvar{R1} \coqdocvar{R2}: \coqdocvar{Rel} \coqdocvar{A})
   (\coqdocvar{f1} \coqdocvar{f2}: \coqdocvar{A}
-  \ensuremath{\rightarrow} \coqdocvar{A}), (\coqdockw{\ensuremath{\forall}} \coqdocvar{x} \coqdocvar{y}, \coqdocvar{R} \coqdocvar{x} \coqdocvar{y} \ensuremath{\leftrightarrow} (\coqdocvar{R1} !\coqdocvar{\_}! \coqdocvar{R2}) \ensuremath{\land}
+  \ensuremath{\rightarrow} \coqdocvar{A}),
+  (\coqdockw{\ensuremath{\forall}} \coqdocvar{x} \coqdocvar{y},
+  \coqdocvar{R} \coqdocvar{x} \coqdocvar{y}
+  \ensuremath{\leftrightarrow} (\coqdocvar{R1} !\coqdocvar{\_}!
+  \coqdocvar{R2}) \coqdocvar{x} \coqdocvar{y}) \ensuremath{\land}
   \coqdocvar{f\_is\_Z} \coqdocvar{R1} \coqdocvar{f1}
   \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a}
   \coqdocvar{b}, \coqdocvar{R1} \coqdocvar{a} \coqdocvar{b}
   \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R})
-  ((\coqdocvar{f2} \# \coqdocvar{f1}) \coqdocvar{a}) ((\coqdocvar{f2} \# \coqdocvar{f1}) \coqdocvar{b}))
+  (\coqdocvar{f2} \coqdocvar{a}) (\coqdocvar{f2} \coqdocvar{b}))
   \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a}
   \coqdocvar{b}, \coqdocvar{b} = \coqdocvar{f1} \coqdocvar{a}
   \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R})
@@ -341,7 +346,7 @@ The next theorem is proved by presenting the Coq proof interleaved with natural 
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{\ensuremath{\exists}} (\coqdocvar{f2} \# \coqdocvar{f1}). \end{coqdoccode}
-\comm{We will prove that the composition (\coqdocvar{f2} \# \coqdocvar{f1})) is Z.} \begin{coqdoccode}
+\comm{We will prove that the composition ($f_2 \circ f_1$) is Z.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{intros} \coqdocvar{a} \coqdocvar{b} \coqdocvar{HR}. \end{coqdoccode}
@@ -410,17 +415,16 @@ non-trivial topic \cite{winkler89,terese03}. The confluence of
 rewriting systems with an equivalence relation can also be proved by a
 variant of the compositional Z, known as Z property
 modulo~\cite{AK12b}. We define the predicate \coqdocvar{Z\_comp\_eq}
-corresponding to the Z property modulo, and prove directly
-that if \coqdocvar{Z\_comp\_eq} holds for a relation \coqdocvar{R}
-then \coqdocvar{Zprop} \coqdocvar{R} also holds.
+corresponding to the Z property modulo, and prove that it implies
+the compositional Z.
 
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
-\coqdockw{Definition} \coqdocvar{Z\_comp\_eq} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R} :\coqdocvar{Rel} \coqdocvar{A}) := \coqdoctac{\ensuremath{\exists}} (\coqdocvar{R1} \coqdocvar{R2}: \coqdocvar{Rel} \coqdocvar{A}) (\coqdocvar{f1} \coqdocvar{f2}: \coqdocvar{A} \ensuremath{\rightarrow} \coqdocvar{A}), (\coqdockw{\ensuremath{\forall}} \coqdocvar{x} \coqdocvar{y}, \coqdocvar{R} \coqdocvar{x} \coqdocvar{y} \ensuremath{\leftrightarrow} (\coqdocvar{R1} !\coqdocvar{\_}! \coqdocvar{R2}) \coqdocvar{x} \coqdocvar{y} \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvar{R1} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{f1} \coqdocvar{a}) = (\coqdocvar{f1} \coqdocvar{b})) \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a}, (\coqdocvar{refltrans} \coqdocvar{R1}) \coqdocvar{a} (\coqdocvar{f1} \coqdocvar{a})) \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{b} \coqdocvar{a}, \coqdocvar{a} = \coqdocvar{f1} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} (\coqdocvar{f2} \coqdocvar{a})) \ensuremath{\land} (\coqdocvar{f\_is\_weak\_Z} \coqdocvar{R2} \coqdocvar{R} (\coqdocvar{f2} \# \coqdocvar{f1})).\coqdoceol
+\coqdockw{Definition} \coqdocvar{Z\_comp\_eq} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R} :\coqdocvar{Rel} \coqdocvar{A}) := \coqdoctac{\ensuremath{\exists}} (\coqdocvar{R1} \coqdocvar{R2}: \coqdocvar{Rel} \coqdocvar{A}) (\coqdocvar{f1} \coqdocvar{f2}: \coqdocvar{A} \ensuremath{\rightarrow} \coqdocvar{A}), \coqdocemptyline \coqdocindent{1.00em} (\coqdockw{\ensuremath{\forall}} \coqdocvar{x} \coqdocvar{y}, \coqdocvar{R} \coqdocvar{x} \coqdocvar{y} \ensuremath{\leftrightarrow} (\coqdocvar{R1} !\coqdocvar{\_}! \coqdocvar{R2}) \coqdocvar{x} \coqdocvar{y}) \ensuremath{\land} \coqdocemptyline \coqdocindent{1.00em} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvar{R1} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{f1} \coqdocvar{a}) = (\coqdocvar{f1} \coqdocvar{b})) \ensuremath{\land} \coqdocemptyline \coqdocindent{1.00em} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a}, (\coqdocvar{refltrans} \coqdocvar{R1}) \coqdocvar{a} (\coqdocvar{f1} \coqdocvar{a})) \ensuremath{\land} \coqdocemptyline \coqdocindent{1.00em} (\coqdockw{\ensuremath{\forall}} \coqdocvar{b} \coqdocvar{a}, \coqdocvar{a} = \coqdocvar{f1} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} (\coqdocvar{f2} \coqdocvar{a})) \ensuremath{\land} \coqdocemptyline \coqdocindent{1.00em} (\coqdocvar{f\_is\_weak\_Z} \coqdocvar{R2} \coqdocvar{R} (\coqdocvar{f2} \# \coqdocvar{f1})).\coqdoceol
 \coqdocemptyline
 \coqdocnoindent
-\coqdockw{Lemma} \coqdocvar{Z\_comp\_eq\_implies\_Z\_prop} \{\coqdocvar{A}:\coqdockw{Type}\}: \coqdockw{\ensuremath{\forall}} (\coqdocvar{R} : \coqdocvar{Rel} \coqdocvar{A}), \coqdocvar{Z\_comp\_eq} \coqdocvar{R} \ensuremath{\rightarrow} \coqdocvar{Z\_prop} \coqdocvar{R}.\coqdoceol
+\coqdockw{Lemma} \coqdocvar{Z\_comp\_eq\_implies\_Z\_comp} \{\coqdocvar{A}:\coqdockw{Type}\}: \coqdockw{\ensuremath{\forall}} (\coqdocvar{R} : \coqdocvar{Rel} \coqdocvar{A}), \coqdocvar{Z\_comp\_eq} \coqdocvar{R} \ensuremath{\rightarrow} \coqdocvar{Z\_comp} \coqdocvar{R}.\coqdoceol
 \coqdocnoindent
 \coqdockw{Proof}.\coqdoceol
 \coqdocindent{1.00em}
@@ -429,113 +433,51 @@ then \coqdocvar{Zprop} \coqdocvar{R} also holds.
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{destruct} \coqdocvar{Heq} \coqdockw{as} [\coqdocvar{R1} [\coqdocvar{R2} [\coqdocvar{f1} [\coqdocvar{f2} [\coqdocvar{Hunion} [\coqdocvar{H1} [\coqdocvar{H2} [\coqdocvar{H3} \coqdocvar{H4}]]]]]]]]. \end{coqdoccode}
-\comm{Call $Hi$ the $i$th hypothesis ($1 \leq i\leq 4$) of the definition of the predicate $Z\_comp\_eq$.}
+\comm{Call $Hi$ the $i$th hypothesis ($1 \leq i\leq 4$) of the definition of the predicate $Z\_comp\_eq$, as in the previous definition.}
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
-\coqdoctac{unfold} \coqdocvar{Z\_prop}. \coqdoctac{\ensuremath{\exists}} (\coqdocvar{f2} \# \coqdocvar{f1}). \end{coqdoccode}
-\comm{From the definition of the
-  predicate $Z\_prop$, we need to find a map, say $f$ that is Z. Let
-  $(f_2 \circ f_1)$ be such map.}  \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{1.00em}
-\coqdoctac{intros} \coqdocvar{a} \coqdocvar{b} \coqdocvar{Hab}. \end{coqdoccode}
-\comm{In order to prove that $(f_2 \circ f_1)$ is Z,
-  let $a$ and $b$ be arbitrary elements of type $A$, and $Hab$ be the
-  hypothesis that $a \to_{R} b$.} \begin{coqdoccode}
+\coqdoctac{unfold} \coqdocvar{Z\_comp}. \coqdoctac{\ensuremath{\exists}} (\coqdocvar{R1}, \coqdocvar{R2}, \coqdocvar{f1}, \coqdocvar{f2}). \end{coqdoccode}
+\comm{Following the definition of the
+  predicate $Z\_comp$, we will show that the relations \coqdocvar{R1} and \coqdocvar{R2}, and the functions \coqdocvar{f1} and \coqdocvar{f2} satisfy the required conditions.}  \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
 \coqdoctac{split}. \end{coqdoccode}
-  \comm{We split the Z property on $f_2 \circ f_1$ onto two reductions we have to prove: $b \tto_{(R1\cup R2)} (f_2 (f_1\ a))$ and $(f_2 (f_1\ a)) \tto_{(R1\cup R2)} (f_2 (f_1\ b))$} \begin{coqdoccode}
-\coqdocemptyline
+\begin{coqdoccode}
+  \coqdocemptyline
 \coqdocindent{1.00em}
-\coqdoctac{split}. \end{coqdoccode}
-\comm{Therefore, we first
-    prove that $b \tto_{(R1\cup R2)} (f_2 (f_1\ a))$, which can be
-    reduced to $b \tto_{(R1\cup R2)} (f_1\ b)$ and $(f_1\ b)
-    \tto_{(R1\cup R2)} (f_2 (f_1\ a))$ by the transitivity of
-    $\tto_{(R1\cup R2)}$.} \begin{coqdoccode}
-\coqdocemptyline
+- \coqdoctac{assumption}. \end{coqdoccode} \comm{The first condition, which states that $R$ is the union of $R1$ with $R2$ is an hypothesis, and there is nothing to do.}
+\begin{coqdoccode}
+  \coqdocemptyline
 \coqdocindent{1.00em}
-- \coqdoctac{apply} \coqdocvar{Hunion} \coqdoctac{in} \coqdocvar{Hab}.
+- \coqdoctac{split}. \end{coqdoccode}
+\begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
-\coqdoctac{inversion} \coqdocvar{Hab}; \coqdoctac{subst}. \end{coqdoccode}
-\comm{Since $a$ $R$-reduces in one step to $b$ and $R$ is the union of the
-    relations $R1$ and $R2$ then we consider two cases:} \begin{coqdoccode}
++ \coqdoctac{unfold} \coqdocvar{f\_is\_Z}. \coqdoctac{intros} \coqdocvar{a} \coqdocvar{b} \coqdocvar{H}; \coqdoctac{split}.\end{coqdoccode}
+\comm{As the second condition, we need to prove that \coqdocvar{f1} is Z for \coqdocvar{R1}. So, assuming that $a\to_{R1} b$, we will prove that $b\tto_{R1} (f_1\ a)$ and $(f_1\ a) \tto_{R1} (f_1\ b)$.} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{3.00em}
+\ensuremath{\times} \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{H2}. \end{coqdoccode}
+\comm{From hypothesis $H1$, we know that $f_1\ a = f_1\ b$, since $a\to_{R1} b$. Therefore, we need to prove that $b\tto_{R1} (f_1\ b)$ that is straightforward from hypothesis $H2$.} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{3.00em}
+\ensuremath{\times} \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{refl}. \end{coqdoccode}
+        \comm{Similarly to the previous case, using the fact that $f_1\ a = f_1\ b$ we complete this case by the reflexivity of $\tto_{R1}$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
-+ \coqdoctac{unfold} \coqdocvar{comp}. \end{coqdoccode}
-\comm{The first case is when $a \to_{R1}
-    b$. This is equivalent to say that $f_2 \circ f_1$ is weak Z for
-    $R1$ by $R1 \cup R2$.} \begin{coqdoccode}
++ \coqdoctac{split}. \end{coqdoccode}
+\begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
-\coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}.
+\ensuremath{\times}  \coqdoctac{intros} \coqdocvar{a} \coqdocvar{b} \coqdocvar{H}. \coqdoctac{unfold} \coqdocvar{comp}. \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{refl}. \end{coqdoccode}\comm{The proof that $(f_2
+    (f_1\ a)) \tto_{R} (f_2 (f_1\ b))$ is straightforward because $(f_2 (f_1\ a)) = (f_2 (f_1\
+    b))$ by hypothesis $H1$.}
+  \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
-\coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{f1} \coqdocvar{b}). \end{coqdoccode}
-\comm{Therefore, we first
-    prove that $b \tto_{(R1\cup R2)} (f_2 (f_1\ a))$, which can be
-    reduced to $b \tto_{(R1\cup R2)} (f_1\ b)$ and $(f_1\ b)
-    \tto_{(R1\cup R2)} (f_2 (f_1\ a))$ by the transitivity of
-    $\tto_{(R1\cup R2)}$.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{3.00em}
-\ensuremath{\times} \coqdoctac{assert} (\coqdocvar{H5}: \coqdocvar{refltrans} \coqdocvar{R1} \coqdocvar{b} (\coqdocvar{f1} \coqdocvar{b})).
-\coqdocemptyline
-\coqdocindent{4.00em}
-{
-\coqdocemptyline
-\coqdocindent{5.00em}
-\coqdoctac{apply} \coqdocvar{H2}.
-\coqdocemptyline
-\coqdocindent{4.00em}
-}
- \end{coqdoccode}
-\comm{The hypothesis H2 guarantees that $b$ reduces to $(f1 b)$ by $R1$.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{4.00em}
-\coqdoctac{apply} \coqdocvar{refltrans\_union\_equiv} \coqdockw{with} \coqdocvar{R1} \coqdocvar{R2}.
-\coqdocemptyline
-\coqdocindent{4.00em}
-** \coqdoctac{assumption}.
-\coqdocemptyline
-\coqdocindent{4.00em}
-** \coqdoctac{apply} \coqdocvar{refltrans\_union}. \coqdoctac{assumption}.
-\end{coqdoccode}
-\comm{Since we have the hypothesis that $b$ reduces to $(f1 b)$ by $R1$, we only need to open up $R$ on its two 
-components, $R1$ and $R2$, and apply the known hypotheses to prove that $b$ reduces to $(f1 b)$ by $R$.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{3.00em}
-\ensuremath{\times} \coqdoctac{apply} \coqdocvar{H3} \coqdockw{with} \coqdocvar{b}. \coqdoctac{reflexivity}. \end{coqdoccode}
-        \comm{The proof that $(f_1\ b)\tto_{(R1\cup R2)} (f_2 (f_1\ a))$ is
-        exactly the hypothesis $H3$.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{2.00em}
-+ \coqdoctac{apply} \coqdocvar{H4}. \coqdoctac{assumption}. \end{coqdoccode}
-\comm{The first case is when $a \to_{R2}
-    b$. In that case, since $f_2 \circ f_1$ is weak Z for
-    $R2$ by $R1 \cup R2$, we have met both necessary conditions to prove 
-    that  $b \tto_{R} ((f2 \circ f1) a)$.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{1.00em}
-- \coqdoctac{apply} \coqdocvar{Hunion} \coqdoctac{in} \coqdocvar{Hab}.
-\coqdocemptyline
-\coqdocindent{2.00em}
-\coqdoctac{inversion} \coqdocvar{Hab}; \coqdoctac{subst}. \end{coqdoccode}
-\comm{First, we have to split the relation $R$ into $R1$ and $R2$.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{1.00em}
-+ \coqdoctac{unfold} \coqdocvar{comp}. \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdoctac{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{refl}.
-\comm{The proof that $(f_2
-    (f_1\ a)) \tto_{(R1\cup R2)} (f_2 (f_1\ b))$ is straightforward because $(f_2 (f_1\ a)) = (f_2 (f_1\
-    b))$ by hypothesis $H1$.} \begin{coqdoccode}
-\coqdocemptyline
-\coqdocindent{1.00em}
-+ \coqdoctac{apply} \coqdocvar{H4}; \coqdoctac{assumption}. \end{coqdoccode}
-\comm{The second case is when $a \to_{R2} b$, and we conclude by
-    hypothesis $H4$.} \begin{coqdoccode}
+\ensuremath{\times} \coqdoctac{split}; \coqdoctac{assumption}. \end{coqdoccode} \comm{Finally, the last two conditions of $Z\_comp\_eq$ and $Z\_comp$ coincide, and we are done.}
+\begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Qed}.\coqdoceol
@@ -571,7 +513,7 @@ representations.
 %\bibliographystyle{alpha} 
 %\bibliography{references}
 %inline the .bbl file directly for mailing to authors.
-\small
+
 \begin{thebibliography}{FNvOS16}
 
 \bibitem[ACCL91]{accl91}
