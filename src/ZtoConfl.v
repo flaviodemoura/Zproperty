@@ -231,7 +231,7 @@ Theorem Z_comp_implies_Z_prop {A:Type}: forall (R :Rel A), Z_comp R -> Z_prop R.
 Proof.
   intros R H.
   unfold Z_prop. unfold Z_comp in H. destruct H as
-  [ R1 [ R2 [f1 [f2 [Hunion [H1 [H2 [H3 H4]]]]]]]].⅜
+  [ R1 [ R2 [f1 [f2 [Hunion [H1 [H2 [H3 H4]]]]]]]].
   exists (f2 # f1).
   intros a b HR.
   apply Hunion in HR. inversion HR; subst. clear HR.
@@ -355,7 +355,7 @@ Proof.
       * apply H3 with b. reflexivity.
     + apply H4. assumption.
   - apply Hunion in Hab.
-    inversion Hab. subst.
+    inversion Hab; subst.
     + unfold comp. apply H1 in H. rewrite H. apply refl.
     + apply H4. assumption.
 Qed.

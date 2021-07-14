@@ -302,13 +302,12 @@ written as R1 !\_! R2.
   :\coqdocvar{Rel} \coqdocvar{A}) := \coqdoctac{\ensuremath{\exists}}
   (\coqdocvar{R1} \coqdocvar{R2}: \coqdocvar{Rel} \coqdocvar{A})
   (\coqdocvar{f1} \coqdocvar{f2}: \coqdocvar{A}
-  \ensuremath{\rightarrow} \coqdocvar{A}), \coqdocvar{R} =
-  (\coqdocvar{R1} !\coqdocvar{\_}! \coqdocvar{R2}) \ensuremath{\land}
+  \ensuremath{\rightarrow} \coqdocvar{A}), (\coqdockw{\ensuremath{\forall}} \coqdocvar{x} \coqdocvar{y}, \coqdocvar{R} \coqdocvar{x} \coqdocvar{y} \ensuremath{\leftrightarrow} (\coqdocvar{R1} !\coqdocvar{\_}! \coqdocvar{R2}) \ensuremath{\land}
   \coqdocvar{f\_is\_Z} \coqdocvar{R1} \coqdocvar{f1}
   \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a}
   \coqdocvar{b}, \coqdocvar{R1} \coqdocvar{a} \coqdocvar{b}
   \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R})
-  (\coqdocvar{f2} \coqdocvar{a}) (\coqdocvar{f2} \coqdocvar{b}))
+  ((\coqdocvar{f2} \# \coqdocvar{f1}) \coqdocvar{a}) ((\coqdocvar{f2} \# \coqdocvar{f1}) \coqdocvar{b}))
   \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a}
   \coqdocvar{b}, \coqdocvar{b} = \coqdocvar{f1} \coqdocvar{a}
   \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R})
@@ -381,7 +380,7 @@ The next theorem is proved by presenting the Coq proof interleaved with natural 
 \coqdocindent{4.00em}
 ** \coqdoctac{apply} \coqdocvar{Hb}. \end{coqdoccode}
     \comm{The proof of $b \tto_{R1} (f_1\ a)$ is done from the fact that $f_1$
-    is Z for $R1$. An ancillary lemma is used to allow for the reflexive closure of R to be used on Hunion} \begin{coqdoccode}
+    is Z for $R1$. An ancillary lemma is used to allow for the reflexive closure of R to be used on Hunion.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
 \ensuremath{\times} \coqdoctac{apply} \coqdocvar{H3} \coqdockw{with} \coqdocvar{a}; \coqdoctac{reflexivity}. \end{coqdoccode}
@@ -418,7 +417,7 @@ then \coqdocvar{Zprop} \coqdocvar{R} also holds.
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
-\coqdockw{Definition} \coqdocvar{Z\_comp\_eq} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R} :\coqdocvar{Rel} \coqdocvar{A}) := \coqdoctac{\ensuremath{\exists}} (\coqdocvar{R1} \coqdocvar{R2}: \coqdocvar{Rel} \coqdocvar{A}) (\coqdocvar{f1} \coqdocvar{f2}: \coqdocvar{A} \ensuremath{\rightarrow} \coqdocvar{A}), \coqdocvar{R} = (\coqdocvar{R1} !\coqdocvar{\_}! \coqdocvar{R2}) \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvar{R1} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{f1} \coqdocvar{a}) = (\coqdocvar{f1} \coqdocvar{b})) \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a}, (\coqdocvar{refltrans} \coqdocvar{R1}) \coqdocvar{a} (\coqdocvar{f1} \coqdocvar{a})) \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{b} \coqdocvar{a}, \coqdocvar{a} = \coqdocvar{f1} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} (\coqdocvar{f2} \coqdocvar{a})) \ensuremath{\land} (\coqdocvar{f\_is\_weak\_Z} \coqdocvar{R2} \coqdocvar{R} (\coqdocvar{f2} \# \coqdocvar{f1})).\coqdoceol
+\coqdockw{Definition} \coqdocvar{Z\_comp\_eq} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R} :\coqdocvar{Rel} \coqdocvar{A}) := \coqdoctac{\ensuremath{\exists}} (\coqdocvar{R1} \coqdocvar{R2}: \coqdocvar{Rel} \coqdocvar{A}) (\coqdocvar{f1} \coqdocvar{f2}: \coqdocvar{A} \ensuremath{\rightarrow} \coqdocvar{A}), (\coqdockw{\ensuremath{\forall}} \coqdocvar{x} \coqdocvar{y}, \coqdocvar{R} \coqdocvar{x} \coqdocvar{y} \ensuremath{\leftrightarrow} (\coqdocvar{R1} !\coqdocvar{\_}! \coqdocvar{R2}) \coqdocvar{x} \coqdocvar{y} \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvar{R1} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{f1} \coqdocvar{a}) = (\coqdocvar{f1} \coqdocvar{b})) \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{a}, (\coqdocvar{refltrans} \coqdocvar{R1}) \coqdocvar{a} (\coqdocvar{f1} \coqdocvar{a})) \ensuremath{\land} (\coqdockw{\ensuremath{\forall}} \coqdocvar{b} \coqdocvar{a}, \coqdocvar{a} = \coqdocvar{f1} \coqdocvar{b} \ensuremath{\rightarrow} (\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{a} (\coqdocvar{f2} \coqdocvar{a})) \ensuremath{\land} (\coqdocvar{f\_is\_weak\_Z} \coqdocvar{R2} \coqdocvar{R} (\coqdocvar{f2} \# \coqdocvar{f1})).\coqdoceol
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Lemma} \coqdocvar{Z\_comp\_eq\_implies\_Z\_prop} \{\coqdocvar{A}:\coqdockw{Type}\}: \coqdockw{\ensuremath{\forall}} (\coqdocvar{R} : \coqdocvar{Rel} \coqdocvar{A}), \coqdocvar{Z\_comp\_eq} \coqdocvar{R} \ensuremath{\rightarrow} \coqdocvar{Z\_prop} \coqdocvar{R}.\coqdoceol
@@ -446,18 +445,36 @@ then \coqdocvar{Zprop} \coqdocvar{R} also holds.
   hypothesis that $a \to_{R} b$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
-\coqdoctac{inversion} \coqdocvar{Hunion}; \coqdoctac{subst}; \coqdoctac{clear} \coqdocvar{H}. \coqdoctac{inversion} \coqdocvar{Hab}; \coqdoctac{subst}; \coqdoctac{clear} \coqdocvar{Hab}. \end{coqdoccode}
-  \comm{Since $a$ $R$-reduces in one step to $b$ and $R$ is the union of the
-  relations $R1$ and $R2$ then we consider two cases:} \begin{coqdoccode}
+\coqdoctac{split}. \end{coqdoccode}
+  \comm{We split the Z property on $f_2 \circ f_1$ onto two reductions we have to prove: $b \tto_{(R1\cup R2)} (f_2 (f_1\ a))$ and $(f_2 (f_1\ a)) \tto_{(R1\cup R2)} (f_2 (f_1\ b))$} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
-- \coqdoctac{unfold} \coqdocvar{comp}; \coqdoctac{split}. \end{coqdoccode}
+\coqdoctac{split}. \end{coqdoccode}
+\comm{Therefore, we first
+    prove that $b \tto_{(R1\cup R2)} (f_2 (f_1\ a))$, which can be
+    reduced to $b \tto_{(R1\cup R2)} (f_1\ b)$ and $(f_1\ b)
+    \tto_{(R1\cup R2)} (f_2 (f_1\ a))$ by the transitivity of
+    $\tto_{(R1\cup R2)}$.} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{1.00em}
+- \coqdoctac{apply} \coqdocvar{Hunion} \coqdoctac{in} \coqdocvar{Hab}.
+\coqdocemptyline
+\coqdocindent{2.00em}
+\coqdoctac{inversion} \coqdocvar{Hab}; \coqdoctac{subst}. \end{coqdoccode}
+\comm{Since $a$ $R$-reduces in one step to $b$ and $R$ is the union of the
+    relations $R1$ and $R2$ then we consider two cases:} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{2.00em}
++ \coqdoctac{unfold} \coqdocvar{comp}. \end{coqdoccode}
 \comm{The first case is when $a \to_{R1}
     b$. This is equivalent to say that $f_2 \circ f_1$ is weak Z for
     $R1$ by $R1 \cup R2$.} \begin{coqdoccode}
 \coqdocemptyline
-\coqdocindent{2.00em}
-+ \coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{f1} \coqdocvar{b}). \end{coqdoccode}
+\coqdocindent{3.00em}
+\coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}.
+\coqdocemptyline
+\coqdocindent{3.00em}
+\coqdoctac{apply} \coqdocvar{refltrans\_composition} \coqdockw{with} (\coqdocvar{f1} \coqdocvar{b}). \end{coqdoccode}
 \comm{Therefore, we first
     prove that $b \tto_{(R1\cup R2)} (f_2 (f_1\ a))$, which can be
     reduced to $b \tto_{(R1\cup R2)} (f_1\ b)$ and $(f_1\ b)
@@ -465,24 +482,58 @@ then \coqdocvar{Zprop} \coqdocvar{R} also holds.
     $\tto_{(R1\cup R2)}$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
-\ensuremath{\times} \coqdoctac{apply} \coqdocvar{refltrans\_union}. \coqdoctac{apply} \coqdocvar{H2}. \end{coqdoccode}
-\comm{From hypothesis $H2$, we
-        know that $a \tto_{R1} (f_1\ a)$ for all $a$, and hence
-        $a\tto_{(R1\cup R2)} (f_1\ a)$ and we are done.} \begin{coqdoccode}
+\ensuremath{\times} \coqdoctac{assert} (\coqdocvar{H5}: \coqdocvar{refltrans} \coqdocvar{R1} \coqdocvar{b} (\coqdocvar{f1} \coqdocvar{b})).
+\coqdocemptyline
+\coqdocindent{4.00em}
+{
+\coqdocemptyline
+\coqdocindent{5.00em}
+\coqdoctac{apply} \coqdocvar{H2}.
+\coqdocemptyline
+\coqdocindent{4.00em}
+}
+ \end{coqdoccode}
+\comm{The hypothesis H2 guarantees that $b$ reduces to $(f1 b)$ by $R1$.} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{4.00em}
+\coqdoctac{apply} \coqdocvar{refltrans\_union\_equiv} \coqdockw{with} \coqdocvar{R1} \coqdocvar{R2}.
+\coqdocemptyline
+\coqdocindent{4.00em}
+** \coqdoctac{assumption}.
+\coqdocemptyline
+\coqdocindent{4.00em}
+** \coqdoctac{apply} \coqdocvar{refltrans\_union}. \coqdoctac{assumption}.
+\end{coqdoccode}
+\comm{Since we have the hypothesis that $b$ reduces to $(f1 b)$ by $R1$, we only need to open up $R$ on its two 
+components, $R1$ and $R2$, and apply the known hypotheses to prove that $b$ reduces to $(f1 b)$ by $R$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{3.00em}
-\ensuremath{\times} \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{H3} \coqdockw{with} \coqdocvar{b}; \coqdoctac{reflexivity}. \end{coqdoccode}
+\ensuremath{\times} \coqdoctac{apply} \coqdocvar{H3} \coqdockw{with} \coqdocvar{b}. \coqdoctac{reflexivity}. \end{coqdoccode}
         \comm{The proof that $(f_1\ b)\tto_{(R1\cup R2)} (f_2 (f_1\ a))$ is
         exactly the hypothesis $H3$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{2.00em}
-+ \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdocvar{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{refl}. \end{coqdoccode}
++ \coqdoctac{apply} \coqdocvar{H4}. \coqdoctac{assumption}. \end{coqdoccode}
+\comm{The first case is when $a \to_{R2}
+    b$. In that case, since $f_2 \circ f_1$ is weak Z for
+    $R2$ by $R1 \cup R2$, we have met both necessary conditions to prove 
+    that  $b \tto_{R} ((f2 \circ f1) a)$.} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{1.00em}
+- \coqdoctac{apply} \coqdocvar{Hunion} \coqdoctac{in} \coqdocvar{Hab}.
+\coqdocemptyline
+\coqdocindent{2.00em}
+\coqdoctac{inversion} \coqdocvar{Hab}; \coqdoctac{subst}. \end{coqdoccode}
+\comm{First, we have to split the relation $R$ into $R1$ and $R2$.} \begin{coqdoccode}
+\coqdocemptyline
+\coqdocindent{1.00em}
++ \coqdoctac{unfold} \coqdocvar{comp}. \coqdoctac{apply} \coqdocvar{H1} \coqdoctac{in} \coqdoctac{H}. \coqdoctac{rewrite} \coqdocvar{H}. \coqdoctac{apply} \coqdocvar{refl}.
 \comm{The proof that $(f_2
     (f_1\ a)) \tto_{(R1\cup R2)} (f_2 (f_1\ b))$ is straightforward because $(f_2 (f_1\ a)) = (f_2 (f_1\
     b))$ by hypothesis $H1$.} \begin{coqdoccode}
 \coqdocemptyline
 \coqdocindent{1.00em}
-- \coqdoctac{apply} \coqdocvar{H4}; \coqdoctac{assumption}. \end{coqdoccode}
++ \coqdoctac{apply} \coqdocvar{H4}; \coqdoctac{assumption}. \end{coqdoccode}
 \comm{The second case is when $a \to_{R2} b$, and we conclude by
     hypothesis $H4$.} \begin{coqdoccode}
 \coqdocemptyline
