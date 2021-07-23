@@ -68,7 +68,7 @@ The contributions of this work are as follows:
   in the Coq proof assistant. 
 \item We formalize an extension of the Z property, known as
   compositional Z property, as presented in
-  \cite{Nakazawa-Fujita2016}. The proofs are presented by interleaving
+  \cite{nakazawaCompositionalConfluenceProofs2016}. The proofs are presented by interleaving
   Coq code followed by an explanation in English of the corresponding
   code. In this way, the annotations are done directly in the Coq
   files using the coqdoc annotation style. We believe that this
@@ -189,8 +189,8 @@ exists a mapping $f:A \to A$ such that $f$ is Z for $\to_R$:
 
 The first contribution of this work is a constructive proof of the
 fact that the Z property implies confluence. Our proof uses nested
-induction, and hence it differs from the one in \cite{kes09} (that
-follows \cite{dehornoy2008z}) and the one in \cite{zproperty} in the
+induction, and hence it differs from the one in \cite{kesnerTheoryExplicitSubstitutions2009} (that
+follows \cite{dehornoy2008z}) and the one in \cite{felgenhauerProperty2016} in the
 sense that it does not rely on the analyses of whether a term is in
 normal form or not, avoiding the necessity of the law of the excluded
 middle. As a result, we have an elegant inductive proof of the fact
@@ -226,7 +226,7 @@ following proof is the first contribution of this work:
   $a \tto c$, as expected because the hypothesis $a \tto (f\ a)$ is
   transformed in the condition $c' \tto (f\ c')$ which can be proved
   using the Z property. The details of the whole proof can be found in
-  the technical report\textsuperscript{\ref{fn:github}}.
+  the technical report\cite{reportZtoConfl}.
 \end{proof}
   
 The interesting point of the above proof is that it reveals the
@@ -237,30 +237,29 @@ Z property known as Compositional Z.
 \section{An extension of the Z property: The Compositional Z property}
 
 In this section we present a formalization of the
-\textit{Compositional Z}, as presented in \cite{Nakazawa-Fujita2016},
+\textit{Compositional Z}, as presented in \cite{nakazawaCompositionalConfluenceProofs2016},
 which is an interesting property because it allows a kind of modular
 approach to the Z property when the reduction relation can be split
 into smaller relations. More precisely, given an ARS $(A,\to_R)$, one
 must be able to decompose the relation $\to_R$ into two parts, say
 $\to_1$ and $\to_2$ such that $\to_R = \to_1\cup \to_2$. This kind of
 decomposition can be done in several interesting situations such as
-the $\lambda$-calculus with $\beta\eta$-reduction\cite{Ba84},
+the $\lambda$-calculus with $\beta\eta$-reduction\cite{barendregtLambdaCalculusIts1984},
 extensions of the $\lambda$-calculus with explicit
-substitutions\cite{accl91}, the $\lambda\mu$-calculus\cite{Parigot92},
+substitutions\cite{abadiExplicitSubstitutions1991}, the $\lambda\mu$-calculus\cite{parigotLambdaMuCalculusAlgorithmicInterpretation1992},
 etc. But before presenting the full definition of the Compositional Z,
 we need to define the \textit{weak Z property}:
 
-\begin{figure}[h] \centering \[ \xymatrix{ a \ar[r]_R & b
-      \ar@{.>>}[dl]^x\\ f(a) \ar@{.>>}[r]_x & f(b) \\ } \]
-  \caption{The weak Z property}\label{fig:weakZ}
-\end{figure}
-
-\begin{definition} Let $(A,\to_R)$ be an ARS and $\to_R'$ be another
+\begin{definition} Let $(A,\to_R)$ be an ARS and $\to_{R1}$ be another
   relation on $A$. A mapping $f$ satisfies the {\it weak Z property}
-  for $\to_R$ by $\to_R'$ if $a\to_R b$ implies $b \tto_R' f(a)$ and
-  $f(a) \tto_R' f(b)$ (cf. Figure \ref{fig:weakZ}). Therefore, a
+  for $\to_R$ by $\to_{R1}$ if $a\to_R b$ implies $b \tto_{R1} (f\ a)$ and
+  $(f\ a) \tto_{R1} (f\ b)$ as in the figure below. Therefore, a
   mapping $f$ satisfies the Z property for $\to_R$ if it satisfies the
   weak Z property by itself.
+  
+  \begin{figure}[h] \centering \[ \xymatrix{ a \ar[r]_R & b
+      \ar@{.>>}[dl]^{R1}\\ (f\ a) \ar@{.>>}[r]_{R1} & (f\ b) \\ } \]
+\end{figure}
 \end{definition}
 
 When $f$ satisfies the weak Z property, we also say that $f$ is weakly
@@ -279,7 +278,7 @@ follows: \begin{coqdoccode} \coqdocemptyline \coqdocnoindent
 
 The compositional Z is then defined as follows:
 
-\begin{definition}\cite{Nakazawa-Fujita2016}
+\begin{definition}\cite{nakazawaCompositionalConfluenceProofs2016}
   Let $(A,\to)$ be an ARS such that $\to = \to_1 \cup \to_2$. The
   $(A,\to)$ satisfies the compositional Z if there exist mappings
   $f_1:A \to A$ and $f_2:A \to A$ such that:
@@ -411,10 +410,10 @@ The next theorem is proved by presenting the Coq proof interleaved with natural 
 \end{coqdoccode}
 
 Rewriting Systems with equations is another interesting and
-non-trivial topic \cite{winkler89,terese03}. The confluence of
+non-trivial topic \cite{winklerEquationalTheoremProving1989,tereseTermRewritingSystems2003}. The confluence of
 rewriting systems with an equivalence relation can also be proved by a
 variant of the compositional Z, known as Z property
-modulo~\cite{AK12b}. We define the predicate \coqdocvar{Z\_comp\_eq}
+modulo~\cite{accattoliPermutativeLambdaCalculus2012}. We define the predicate \coqdocvar{Z\_comp\_eq}
 corresponding to the Z property modulo, and prove that it implies
 the compositional Z.
 
@@ -491,15 +490,15 @@ implies confluence, and this proof was formalized in the Coq proof
 assistant\footnote{The corresponding files are available at
   \url{https://github.com/flaviodemoura/Zproperty}}.  Moreover, our
 formalization includes an extension of the Z property, known as
-compositional Z property, as presented in \cite{Nakazawa-Fujita2016}.
+compositional Z property, as presented in \cite{nakazawaCompositionalConfluenceProofs2016}.
 
 The Z property was presented by V. van Oostrom as a sufficient
-condition for an ARS to be confluent~\cite{zproperty}, and since then
+condition for an ARS to be confluent~\cite{felgenhauerProperty2016}, and since then
 has been used to prove confluence in different contexts such as the
 $\lambda$-calculus with $\beta\eta$-reduction, extensions of the
 $\lambda$-calculus with explicit substitutions and the
-$\lambda\mu$-calculus. In \cite{zproperty}, B. Felgenhauer
-et.al. formalized the Z property in Isabelle/HOL via
+$\lambda\mu$-calculus. In \cite{felgenhauerProperty2016}, B. Felgenhauer
+et al. formalized the Z property in Isabelle/HOL via
 semiconfluence. Recently, \cite{vanoostrom:LIPIcs.FSCD.2021.24} shows
 the flexibility and applicability of the Z property to prove
 confluence and normalisation based on a syntax-free version of the
@@ -510,77 +509,77 @@ confluence property of calculi with explicit substitutions using
 different approaches such as nominal and locally nameless
 representations.
 
-%\bibliographystyle{alpha} 
-%\bibliography{references}
+\bibliographystyle{alpha} 
+\bibliography{/Users/flaviomoura/Dropbox/org/zotLib}
 %inline the .bbl file directly for mailing to authors.
 
-\begin{thebibliography}{FNvOS16}
+% \begin{thebibliography}{FNvOS16}
 
-\bibitem[ACCL91]{accl91}
-M.~Abadi, L.~Cardelli, P.-L. Curien, and J.-J. L{\'e}vy.
-\newblock {Explicit Substitutions}.
-\newblock {\em JFP}, 1(4):375--416, 1991.
+% \bibitem[ACCL91]{abadiExplicitSubstitutions1991}
+% M.~Abadi, L.~Cardelli, P.-L. Curien, and J.-J. L{\'e}vy.
+% \newblock {Explicit Substitutions}.
+% \newblock {\em JFP}, 1(4):375--416, 1991.
 
-\bibitem[AK12]{AK12b}
-B.~Accattoli and D.~Kesner.
-\newblock The permutative lambda calculus.
-\newblock In Nikolaj Bj{\o}rner and Andrei Voronkov, editors, {\em LPAR},
-  volume 7180 of {\em Lecture Notes in Computer Science}, pages 23--36.
-  Springer, 2012.
+% \bibitem[AK12]{accattoliPermutativeLambdaCalculus2012}
+% B.~Accattoli and D.~Kesner.
+% \newblock The permutative lambda calculus.
+% \newblock In Nikolaj Bj{\o}rner and Andrei Voronkov, editors, {\em LPAR},
+%   volume 7180 of {\em Lecture Notes in Computer Science}, pages 23--36.
+%   Springer, 2012.
 
-\bibitem[Bar84]{Ba84}
-H.~P. Barendregt.
-\newblock {\em {The Lambda Calculus : Its Syntax and Semantics (revised
-  edition)}}.
-\newblock North Holland, 1984.
+% \bibitem[Bar84]{barendregtLambdaCalculusIts1984}
+% H.~P. Barendregt.
+% \newblock {\em {The Lambda Calculus : Its Syntax and Semantics (revised
+%   edition)}}.
+% \newblock North Holland, 1984.
 
-\bibitem[DvO08]{dehornoy2008z}
-P.~Dehornoy and V.~van Oostrom.
-\newblock Z, proving confluence by monotonic single-step upperbound functions.
-\newblock In {\em Logical Models of Reasoning and Computation (LMRC-08)}, 2008.
+% \bibitem[DvO08]{dehornoy2008z}
+% P.~Dehornoy and V.~van Oostrom.
+% \newblock Z, proving confluence by monotonic single-step upperbound functions.
+% \newblock In {\em Logical Models of Reasoning and Computation (LMRC-08)}, 2008.
 
-\bibitem[FNvOS16]{zproperty}
-B.~Felgenhauer {\it et. al.}
-\newblock The {Z} property.
-\newblock {\em Archive of Formal Proofs}, 2016.
+% \bibitem[FNvOS16]{felgenhauerProperty2016}
+% B.~Felgenhauer {\it et. al.}
+% \newblock The {Z} property.
+% \newblock {\em Archive of Formal Proofs}, 2016.
 
-\bibitem[Kes09]{kes09}
-D.~Kesner.
-\newblock {A Theory of Explicit Substitutions with Safe and Full Composition}.
-\newblock {\em Logical Methods in Computer Science}, 5(3:1):1--29, 2009.
+% \bibitem[Kes09]{kesnerTheoryExplicitSubstitutions2009}
+% D.~Kesner.
+% \newblock {A Theory of Explicit Substitutions with Safe and Full Composition}.
+% \newblock {\em Logical Methods in Computer Science}, 5(3:1):1--29, 2009.
 
-\bibitem[NF16]{Nakazawa-Fujita2016}
-K. Nakazawa and K. Fujita.
-\newblock Compositional {Z:} confluence proofs for permutative conversion.
-\newblock {\em Studia Logica}, 104(6):1205--1224, 2016.
+% \bibitem[NF16]{nakazawaCompositionalConfluenceProofs2016}
+% K. Nakazawa and K. Fujita.
+% \newblock Compositional {Z:} confluence proofs for permutative conversion.
+% \newblock {\em Studia Logica}, 104(6):1205--1224, 2016.
 
-\bibitem[Par92]{Parigot92}
-M. Parigot.
-\newblock Lambda-mu-calculus: An algorithmic interpretation of classical
-  natural deduction.
-\newblock In Andrei Voronkov, editor, {\em Logic Programming and Automated
-  Reasoning,International Conference LPAR'92, St. Petersburg, Russia, July
-  15-20, 1992, Proceedings}, volume 624 of {\em LNCS}, pages 190--201. Springer, 1992.
+% \bibitem[Par92]{parigotLambdaMuCalculusAlgorithmicInterpretation1992}
+% M. Parigot.
+% \newblock Lambda-mu-calculus: An algorithmic interpretation of classical
+%   natural deduction.
+% \newblock In Andrei Voronkov, editor, {\em Logic Programming and Automated
+%   Reasoning,International Conference LPAR'92, St. Petersburg, Russia, July
+%   15-20, 1992, Proceedings}, volume 624 of {\em LNCS}, pages 190--201. Springer, 1992.
 
-\bibitem[Ter03]{terese03}
-Terese.
-\newblock {\em Term Rewriting Systems}, volume~55 of {\em Cambridge Tracts in
-  Theoretical Computer Science}.
-\newblock Cambridge University Press, 2003.
+% \bibitem[Ter03]{tereseTermRewritingSystems2003}
+% Terese.
+% \newblock {\em Term Rewriting Systems}, volume~55 of {\em Cambridge Tracts in
+%   Theoretical Computer Science}.
+% \newblock Cambridge University Press, 2003.
 
-\bibitem[{van}21]{vanoostrom:LIPIcs.FSCD.2021.24}
-V. {van Oostrom}.
-\newblock Z; syntax-free developments.
-\newblock In Naoki Kobayashi, editor, {\em 6th International Conference on
-  Formal Structures for Computation and Deduction ({{FSCD}} 2021)}, volume 195 of {\em Leibniz International Proceedings in Informatics ({{LIPIcs}})}, pages 24:1--24:22, {Dagstuhl, Germany}, 2021. 
+% \bibitem[{van}21]{vanoostrom:LIPIcs.FSCD.2021.24}
+% V. {van Oostrom}.
+% \newblock Z; syntax-free developments.
+% \newblock In Naoki Kobayashi, editor, {\em 6th International Conference on
+%   Formal Structures for Computation and Deduction ({{FSCD}} 2021)}, volume 195 of {\em Leibniz International Proceedings in Informatics ({{LIPIcs}})}, pages 24:1--24:22, {Dagstuhl, Germany}, 2021. 
 
-\bibitem[Win89]{winkler89}
-F. Winkler.
-\newblock {\em Equational Theorem Proving and Rewrite Rule Systems}, pages
-  26--39.
-\newblock Informatik-Fachberichte. Springer Berlin Heidelberg, 1989.
+% \bibitem[Win89]{winklerEquationalTheoremProving1989}
+% F. Winkler.
+% \newblock {\em Equational Theorem Proving and Rewrite Rule Systems}, pages
+%   26--39.
+% \newblock Informatik-Fachberichte. Springer Berlin Heidelberg, 1989.
 
-\end{thebibliography}
+% \end{thebibliography}
 
 \end{document}
 
