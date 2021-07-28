@@ -1,4 +1,4 @@
-% Created 2019-08-09 Fri 15:56
+% Created 2021-07-27 Ter 06:19
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -35,7 +35,7 @@
 \maketitle
 
 \section{Introduction}
-\label{sec:orgf0f9137}
+\label{sec:org82831c6}
 
 This work is about confluence, an essential property related to the
 determinism of the computation in the sense that different reduction
@@ -50,12 +50,15 @@ including \(\lambda\)-calculi with and without explicit substitutions
 \cite{kes09,2016arXiv160903139N}.
 
 An ARS is a pair \((A,R)\) formed by a set \(A\) and a binary relation
-\(R\) over this set. The decomposition of the binary relation \(R\) into sub-relations allows \ldots{} For instance, in the \(\lambda\)-calculus, the reduction \(\to_{\beta\eta}\) means \(\to_{\beta} \cup \to_{\eta}\).
+\(R\) over this set. The decomposition of the binary relation \(R\)
+into sub-relations allows \ldots{} For instance, in the
+\(\lambda\)-calculus, the reduction \(\to_{\beta\eta}\) means
+\(\to_{\beta} \cup \to_{\eta}\).
 
 In this work, we
 
 \section{Abstract Rewriting Systems}
-\label{sec:org9f76804}
+\label{sec:org7a3a72a}
 
  When \((a,b) \in R\),
 we write \(a R b\) or \(a \to_R b\) and we say that \(a\) \emph{reduces} to
@@ -85,10 +88,10 @@ The diagram states that if \(a\) can be reduced in two different ways
 to \(b\) and \(c\), then there exists an element \(d\) in \(A\) such
 that both \(b\) and \(c\) can be reduced to \(d\). 
 
-The paper is organized as follows: In Section \ref{sec:org9727d04}, we present 
+The paper is organized as follows: In Section \ref{sec:org2a73302}, we present 
 
 \section{Yet another proof that Z property implies confluence}
-\label{sec:org7fb54b5}
+\label{sec:orgdea6d21}
 
 In this section, we prove that Z property implies confluence for
 ARSs. The novelty of this proof is that it is direct (for instance,
@@ -165,7 +168,7 @@ b\) for some \(a'\in A\).
       }
      \]
 \section{The formalization}
-\label{sec:org9727d04}
+\label{sec:org2a73302}
 
 In \cite{ZPropertyDraft}, a sufficient condition for confluence is given
 by the so called Z property:
@@ -185,8 +188,8 @@ that \(b \tto f(a)\) and \(f(a) \tto f(b)\):
 
 
 \section{Conclusions and Future Work}
-\label{sec:org0712535}
+\label{sec:orgd7f8e05}
 
 \bibliographystyle{alpha}
-\bibliography{../../../Dropbox/bibliography/references} 
+\bibliography{/Users/flaviomoura/Dropbox/bibliography/references} 
 \end{document}

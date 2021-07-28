@@ -72,6 +72,12 @@ Proof.
     + assumption.
     + apply refl.
   - intros c0 Hrefl2.
+    generalize dependent c.
+    induction Hrefl2.
+    + admit.
+    + intros c' H2 IH1.
+    generalize dependent b.
+    
     assert (Hbga: refltrans R b (g a)).
     { apply HZ_prop; assumption.  }
     assert (Haga: refltrans R a (g a)).
