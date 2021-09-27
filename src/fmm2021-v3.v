@@ -118,7 +118,7 @@ Proof.
       apply IHHrefl2; apply refltrans_composition with (f a); assumption.
 Qed.
 
-Definition f_is_weak_Z {A} (R R': Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R') b (f a) /\ (refltrans R') (f a) (f b)).
+Definition f_is_weak_Z {A} (R Rx: Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans Rx) b (f a) /\ (refltrans Rx) (f a) (f b)).
 
 Definition comp {A} (f1 f2: A -> A) := fun x:A => f1 (f2 x).
 Notation "f1 # f2" := (comp f1 f2) (at level 40).
@@ -128,9 +128,9 @@ Inductive union {A} (red1 red2: Rel A) : Rel A :=
 | union_right: forall a b, red2 a b -> union red1 red2 a b.
 Notation "R1 !_! R2" := (union R1 R2) (at level 40).
 
-Lemma refltrans_union {A:Type}: forall (R R' :Rel A) (a b: A), refltrans R a b -> refltrans (R !_! R') a b.
+Lemma refltrans_union {A:Type}: forall (R Rx :Rel A) (a b: A), refltrans R a b -> refltrans (R !_! Rx) a b.
 Proof.
-  intros R R' a b Hrefl.
+  intros R Rx a b Hrefl.
   induction Hrefl.
   - apply refl.
   - apply rtrans with b.
@@ -153,13 +153,15 @@ Definition Z_comp {A:Type} (R R1 R2: Rel A) := (forall x y, R x y <-> (R1 !_! R2
 Theorem Z_comp_implies_Z_prop {A:Type}: forall (R R1 R2 :Rel A), Z_comp R R1 R2 -> Z_prop R.
 Proof.
   intros R R1 R2 HZ_comp.
-  unfold Z_prop. unfold Z_comp in HZ_comp.
+  unfold Z_prop.
+  unfold Z_comp in HZ_comp.
   destruct HZ_comp as
   [Hunion [f1 [f2 [H1 [H2 [H3 H4]]]]]].
   exists (f2 # f1).
   unfold f_is_Z.
   intros a b HR.
-  apply Hunion in HR. inversion HR; subst. clear HR.
+  apply Hunion in HR.
+  inversion HR; subst. clear HR.
   - split.
     + apply refltrans_composition with (f1 a).
       * apply H1 in H.
@@ -216,4 +218,11 @@ Proof.
   intros R R1 R2 HZ_comp_eq.
   apply Z_comp_eq_corol in HZ_comp_eq.
   apply Z_comp_implies_Z_prop with R1 R2; assumption.
+Qed.
+
+Corollary Z_comp_eq_implies_Confl {A:Type}: forall (R R1 R2: Rel A), Z_comp_eq R R1 R2 -> Confl R.
+Proof.
+  intros R R1 R2 HZ_comp_eq.
+  apply Z_comp_eq_implies_Z_prop in HZ_comp_eq.
+  apply Z_prop_implies_Confl; assumption.
 Qed.
