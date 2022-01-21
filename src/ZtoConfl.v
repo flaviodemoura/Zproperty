@@ -1,12 +1,23 @@
-(** * The Z property implies Confluence *)
+(** * A Formalization of the Z property *)
+(* comments used in the report *)
+(** In this section, we present a formalization of the Z property in the context of ARS, which are sets with a binary relation. A binary relation is a predicate over a type [A]: *)
 
 Definition Rel (A:Type) := A -> A -> Prop.
 
-Inductive trans {A} (red: Rel A) : Rel A :=
-| singl: forall a b,  red a b -> trans red a b
-| transit: forall b a c,  red a b -> trans red b c -> trans red a c.
+(** If $(A,R)$, is an ARS and $a,b\in A$ then we write $a\to_R b$ (or $R\ a\ b$ in the Coq syntax below) to denote that $(a,b)\in R$, and in this case, we say that $a$ $R$-reduces to $b$ in one step. The transitive closure of $\to_R$, written $\to^+_R$, is defined as usual by the following inference rules:
 
-Arguments transit {A} {red} _ _ _ _ _ .
+    $\begin{mathpar}
+     \inferrule*[Right={($singl$)}]{a \to_R b}{a \to^+_R b} \and\and
+     \inferrule*[Right={($transit$)}]{a \to_R b \and b \to^+_R c}{a \to^+_R c}
+     \end{mathpar}$
+
+ This definition corresponds to the following Coq code, where $\to_R$ (resp. $\to^+_R$) corresponds to [R] (resp. [trans R]):$\newline$ *)
+
+Inductive trans {A} (R: Rel A) : Rel A :=
+| singl: forall a b,  R a b -> trans R a b
+| transit: forall b a c,  R a b -> trans R b c -> trans R a c.
+(* begin hide *)
+Arguments transit {A} {R} _ _ _ _ _ .
 
 Lemma trans_composition {A} (R: Rel A):
   forall t u v, trans R t u -> trans R u v -> trans R t v.
@@ -17,11 +28,21 @@ Proof.
     + assumption.
     + apply IHtrans; assumption.
 Qed.
+(* end hide *)
+
+(** The reflexive transitive closure of $\to_R$, written $\tto_R$, is defined by:
+
+    $\begin{mathpar}
+     \inferrule*[Right={($refl$)}]{a \to_R b}{a \tto_R b} \and\and
+     \inferrule*[Right={($rtrans$)}]{a \to_R b \and b \tto_R c}{a \tto_R c}
+    \end{mathpar}$
+
+ This definition corresponds to the following Coq code, where $\tto_R$ is written as [refltrans R]: *)
 
 Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
-| refl: forall a, (refltrans R) a a
+| refl: forall a, refltrans R a a
 | rtrans: forall a b c, R a b -> refltrans R b c -> refltrans R a c.
-
+(* begin hide *)
 Lemma refltrans_composition {A} (R: Rel A): forall t u v, refltrans R t u -> refltrans R u v -> refltrans R t v.
 Proof.
   intros t u v.
@@ -52,12 +73,50 @@ Proof.
     + apply refl.
   - apply rtrans with b; assumption.
 Qed.
+(* end hide *)
+(** The reflexive transitive closure of a relation is used to define
+    the notion of confluence: no matter how the reduction is done, the
+    result will always be the same. In other words, every divergence
+    is joinable as stated by the following diagram:
+
+    $\centerline{\xymatrix{ & a \ar@{->>}[dl] \ar@{->>}[dr] & \\ b
+    \ar@{.>>}[dr] & & c \ar@{.>>}[dl] \\ & d & }}$
+
+Formally, this means that if an expression $a$ can be reduced in two
+different ways to $b$ and $c$, then there exists an expression $d$
+such that both $b$ and $c$ reduce to $d$. The existential
+quantification is expressed by the dotted lines in the diagram. This
+notion is defined in the Coq system as follows: *)
 
 Definition Confl {A:Type} (R: Rel A) := forall a b c, (refltrans R) a b -> (refltrans R) a c -> (exists d, (refltrans R) b d /\ (refltrans R) c d).
 
+(** In $\cite{dehornoy2008z}$, V. van Oostrom gives a sufficient condition
+for an ARS to be confluent. This condition is based on the $\textit{Z
+  Property}$ that is defined as follows:
+
+$\begin{definition} \text{Let } (A,\to_R) \text{ be an ARS. A mapping } f:A \to A 
+  \text{ satisfies the Z property for} \to_R, \text{ if } a \to_R b \text{ implies }
+  b \tto_R f a  \tto_R f b, \text{ for any } a, b \in A. 
+\end{definition}$
+
+The name of the property comes from the following diagrammatic
+representation of this definition:
+    
+$\xymatrix{ a \ar[r]_R & b \ar@{.>>}[dl]^R\\ f a \ar@{.>>}[r]_R & f
+    b \\ }$
+
+If a function [f] satisfies the Z property for $\to_R$ then
+we say that [f] is Z for $\to_R$, and the corresponding Coq
+definition is given by the following predicate: *)
+
 Definition f_is_Z {A:Type} (R: Rel A) (f: A -> A) := forall a b, R a b -> ((refltrans R)  b (f a) /\ (refltrans R) (f a) (f b)).
 
+(** Alternatively, an ARS $(A,\to_R)$ satisfies the Z property if there
+exists a mapping $f:A \to A$ such that $f$ is Z for $\to_R$: *)
+
 Definition Z_prop {A:Type} (R: Rel A) := exists f:A -> A, forall a b, R a b -> ((refltrans R) b (f a) /\ (refltrans R) (f a) (f b)).
+
+(** The first contribution of this work is a constructive proof of the fact that the Z property implies confluence. Our proof uses nested induction, and hence it differs from the one in $\cite{kesnerTheoryExplicitSubstitutions2009}$ (that follows $\cite{dehornoy2008z}$) and the one in $\cite{felgenhauerProperty2016}$ in the sense that it does not rely on the analyses of whether a term is in normal form or not, avoiding the necessity of the law of the excluded middle. As a result, we have an elegant inductive proof of the fact that if an ARS satisfies the Z property then it is confluent. *)
 
 Theorem Z_prop_implies_Confl {A:Type}: forall R: Rel A, Z_prop R -> Confl R.
 Proof.
