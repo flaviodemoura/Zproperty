@@ -113,7 +113,7 @@ Definition f_is_Z {A:Type} (R: Rel A) (f: A -> A) := forall a b, R a b -> ((refl
 (** Alternatively, an ARS $(A,\to_R)$ satisfies the Z property if there
 exists a mapping $f:A \to A$ such that $f$ is Z for $\to_R$: *)
 
-Definition Z_prop {A:Type} (R: Rel A) := exists f:A -> A, forall a b, R a b -> ((refltrans R) b (f a) /\ (refltrans R) (f a) (f b)).
+Definition Z_prop {A:Type} (R: Rel A) := exists f:A -> A, f_is_Z R f. 
 
 (** The first contribution of this work is a constructive proof of the fact that the Z property implies confluence. Our proof uses nested induction, and hence it differs from the one in %\cite{kesnerTheoryExplicitSubstitutions2009}% (that follows %\cite{dehornoy2008z}%) and the one in %\cite{felgenhauerProperty2016}% in the sense that it does not rely on the analyses of whether a term is in normal form or not, avoiding the necessity of the law of the excluded middle. As a result, we have an elegant inductive proof of the fact that if an ARS satisfies the Z property then it is confluent. *)
 

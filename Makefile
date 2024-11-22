@@ -1,4 +1,4 @@
-MODULES  := ZProperty
+MODULES  := ZtoConfl
 VS            := $(MODULES:%=src/%.v)
 TEX           := $(MODULES:%=latex/%.v.tex)
 VS_DOC        := $(MODULES:%=%.v)
@@ -10,8 +10,8 @@ coq: Makefile.coq
 
 Makefile.coq: Makefile $(VS)
 	coq_makefile $(VS) \
-		COQC = "coqc -R src Zproperty" \
-		COQDEP = "coqdep -R src Zproperty" \
+		COQC = "coqc -R src ZtoConfl" \
+		COQDEP = "coqdep -R src ZtoConfl" \
 		-o Makefile.coq
 
 clean:: Makefile.coq
@@ -19,19 +19,19 @@ clean:: Makefile.coq
 	rm -f Makefile.coq .depend 
 	cd latex; rm -f *.log *.aux *.dvi *.v.tex *.toc *.bbl *.blg *.idx *.ilg *.pdf *.ind *.out *.fls *.gz *.fdb_latexmk
 
-doc: latex/Zproperty.pdf
+doc: latex/reportZtoConfl.pdf
 
-COQDOC = coqdoc -R . Zproperty
+COQDOC = coqdoc -R . ZtoConfl
 
 latex/%.v.tex: Makefile src/%.v src/%.glob
 	cd src ; $(COQDOC) --interpolate --latex --body-only -s \
 		$*.v -o ../latex/$*.v.tex
 
-latex/Zproperty.pdf: latex/Zproperty.tex $(TEX) latex/Zproperty.bib
-	cd latex ; pdflatex Zproperty ; pdflatex Zproperty ; bibtex Zproperty ; pdflatex Zproperty ; pdflatex Zproperty
+latex/ZtoConfl.pdf: latex/reportZtoConfl.tex $(TEX) latex/zotLib.bib
+	cd latex ; pdflatex reportZtoConfl ; pdflatex reportZtoConfl ; bibtex reportZtoConfl ; pdflatex reportZtoConfl ; pdflatex reportZtoConfl
 
-latex/%.pdf: latex/%.tex latex/Zproperty.bib
-	cd latex ; pdflatex $* ; pdflatex $* ; bibtex $* ; makeindex $* ; pdflatex $* ; pdflatex $*
+latex/%.pdf: latex/%.tex
+	cd latex ; pdflatex $* ; pdflatex $* ; bibtex --include-directory="/home/flaviomoura/workspace/org" $* ; makeindex $* ; pdflatex $* ; pdflatex $*
 
 html: Makefile $(VS) src/toc.html
 	mkdir -p html
@@ -39,13 +39,13 @@ html: Makefile $(VS) src/toc.html
 		-d ../html
 	cp src/toc.html html/
 
-PDF_OPEN = xdg-open latex/Zproperty.pdf&		
+PDF_OPEN = xdg-open latex/reportZtoConfl.pdf&		
 
 ifeq ($(OS),Windows_NT) # Se o Sistema Operacional for Windows...
 else # Caso o Sistema Operacional seja Mac OS, modifica-se a variável pdf
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S), Darwin)
-PDF_OPEN = open -a Skim latex/Zproperty.pdf&
+PDF_OPEN = open -a Skim latex/reportZtoConfl.pdf&
 endif
 endif
 
