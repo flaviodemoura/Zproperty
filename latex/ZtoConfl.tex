@@ -1,40 +1,27 @@
-In this section, we present a formalization of the Z property in the context of ARS, which are sets with a binary relation. A binary relation is a predicate over a type \coqdocvar{A}: 
+\begin{coqdoccode}
+\end{coqdoccode}
+\section{A Formalization of the Z property}
+
+
+\begin{coqdoccode}
+\end{coqdoccode}
+An Abstract Reduction System (ARS) is a pair $(A,R)$, where \coqdocvar{A} is a set and \coqdocvar{R} is a binary relation over \coqdocvar{A} whose type written \coqdocvar{Rel} \coqdocvar{A} is defined as follows: 
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
 \coqdockw{Definition} \coqdocvar{Rel} (\coqdocvar{A}:\coqdockw{Type}) := \coqdocvar{A} \ensuremath{\rightarrow} \coqdocvar{A} \ensuremath{\rightarrow} \coqdockw{Prop}.\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
-If $(A,R)$, is an ARS and $a,b\in A$ then we write $a\to_R b$ (or $R\ a\ b$ in the Coq syntax below) to denote that $(a,b)\in R$, and in this case, we say that $a$ $R$-reduces to $b$ in one step. The transitive closure of $\to_R$, written $\to^+_R$, is defined as usual by the following inference rules:
+Let $(A,R)$ be an ARS and $a,b\in A$. Then we write $a\to_R b$ (or $R\ a\ b$ in the Coq syntax below) to denote that $(a,b)\in R$, and in this case, we say that $a$ $R$-reduces to $b$ in one step. The reflexive transitive closure of $\to_R$, written $\tto_R$, is defined by:
 
 
 \begin{mathpar}
-     \inferrule*[Right={($singl$)}]{a \to_R b}{a \to^+_R b} \and
-     \inferrule*[Right={($transit$)}]{a \to_R b \and b \to^+_R c}{a \to^+_R c}
-\end{mathpar}
-
-
- This definition corresponds to the following Coq code, where $\to_R$ (resp. $\to^+_R$) corresponds to \coqdocvar{R} (resp. \coqdocvar{trans} \coqdocvar{R}):$\newline$ 
-\begin{coqdoccode}
-\coqdocemptyline
-\coqdocnoindent
-\coqdockw{Inductive} \coqdocvar{trans} \{\coqdocvar{A}\} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}) : \coqdocvar{Rel} \coqdocvar{A} :=\coqdoceol
-\coqdocnoindent
-\ensuremath{|} \coqdocvar{singl}: \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b},  \coqdocvar{R} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} \coqdocvar{trans} \coqdocvar{R} \coqdocvar{a} \coqdocvar{b}\coqdoceol
-\coqdocnoindent
-\ensuremath{|} \coqdocvar{transit}: \coqdockw{\ensuremath{\forall}} \coqdocvar{b} \coqdocvar{a} \coqdocvar{c},  \coqdocvar{R} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} \coqdocvar{trans} \coqdocvar{R} \coqdocvar{b} \coqdocvar{c} \ensuremath{\rightarrow} \coqdocvar{trans} \coqdocvar{R} \coqdocvar{a} \coqdocvar{c}.\coqdoceol
-\coqdocemptyline
-\end{coqdoccode}
-The reflexive transitive closure of $\to_R$, written $\tto_R$, is defined by:
-
-
-\begin{mathpar}
-     \inferrule*[Right={($refl$)}]{a \to_R b}{a \tto_R b}\and\and
+     \inferrule*[Right={($refl$)}]{~}{a \tto_R a}\and\and
      \inferrule*[Right={($rtrans$)}]{a \to_R b \and b \tto_R c}{a \tto_R c}
 \end{mathpar}
 
 
- This definition corresponds to the following Coq code, where $\tto_R$ is written as \coqdocvar{refltrans} \coqdocvar{R}: 
+ This definition corresponds to the following Coq code, where $\tto_R$ is written as (\coqdocvar{refltrans} \coqdocvar{R}): 
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
@@ -97,7 +84,7 @@ exists a mapping $f:A \to A$ such that $f$ is Z for $\to_R$:
 \begin{coqdoccode}
 \coqdocemptyline
 \coqdocnoindent
-\coqdockw{Definition} \coqdocvar{Z\_prop} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}) := \coqdoctac{\ensuremath{\exists}} \coqdocvar{f}:\coqdocvar{A} \ensuremath{\rightarrow} \coqdocvar{A}, \coqdockw{\ensuremath{\forall}} \coqdocvar{a} \coqdocvar{b}, \coqdocvar{R} \coqdocvar{a} \coqdocvar{b} \ensuremath{\rightarrow} ((\coqdocvar{refltrans} \coqdocvar{R}) \coqdocvar{b} (\coqdocvar{f} \coqdocvar{a}) \ensuremath{\land} (\coqdocvar{refltrans} \coqdocvar{R}) (\coqdocvar{f} \coqdocvar{a}) (\coqdocvar{f} \coqdocvar{b})).\coqdoceol
+\coqdockw{Definition} \coqdocvar{Z\_prop} \{\coqdocvar{A}:\coqdockw{Type}\} (\coqdocvar{R}: \coqdocvar{Rel} \coqdocvar{A}) := \coqdoctac{\ensuremath{\exists}} \coqdocvar{f}:\coqdocvar{A} \ensuremath{\rightarrow} \coqdocvar{A}, \coqdocvar{f\_is\_Z} \coqdocvar{R} \coqdocvar{f}.\coqdoceol
 \coqdocemptyline
 \end{coqdoccode}
 The first contribution of this work is a constructive proof of the fact that the Z property implies confluence. Our proof uses nested induction, and hence it differs from the one in \cite{kesnerTheoryExplicitSubstitutions2009} (that follows \cite{dehornoy2008z}) and the one in \cite{felgenhauerProperty2016} in the sense that it does not rely on the analyses of whether a term is in normal form or not, avoiding the necessity of the law of the excluded middle. As a result, we have an elegant inductive proof of the fact that if an ARS satisfies the Z property then it is confluent. 

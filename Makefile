@@ -23,15 +23,14 @@ doc: latex/reportZtoConfl.pdf
 
 COQDOC = coqdoc -R . ZtoConfl
 
-latex/%.v.tex: Makefile src/%.v src/%.glob
+latex/%.tex: Makefile src/%.v src/%.glob
 	cd src ; $(COQDOC) --interpolate --latex --body-only -s \
-		$*.v -o ../latex/$*.v.tex
-
-latex/ZtoConfl.pdf: latex/reportZtoConfl.tex $(TEX) latex/zotLib.bib
-	cd latex ; pdflatex reportZtoConfl ; pdflatex reportZtoConfl ; bibtex reportZtoConfl ; pdflatex reportZtoConfl ; pdflatex reportZtoConfl
+		$*.v -o ../latex/$*.tex
 
 latex/%.pdf: latex/%.tex
-	cd latex ; pdflatex $* ; pdflatex $* ; bibtex --include-directory="/home/flaviomoura/workspace/org" $* ; makeindex $* ; pdflatex $* ; pdflatex $*
+	cd latex ; pdflatex $* ; pdflatex $* ; bibtex $* ; pdflatex $* ; pdflatex $*
+
+latex/reportZtoConfl.pdf: latex/ZtoConfl.tex
 
 html: Makefile $(VS) src/toc.html
 	mkdir -p html

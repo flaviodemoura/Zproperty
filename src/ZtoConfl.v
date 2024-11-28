@@ -1,43 +1,17 @@
 (** * A Formalization of the Z property *)
 (* comments used in the report *)
-(** In this section, we present a formalization of the Z property in the context of ARS, which are sets with a binary relation. A binary relation is a predicate over a type [A]: *)
+(** An Abstract Reduction System (ARS) is a pair $(A,R)$, where [A] is a set and [R] is a binary relation over [A] whose type written [Rel A] is defined as follows: *)
 
 Definition Rel (A:Type) := A -> A -> Prop.
 
-(** If $(A,R)$, is an ARS and $a,b\in A$ then we write $a\to_R b$ (or $R\ a\ b$ in the Coq syntax below) to denote that $(a,b)\in R$, and in this case, we say that $a$ $R$-reduces to $b$ in one step. The transitive closure of $\to_R$, written $\to^+_R$, is defined as usual by the following inference rules:
+(** Let $(A,R)$ be an ARS and $a,b\in A$. Then we write $a\to_R b$ (or $R\ a\ b$ in the Coq syntax below) to denote that $(a,b)\in R$, and in this case, we say that $a$ $R$-reduces to $b$ in one step. The reflexive transitive closure of $\to_R$, written $\tto_R$, is defined by:
 
 %\begin{mathpar}
-     \inferrule*[Right={($singl$)}]{a \to_R b}{a \to^+_R b} \and
-     \inferrule*[Right={($transit$)}]{a \to_R b \and b \to^+_R c}{a \to^+_R c}
-\end{mathpar}%
-
- This definition corresponds to the following Coq code, where $\to_R$ (resp. $\to^+_R$) corresponds to [R] (resp. [trans R]):$\newline$ *)
-
-Inductive trans {A} (R: Rel A) : Rel A :=
-| singl: forall a b,  R a b -> trans R a b
-| transit: forall b a c,  R a b -> trans R b c -> trans R a c.
-(* begin hide *)
-Arguments transit {A} {R} _ _ _ _ _ .
-
-Lemma trans_composition {A} (R: Rel A):
-  forall t u v, trans R t u -> trans R u v -> trans R t v.
-Proof.
-  intros t u v H1 H2. induction H1.
-  - apply transit with b; assumption.
-  - apply transit with b.
-    + assumption.
-    + apply IHtrans; assumption.
-Qed.
-(* end hide *)
-
-(** The reflexive transitive closure of $\to_R$, written $\tto_R$, is defined by:
-
-%\begin{mathpar}
-     \inferrule*[Right={($refl$)}]{a \to_R b}{a \tto_R b}\and\and
+     \inferrule*[Right={($refl$)}]{~}{a \tto_R a}\and\and
      \inferrule*[Right={($rtrans$)}]{a \to_R b \and b \tto_R c}{a \tto_R c}
 \end{mathpar}%
 
- This definition corresponds to the following Coq code, where $\tto_R$ is written as [refltrans R]: *)
+ This definition corresponds to the following Coq code, where $\tto_R$ is written as [(refltrans R)]: *)
 
 Inductive refltrans {A:Type} (R: Rel A) : A -> A -> Prop :=
 | refl: forall a, refltrans R a a
