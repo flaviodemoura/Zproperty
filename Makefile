@@ -1,55 +1,45 @@
+COQC = coqc
+COQDEP = coqdep
+COQDOC = coqdoc
+
 MODULES  := ZtoConfl
-VS            := $(MODULES:%=src/%.v)
 TEX           := $(MODULES:%=latex/%.v.tex)
-VS_DOC        := $(MODULES:%=%.v)
 
-.PHONY: coq clean doc html pdf
+LIBNAME = Zprop
+COQMKFILENAME=CoqZprop.mk
 
-coq: Makefile.coq
-	$(MAKE) -f Makefile.coq
+.PHONY: all coq clean doc pdf install force
+.SUFFIXES: .v .vo .v.d .v.glob
 
-Makefile.coq: Makefile $(VS)
-	coq_makefile $(VS) \
-		COQC = "coqc -R src ZtoConfl" \
-		COQDEP = "coqdep -R src ZtoConfl" \
-		-o Makefile.coq
+all: coq
 
-clean:: Makefile.coq
-	$(MAKE) -f Makefile.coq clean
-	rm -f Makefile.coq .depend 
-	cd latex; rm -f *.log *.aux *.dvi *.v.tex *.toc *.bbl *.blg *.idx *.ilg *.pdf *.ind *.out *.fls *.gz *.fdb_latexmk
+coq: src/$(COQMKFILENAME)
+	@$(MAKE) -C src -f $(COQMKFILENAME)
 
-doc: latex/reportZtoConfl.pdf
+%.mk : Makefile _%
+	coq_makefile -f _$* -o $*.mk
 
-COQDOC = coqdoc -R . ZtoConfl
+src/$(COQMKFILENAME): Makefile
+	cd src && { echo "-R . $(LIBNAME)" ; ls *.v ; } > _CoqProject && coq_makefile -f _CoqProject -o $(COQMKFILENAME)
 
-latex/%.tex: Makefile src/%.v src/%.glob
-	cd src ; $(COQDOC) --interpolate --latex --body-only -s \
-		$*.v -o ../latex/$*.tex
+install: all
+	@$(MAKE) -C src -f $(COQMKFILENAME) install
 
-latex/%.pdf: latex/%.tex
-	cd latex ; pdflatex $* ; pdflatex $* ; bibtex $* ; pdflatex $* ; pdflatex $*
+clean:
+	@if [ -f src/$(COQMKFILENAME) ]; then $(MAKE) -C src -f $(COQMKFILENAME) clean; fi
+	rm -f src/$(COQMKFILENAME) src/_CoqProject
 
-latex/reportZtoConfl.pdf: latex/ZtoConfl.tex
+force:
 
-html: Makefile $(VS) src/toc.html
-	mkdir -p html
-	cd src ; $(COQDOC) --interpolate --no-externals $(VS_DOC) \
-		-d ../html
-	cp src/toc.html html/
+$(TEX): force
+	$(COQDOC) --gallina --interpolate --latex --body-only -s \
+			$(patsubst %.v.tex,src/%.v,$(notdir $@)) -o $@
 
-PDF_OPEN = xdg-open latex/reportZtoConfl.pdf&		
+doc: latex/fmm2021.pdf $(TEX)
 
-ifeq ($(OS),Windows_NT) # Se o Sistema Operacional for Windows...
-else # Caso o Sistema Operacional seja Mac OS, modifica-se a variável pdf
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S), Darwin)
-PDF_OPEN = open -a Skim latex/reportZtoConfl.pdf&
-endif
-endif
+latex/fmm2021.pdf: latex/fmm2021.tex $(TEX)  latex/fmm2021.bib
+	cd latex ; pdflatex fmm2021 ; pdflatex fmm2021 ; bibtex fmm2021 ; pdflatex fmm2021 ; pdflatex fmm2021
 
-# Assume-se o Linux como sistema operacional padrão
-pdf:    doc
-	$(PDF_OPEN)
-
+pdf:
+	okular latex/fmm2021.pdf&
 

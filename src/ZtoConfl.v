@@ -37,16 +37,6 @@ Proof.
   - apply IHrefltrans in H2.
     apply rtrans with b; assumption.
 Qed.
-
-Lemma trans_to_refltrans {A:Type} (R: Rel A): forall a b, trans R a b -> refltrans R a b.
-Proof.
-  intros a b Htrans.
-  induction Htrans.
-  - apply rtrans with b.
-    + assumption.
-    + apply refl.
-  - apply rtrans with b; assumption.
-Qed.
 (* end hide *)
 (** The reflexive transitive closure of a relation is used to define
     the notion of confluence: no matter how the reduction is done, the
