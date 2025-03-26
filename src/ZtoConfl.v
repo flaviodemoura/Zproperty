@@ -409,7 +409,6 @@ Proof.
 Qed.
 (* end hide *)
 
-Require Import Setoid.
 Lemma refltrans_union_equiv {A}: forall (R R1 R2 : Rel A), (forall (x y : A), (R x y <-> (R1 !_! R2) x y)) -> forall (x y: A), refltrans (R1 !_! R2) x y -> refltrans R x y.
 (* begin hide *)
 Proof.
